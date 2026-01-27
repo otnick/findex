@@ -11,14 +11,32 @@ ADD COLUMN IF NOT EXISTS comments_count INTEGER DEFAULT 0;
 -- Create user profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    username TEXT UNIQUE,
-    display_name TEXT,
+    username TEXT UNIQUE NOT NULL,
     bio TEXT,
     avatar_url TEXT,
     is_public BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Trigger to auto-create profile on user signup
+CREATE OR REPLACE FUNCTION create_profile_for_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, username)
+    VALUES (
+        NEW.id,
+        SPLIT_PART(NEW.email, '@', 1)
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS create_profile_trigger ON auth.users;
+CREATE TRIGGER create_profile_trigger
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION create_profile_for_user();
 
 -- Create friendships table
 CREATE TABLE IF NOT EXISTS public.friendships (

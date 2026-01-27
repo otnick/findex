@@ -40,27 +40,38 @@ export default function FriendsPage() {
         .select('*')
         .eq('friend_id', user.id)
 
-      // Get user emails
+      // Get unique user IDs
       const allUserIds = [
         ...(outgoing?.map(f => f.friend_id) || []),
         ...(incoming?.map(f => f.user_id) || []),
       ]
-      const { data: { users } } = await supabase.auth.admin.listUsers()
+
+      // Fetch profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', allUserIds)
 
       const friendsList = outgoing
         ?.filter(f => f.status === 'accepted')
-        .map(f => ({
-          ...f,
-          friend_email: users?.find(u => u.id === f.friend_id)?.email || 'Unbekannt',
-        })) || []
+        .map(f => {
+          const profile = profiles?.find(p => p.id === f.friend_id)
+          return {
+            ...f,
+            friend_email: `@${profile?.username || 'angler'}`,
+          }
+        }) || []
 
       const requestsList = incoming
         ?.filter(f => f.status === 'pending')
-        .map(f => ({
-          ...f,
-          friend_id: f.user_id,
-          friend_email: users?.find(u => u.id === f.user_id)?.email || 'Unbekannt',
-        })) || []
+        .map(f => {
+          const profile = profiles?.find(p => p.id === f.user_id)
+          return {
+            ...f,
+            friend_id: f.user_id,
+            friend_email: `@${profile?.username || 'angler'}`,
+          }
+        }) || []
 
       setFriends(friendsList)
       setRequests(requestsList)
@@ -75,14 +86,19 @@ export default function FriendsPage() {
     if (!searchEmail.trim() || !user) return
 
     try {
-      // Find user by email
-      const { data: { users } } = await supabase.auth.admin.listUsers()
-      const targetUser = users?.find(u => u.email === searchEmail.trim())
+      // Search by username or email in profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .or(`username.ilike.%${searchEmail.trim()}%`)
+        .limit(1)
 
-      if (!targetUser) {
-        alert('Benutzer nicht gefunden')
+      if (!profiles || profiles.length === 0) {
+        alert('Benutzer nicht gefunden. Suche nach Username.')
         return
       }
+
+      const targetUser = profiles[0]
 
       if (targetUser.id === user.id) {
         alert('Du kannst dich nicht selbst hinzufügen')
@@ -160,10 +176,10 @@ export default function FriendsPage() {
         <h2 className="text-lg font-bold text-white mb-4">Freund hinzufügen</h2>
         <div className="flex gap-2">
           <input
-            type="email"
+            type="text"
             value={searchEmail}
             onChange={(e) => setSearchEmail(e.target.value)}
-            placeholder="E-Mail-Adresse"
+            placeholder="Username suchen..."
             className="flex-1 px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
           />
           <button

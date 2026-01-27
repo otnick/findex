@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
@@ -9,12 +10,16 @@ import { de } from 'date-fns/locale'
 
 interface Activity {
   id: string
-  user_email: string
-  activity_type: string
+  user_id: string
+  username: string
   species?: string
   length?: number
   photo?: string
+  location?: string
   created_at: string
+  likes_count: number
+  comments_count: number
+  user_has_liked: boolean
 }
 
 export default function SocialPage() {
@@ -27,35 +32,52 @@ export default function SocialPage() {
   }, [])
 
   const fetchActivities = async () => {
+    if (!user) return
+
     try {
       // Fetch recent public catches
       const { data: catches, error } = await supabase
         .from('catches')
-        .select('id, user_id, species, length, photo_url, created_at')
+        .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(50)
 
-      if (error) {
-        console.error('Error fetching activities:', error)
-        return
-      }
+      if (error) throw error
 
-      // Get user emails (simplified - in production use profiles table)
+      // Get unique user IDs
       const userIds = [...new Set(catches.map((c: any) => c.user_id))]
-      const { data: { users } } = await supabase.auth.admin.listUsers()
+
+      // Fetch profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', userIds)
+
+      // Check which catches user has liked
+      const { data: userLikes } = await supabase
+        .from('catch_likes')
+        .select('catch_id')
+        .eq('user_id', user.id)
+        .in('catch_id', catches.map((c: any) => c.id))
+
+      const likedCatchIds = new Set(userLikes?.map(l => l.catch_id) || [])
 
       const activitiesData = catches.map((c: any) => {
-        const userEmail = users?.find(u => u.id === c.user_id)?.email || 'Unbekannt'
+        const profile = profiles?.find(p => p.id === c.user_id)
         
         return {
           id: c.id,
-          user_email: userEmail,
-          activity_type: 'catch',
+          user_id: c.user_id,
+          username: profile?.username || 'angler',
           species: c.species,
           length: c.length,
           photo: c.photo_url,
+          location: c.location,
           created_at: c.created_at,
+          likes_count: c.likes_count || 0,
+          comments_count: c.comments_count || 0,
+          user_has_liked: likedCatchIds.has(c.id),
         }
       })
 
@@ -67,36 +89,42 @@ export default function SocialPage() {
     }
   }
 
-  const handleLike = async (catchId: string) => {
+  const toggleLike = async (catchId: string) => {
     if (!user) return
 
-    try {
-      // Toggle like
-      const { data: existing } = await supabase
-        .from('catch_likes')
-        .select('id')
-        .eq('catch_id', catchId)
-        .eq('user_id', user.id)
-        .single()
+    const activity = activities.find(a => a.id === catchId)
+    if (!activity) return
 
-      if (existing) {
+    try {
+      if (activity.user_has_liked) {
         // Unlike
         await supabase
           .from('catch_likes')
           .delete()
           .eq('catch_id', catchId)
           .eq('user_id', user.id)
+
+        setActivities(prev => prev.map(a => 
+          a.id === catchId 
+            ? { ...a, likes_count: a.likes_count - 1, user_has_liked: false }
+            : a
+        ))
       } else {
         // Like
         await supabase
           .from('catch_likes')
           .insert({ catch_id: catchId, user_id: user.id })
-      }
 
-      // Refresh
-      fetchActivities()
+        setActivities(prev => prev.map(a => 
+          a.id === catchId 
+            ? { ...a, likes_count: a.likes_count + 1, user_has_liked: true }
+            : a
+        ))
+      }
     } catch (error) {
       console.error('Error toggling like:', error)
+      // Revert on error
+      await fetchActivities()
     }
   }
 
@@ -146,22 +174,24 @@ export default function SocialPage() {
             >
               {/* Photo */}
               {activity.photo && (
-                <div className="relative w-full h-64">
-                  <Image
-                    src={activity.photo}
-                    alt={activity.species || 'Fang'}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                <Link href={`/catch/${activity.id}`}>
+                  <div className="relative w-full h-64 cursor-pointer">
+                    <Image
+                      src={activity.photo}
+                      alt={activity.species || 'Fang'}
+                      fill
+                      className="object-cover hover:opacity-90 transition-opacity"
+                    />
+                  </div>
+                </Link>
               )}
 
               {/* Content */}
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <div className="font-semibold text-white">
-                      {activity.user_email.split('@')[0]}
+                    <div className="font-semibold text-white text-lg">
+                      @{activity.username}
                     </div>
                     <div className="text-ocean-light text-sm">
                       {format(new Date(activity.created_at), 'dd. MMM yyyy, HH:mm', { locale: de })}
@@ -169,28 +199,42 @@ export default function SocialPage() {
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <div className="text-white text-lg font-semibold">
-                    🎣 {activity.species} gefangen!
+                <Link href={`/catch/${activity.id}`}>
+                  <div className="mb-4 cursor-pointer hover:opacity-80">
+                    <div className="text-white text-lg font-semibold">
+                      🎣 {activity.species} gefangen!
+                    </div>
+                    <div className="text-ocean-light">
+                      {activity.length} cm
+                      {activity.location && ` • 📍 ${activity.location}`}
+                    </div>
                   </div>
-                  <div className="text-ocean-light">
-                    {activity.length} cm
-                  </div>
-                </div>
+                </Link>
 
                 {/* Actions */}
-                <div className="flex items-center gap-4 pt-4 border-t border-ocean-light/20">
+                <div className="flex items-center gap-6 pt-4 border-t border-ocean-light/20">
                   <button
-                    onClick={() => handleLike(activity.id)}
-                    className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors"
+                    onClick={() => toggleLike(activity.id)}
+                    className={`flex items-center gap-2 transition-colors ${
+                      activity.user_has_liked
+                        ? 'text-red-400'
+                        : 'text-ocean-light hover:text-white'
+                    }`}
                   >
-                    <span className="text-xl">❤️</span>
-                    <span className="text-sm">Gefällt mir</span>
+                    <span className="text-xl">{activity.user_has_liked ? '❤️' : '🤍'}</span>
+                    <span className="text-sm font-semibold">{activity.likes_count}</span>
                   </button>
-                  <button className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors">
-                    <span className="text-xl">💬</span>
-                    <span className="text-sm">Kommentieren</span>
-                  </button>
+                  <Link href={`/catch/${activity.id}`}>
+                    <button className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors">
+                      <span className="text-xl">💬</span>
+                      <span className="text-sm">{activity.comments_count}</span>
+                    </button>
+                  </Link>
+                  <Link href={`/catch/${activity.id}`}>
+                    <button className="text-ocean-light hover:text-white transition-colors text-sm">
+                      Details →
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>

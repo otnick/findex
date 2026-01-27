@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useCatchStore } from '@/lib/store'
+import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { 
@@ -10,22 +11,77 @@ import {
   setNotificationPreference 
 } from '@/lib/utils/notifications'
 
+interface Profile {
+  username: string
+  bio?: string
+}
+
 export default function ProfilePage() {
   const { user, catches, signOut } = useCatchStore()
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [editingProfile, setEditingProfile] = useState(false)
+  const [profileForm, setProfileForm] = useState({
+    username: '',
+    bio: '',
+  })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     setNotificationsEnabled(getNotificationPreference())
+    fetchProfile()
   }, [])
+
+  const fetchProfile = async () => {
+    if (!user) return
+
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (data) {
+      setProfile(data)
+      setProfileForm({
+        username: data.username || '',
+        bio: data.bio || '',
+      })
+    }
+  }
+
+  const saveProfile = async () => {
+    if (!user) return
+
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          username: profileForm.username,
+          bio: profileForm.bio,
+          updated_at: new Date().toISOString(),
+        })
+
+      if (error) throw error
+
+      await fetchProfile()
+      setEditingProfile(false)
+      alert('Profil gespeichert!')
+    } catch (error: any) {
+      alert('Fehler: ' + error.message)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const toggleNotifications = async () => {
     if (!notificationsEnabled) {
-      // Request permission
       const granted = await notificationService.requestPermission()
       if (granted) {
         setNotificationPreference(true)
         setNotificationsEnabled(true)
-        // Send test notification
         await notificationService.send({
           title: '🎣 Benachrichtigungen aktiviert!',
           body: 'Du erhältst jetzt Updates zu Likes, Kommentaren und mehr.',
@@ -92,22 +148,76 @@ export default function ProfilePage() {
 
       {/* User Info */}
       <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">Account</h2>
-        <div className="space-y-4">
-          <div>
-            <div className="text-ocean-light text-sm">E-Mail</div>
-            <div className="text-white font-semibold">{user?.email}</div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white">Profil</h2>
+          <button
+            onClick={() => setEditingProfile(!editingProfile)}
+            className="text-ocean-light hover:text-white text-sm transition-colors"
+          >
+            {editingProfile ? 'Abbrechen' : 'Bearbeiten'}
+          </button>
+        </div>
+
+        {editingProfile ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-ocean-light text-sm mb-2">Username</label>
+              <input
+                type="text"
+                value={profileForm.username}
+                onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+                placeholder="dein_username"
+              />
+              <p className="text-xs text-ocean-light mt-1">Wird überall als @{profileForm.username} angezeigt</p>
+            </div>
+
+            <div>
+              <label className="block text-ocean-light text-sm mb-2">Bio</label>
+              <textarea
+                value={profileForm.bio}
+                onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+                rows={3}
+                placeholder="Erzähl etwas über dich..."
+              />
+            </div>
+
+            <button
+              onClick={saveProfile}
+              disabled={saving}
+              className="w-full bg-ocean hover:bg-ocean-light text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {saving ? 'Speichern...' : 'Speichern'}
+            </button>
           </div>
-          <div>
-            <div className="text-ocean-light text-sm">Mitglied seit</div>
-            <div className="text-white font-semibold">
-              {user?.created_at 
-                ? format(new Date(user.created_at), 'dd. MMMM yyyy', { locale: de })
-                : '-'
-              }
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <div className="text-ocean-light text-sm">E-Mail</div>
+              <div className="text-white font-semibold">{user?.email}</div>
+            </div>
+            <div>
+              <div className="text-ocean-light text-sm">Username</div>
+              <div className="text-white font-semibold text-lg">@{profile?.username || 'Nicht gesetzt'}</div>
+            </div>
+            {profile?.bio && (
+              <div>
+                <div className="text-ocean-light text-sm">Bio</div>
+                <div className="text-white">{profile.bio}</div>
+              </div>
+            )}
+            <div>
+              <div className="text-ocean-light text-sm">Mitglied seit</div>
+              <div className="text-white font-semibold">
+                {user?.created_at 
+                  ? format(new Date(user.created_at), 'dd. MMMM yyyy', { locale: de })
+                  : '-'
+                }
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Stats Overview */}

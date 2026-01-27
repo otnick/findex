@@ -18,20 +18,21 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'all'>('month')
   const [category, setCategory] = useState<'catches' | 'weight' | 'size' | 'species'>('catches')
+  const [speciesFilter, setSpeciesFilter] = useState<string>('all')
+  const [availableSpecies, setAvailableSpecies] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const user = useCatchStore((state) => state.user)
 
   useEffect(() => {
     fetchLeaderboard()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeframe, category])
+  }, [timeframe, category, speciesFilter])
 
   const fetchLeaderboard = async () => {
     setLoading(true)
     try {
-      // Calculate date filter
       const now = new Date()
-      let startDate = new Date(0) // All time
+      let startDate = new Date(0)
 
       if (timeframe === 'week') {
         startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -39,17 +40,28 @@ export default function LeaderboardPage() {
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
       }
 
-      // Fetch public catches
-      const { data: catches, error } = await supabase
+      // Build query
+      let query = supabase
         .from('catches')
         .select('user_id, species, length, weight')
         .eq('is_public', true)
         .gte('date', startDate.toISOString())
 
+      // Add species filter
+      if (speciesFilter !== 'all') {
+        query = query.eq('species', speciesFilter)
+      }
+
+      const { data: catches, error } = await query
+
       if (error) {
         console.error('Error fetching leaderboard:', error)
         return
       }
+
+      // Get unique species for filter
+      const species = [...new Set(catches.map((c: any) => c.species))].sort()
+      setAvailableSpecies(species)
 
       // Group by user
       const userStats = new Map<string, {
@@ -76,19 +88,24 @@ export default function LeaderboardPage() {
         stats.species.add(c.species)
       })
 
-      // Get user emails
+      // Get user IDs
       const userIds = Array.from(userStats.keys())
-      const { data: users } = await supabase.auth.admin.listUsers()
+      
+      // Fetch profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', userIds)
 
       const leaderboardData: LeaderboardEntry[] = userIds
         .map(userId => {
           const stats = userStats.get(userId)!
-          const userEmail = users?.users.find(u => u.id === userId)?.email || 'Unbekannt'
+          const profile = profiles?.find(p => p.id === userId)
 
           return {
             user_id: userId,
-            email: userEmail,
-            username: userEmail.split('@')[0],
+            email: profile?.username || 'angler',
+            username: profile?.username || 'angler',
             total_catches: stats.catches,
             total_weight: stats.totalWeight,
             biggest_catch: stats.biggestCatch,
@@ -107,7 +124,7 @@ export default function LeaderboardPage() {
               return b.total_catches - a.total_catches
           }
         })
-        .slice(0, 100) // Top 100
+        .slice(0, 100)
 
       setLeaderboard(leaderboardData)
     } catch (error) {
@@ -151,7 +168,7 @@ export default function LeaderboardPage() {
 
       {/* Filters */}
       <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Timeframe */}
           <div>
             <label className="block text-ocean-light text-sm mb-2">Zeitraum</label>
@@ -178,6 +195,21 @@ export default function LeaderboardPage() {
               <option value="weight">Gesamt-Gewicht</option>
               <option value="size">Größter Fisch</option>
               <option value="species">Meiste Arten</option>
+            </select>
+          </div>
+
+          {/* Species Filter */}
+          <div>
+            <label className="block text-ocean-light text-sm mb-2">Fischart</label>
+            <select
+              value={speciesFilter}
+              onChange={(e) => setSpeciesFilter(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            >
+              <option value="all">Alle Arten</option>
+              {availableSpecies.map(species => (
+                <option key={species} value={species}>{species}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -251,7 +283,7 @@ export default function LeaderboardPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-white">
-                          {entry.username}
+                          @{entry.username}
                           {isCurrentUser && (
                             <span className="ml-2 text-xs text-ocean-light">(Du)</span>
                           )}
