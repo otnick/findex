@@ -1,23 +1,64 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import FishAquarium from '@/components/FishAquarium'
 import CatchForm from '@/components/CatchForm'
 import CatchList from '@/components/CatchList'
+import Auth from '@/components/auth/Auth'
 import { useCatchStore } from '@/lib/store'
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false)
-  const catches = useCatchStore((state) => state.catches)
+  const { catches, user, loading, signOut } = useCatchStore()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Show loading state during hydration
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark flex items-center justify-center">
+        <div className="text-white text-2xl">Laden...</div>
+      </div>
+    )
+  }
+
+  // Show auth screen if not logged in
+  if (!user) {
+    return <Auth onSuccess={() => {}} />
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-2">🎣 FishBox</h1>
-          <p className="text-ocean-light text-lg">Deine Angel-Sammlung in 3D</p>
+        {/* Header with User Info */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="text-center flex-1">
+            <h1 className="text-5xl font-bold text-white mb-2">🎣 FishBox</h1>
+            <p className="text-ocean-light text-lg">Deine Angel-Sammlung in 3D</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-ocean-light text-sm">Angemeldet als</p>
+              <p className="text-white font-semibold">{user.email}</p>
+            </div>
+            <button
+              onClick={signOut}
+              className="bg-ocean/50 hover:bg-ocean text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Abmelden
+            </button>
+          </div>
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center text-ocean-light mb-4">
+            Lädt deine Fänge...
+          </div>
+        )}
 
         {/* 3D Aquarium */}
         <div className="mb-8 rounded-xl overflow-hidden shadow-2xl">

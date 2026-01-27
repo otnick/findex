@@ -35,10 +35,10 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
     date: new Date().toISOString().split('T')[0],
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    addCatch({
+    await addCatch({
       species: formData.species,
       length: Number(formData.length),
       weight: Number(formData.weight),
