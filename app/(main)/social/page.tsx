@@ -7,6 +7,9 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { Users, Heart, MessageCircle, Eye, Info, Fish } from 'lucide-react'
+import LoadingSkeleton from '@/components/LoadingSkeleton'
+import EmptyState from '@/components/EmptyState'
 
 interface Activity {
   id: string
@@ -129,17 +132,22 @@ export default function SocialPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">👥 Social</h1>
+        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <Users className="w-8 h-8 text-ocean-light" />
+          Social
+        </h1>
         <p className="text-ocean-light mt-1">Sieh was andere Angler fangen</p>
       </div>
 
       {/* Info Box */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+      <div className="bg-gradient-to-r from-ocean/40 to-ocean-dark/40 backdrop-blur-sm rounded-lg p-6 border border-ocean-light/10">
         <div className="flex items-start gap-4">
-          <div className="text-4xl">💡</div>
+          <div className="flex-shrink-0">
+            <Info className="w-8 h-8 text-ocean-light" />
+          </div>
           <div>
             <h3 className="text-white font-semibold mb-2">Teile deine Fänge!</h3>
             <p className="text-ocean-light text-sm">
@@ -152,36 +160,35 @@ export default function SocialPage() {
 
       {/* Activity Feed */}
       {loading ? (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <div className="text-ocean-light">Laden...</div>
-        </div>
+        <LoadingSkeleton type="grid" />
       ) : activities.length === 0 ? (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <div className="text-6xl mb-4">🎣</div>
-          <h3 className="text-2xl font-bold text-white mb-2">
-            Noch keine Aktivitäten
-          </h3>
-          <p className="text-ocean-light">
-            Sei der Erste, der einen öffentlichen Fang teilt!
-          </p>
-        </div>
+        <EmptyState
+          icon={Fish}
+          title="Noch keine Aktivitäten"
+          description="Sei der Erste, der einen öffentlichen Fang teilt!"
+          actionLabel="Zu meinen Fängen"
+          actionHref="/catches"
+        />
       ) : (
         <div className="space-y-4">
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:bg-ocean/40 transition-colors"
+              className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:bg-ocean/40 transition-all duration-300 hover:shadow-xl animate-slide-up"
             >
               {/* Photo */}
               {activity.photo && (
                 <Link href={`/catch/${activity.id}`}>
-                  <div className="relative w-full h-64 cursor-pointer">
+                  <div className="relative w-full h-64 cursor-pointer group">
                     <Image
                       src={activity.photo}
                       alt={activity.species || 'Fang'}
                       fill
-                      className="object-cover hover:opacity-90 transition-opacity"
+                      className="object-cover group-hover:opacity-90 transition-opacity"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ocean-deeper/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Eye className="w-12 h-12 text-white" />
+                    </div>
                   </div>
                 </Link>
               )}
@@ -190,9 +197,11 @@ export default function SocialPage() {
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <div className="font-semibold text-white text-lg">
-                      @{activity.username}
-                    </div>
+                    <Link href={`/user/${activity.username}`}>
+                      <div className="font-semibold text-white text-lg hover:text-ocean-light transition-colors">
+                        @{activity.username}
+                      </div>
+                    </Link>
                     <div className="text-ocean-light text-sm">
                       {format(new Date(activity.created_at), 'dd. MMM yyyy, HH:mm', { locale: de })}
                     </div>
@@ -200,9 +209,10 @@ export default function SocialPage() {
                 </div>
 
                 <Link href={`/catch/${activity.id}`}>
-                  <div className="mb-4 cursor-pointer hover:opacity-80">
-                    <div className="text-white text-lg font-semibold">
-                      🎣 {activity.species} gefangen!
+                  <div className="mb-4 cursor-pointer hover:opacity-80 transition-opacity">
+                    <div className="text-white text-lg font-semibold flex items-center gap-2">
+                      <Fish className="w-5 h-5 text-ocean-light" />
+                      {activity.species} gefangen!
                     </div>
                     <div className="text-ocean-light">
                       {activity.length} cm
@@ -215,24 +225,27 @@ export default function SocialPage() {
                 <div className="flex items-center gap-6 pt-4 border-t border-ocean-light/20">
                   <button
                     onClick={() => toggleLike(activity.id)}
-                    className={`flex items-center gap-2 transition-colors ${
+                    className={`flex items-center gap-2 transition-all duration-200 ${
                       activity.user_has_liked
-                        ? 'text-red-400'
-                        : 'text-ocean-light hover:text-white'
+                        ? 'text-red-400 scale-110'
+                        : 'text-ocean-light hover:text-red-400 hover:scale-110'
                     }`}
                   >
-                    <span className="text-xl">{activity.user_has_liked ? '❤️' : '🤍'}</span>
+                    <Heart 
+                      className={`w-5 h-5 ${activity.user_has_liked ? 'fill-current' : ''}`} 
+                    />
                     <span className="text-sm font-semibold">{activity.likes_count}</span>
                   </button>
                   <Link href={`/catch/${activity.id}`}>
                     <button className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors">
-                      <span className="text-xl">💬</span>
+                      <MessageCircle className="w-5 h-5" />
                       <span className="text-sm">{activity.comments_count}</span>
                     </button>
                   </Link>
                   <Link href={`/catch/${activity.id}`}>
-                    <button className="text-ocean-light hover:text-white transition-colors text-sm">
-                      Details →
+                    <button className="ml-auto text-ocean-light hover:text-white transition-colors text-sm flex items-center gap-1">
+                      Details
+                      <Eye className="w-4 h-4" />
                     </button>
                   </Link>
                 </div>
@@ -247,7 +260,7 @@ export default function SocialPage() {
         <div className="text-center">
           <button
             onClick={fetchActivities}
-            className="bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+            className="bg-gradient-to-r from-ocean-light to-ocean hover:from-ocean hover:to-ocean-dark text-white font-semibold py-3 px-8 rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Mehr laden
           </button>

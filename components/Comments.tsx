@@ -40,13 +40,18 @@ export default function Comments({ catchId }: CommentsProps) {
 
       if (error) throw error
 
-      // Get user emails
+      // Get user IDs
       const userIds = [...new Set(data.map((c: any) => c.user_id))]
-      const { data: { users } } = await supabase.auth.admin.listUsers()
+      
+      // Get profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', userIds)
 
       const commentsData = data.map((c: any) => ({
         ...c,
-        user_email: users?.find(u => u.id === c.user_id)?.email || 'Unbekannt',
+        user_email: profiles?.find(p => p.id === c.user_id)?.username || 'angler',
       }))
 
       setComments(commentsData)
@@ -138,7 +143,7 @@ export default function Comments({ catchId }: CommentsProps) {
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <div className="font-semibold text-white text-sm">
-                    {comment.user_email.split('@')[0]}
+                    @{comment.user_email}
                   </div>
                   <div className="text-xs text-ocean-light">
                     {format(new Date(comment.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
