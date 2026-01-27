@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCatchStore } from '@/lib/store'
 import { format, subDays, isAfter } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -98,11 +99,14 @@ export default function DashboardPage() {
                 className="flex items-center gap-4 bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors"
               >
                 {catchData.photo && (
-                  <img
-                    src={catchData.photo}
-                    alt={catchData.species}
-                    className="w-16 h-16 object-cover rounded-lg"
-                  />
+                  <div className="relative w-16 h-16 flex-shrink-0">
+                    <Image
+                      src={catchData.photo}
+                      alt={catchData.species}
+                      fill
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-white truncate">{catchData.species}</div>

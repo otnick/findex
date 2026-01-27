@@ -149,7 +149,7 @@ export default function SocialPage() {
                 <div className="relative w-full h-64">
                   <Image
                     src={activity.photo}
-                    alt={activity.species}
+                    alt={activity.species || 'Fang'}
                     fill
                     className="object-cover"
                   />

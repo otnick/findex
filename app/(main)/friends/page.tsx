@@ -21,6 +21,7 @@ export default function FriendsPage() {
 
   useEffect(() => {
     fetchFriends()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchFriends = async () => {
