@@ -45,7 +45,7 @@ export default function GalleryPage() {
         url: c.photo!,
         species: c.species,
         length: c.length,
-        date: c.date,
+        date: typeof c.date === 'string' ? c.date : c.date.toISOString(),
         catchId: c.id,
       }))
 
