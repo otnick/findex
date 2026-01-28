@@ -29,7 +29,11 @@ const navigation = [
   { name: 'Profil', href: '/profile', icon: UserCircle },
 ]
 
-export default function Navigation() {
+type NavigationProps = {
+  userEmail?: string
+}
+
+export default function Navigation({ userEmail }: NavigationProps) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
