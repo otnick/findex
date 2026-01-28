@@ -22,6 +22,10 @@ interface MapProps {
   location?: string
   zoom?: number
   height?: string
+  markers?: Array<{
+    position: Coordinates
+    title: string
+  }>
 }
 
 function RecenterMap({ coordinates }: { coordinates: Coordinates }) {
@@ -34,7 +38,9 @@ function RecenterMap({ coordinates }: { coordinates: Coordinates }) {
   return null
 }
 
-export default function Map({ coordinates, location, zoom = 13, height = '300px' }: MapProps) {
+export default function Map({ coordinates, location, zoom = 13, height = '300px', markers }: MapProps) {
+  const displayMarkers = markers || [{ position: coordinates, title: location || 'Fangort' }]
+  
   return (
     <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden">
       <MapContainer
@@ -47,15 +53,17 @@ export default function Map({ coordinates, location, zoom = 13, height = '300px'
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Marker position={[coordinates.lat, coordinates.lng]} icon={icon}>
-          <Popup>
-            {location || 'Fang-Spot'}
-            <br />
-            <small>
-              {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
-            </small>
-          </Popup>
-        </Marker>
+        {displayMarkers.map((marker, index) => (
+          <Marker key={index} position={[marker.position.lat, marker.position.lng]} icon={icon}>
+            <Popup>
+              {marker.title || 'Fang-Spot'}
+              <br />
+              <small>
+                {marker.position.lat.toFixed(6)}, {marker.position.lng.toFixed(6)}
+              </small>
+            </Popup>
+          </Marker>
+        ))}
         <RecenterMap coordinates={coordinates} />
       </MapContainer>
     </div>

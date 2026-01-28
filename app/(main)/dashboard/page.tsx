@@ -94,41 +94,40 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-4">
             {recentCatchesList.map((catchData) => (
-              <div
-                key={catchData.id}
-                className="flex items-center gap-4 bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors"
-              >
-                {catchData.photo && (
-                  <div className="relative w-16 h-16 flex-shrink-0">
-                    <Image
-                      src={catchData.photo}
-                      alt={catchData.species}
-                      fill
-                      className="object-cover rounded-lg"
-                    />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-white truncate">{catchData.species}</div>
-                  <div className="text-sm text-ocean-light">
-                    {catchData.length} cm
-                    {catchData.weight && ` • ${catchData.weight > 1000 
-                      ? `${(catchData.weight / 1000).toFixed(1)} kg`
-                      : `${catchData.weight} g`
-                    }`}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm text-ocean-light">
-                    {format(new Date(catchData.date), 'dd.MM.yyyy', { locale: de })}
-                  </div>
-                  {catchData.location && (
-                    <div className="text-xs text-ocean-light/70 truncate max-w-[100px]">
-                      📍 {catchData.location}
+              <Link key={catchData.id} href={`/catch/${catchData.id}`}>
+                <div className="flex items-center gap-4 bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors cursor-pointer group">
+                  {catchData.photo && (
+                    <div className="relative w-16 h-16 flex-shrink-0">
+                      <Image
+                        src={catchData.photo}
+                        alt={catchData.species}
+                        fill
+                        className="object-cover rounded-lg group-hover:scale-105 transition-transform"
+                      />
                     </div>
                   )}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-white truncate group-hover:text-ocean-light transition-colors">{catchData.species}</div>
+                    <div className="text-sm text-ocean-light">
+                      {catchData.length} cm
+                      {catchData.weight && ` • ${catchData.weight > 1000 
+                        ? `${(catchData.weight / 1000).toFixed(1)} kg`
+                        : `${catchData.weight} g`
+                      }`}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-ocean-light">
+                      {format(new Date(catchData.date), 'dd.MM.yyyy', { locale: de })}
+                    </div>
+                    {catchData.location && (
+                      <div className="text-xs text-ocean-light/70 truncate max-w-[100px]">
+                        📍 {catchData.location}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

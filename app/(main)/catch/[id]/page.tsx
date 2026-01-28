@@ -8,9 +8,8 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Heart, MessageCircle, MapPin, Calendar, Ruler, Scale, Fish as FishIcon, ArrowLeft } from 'lucide-react'
+import { Heart, MessageCircle, MapPin, Calendar, Ruler, Scale, Fish as FishIcon, ArrowLeft, Image as ImageIcon } from 'lucide-react'
 
-// Dynamic imports to avoid SSR issues
 const PhotoLightbox = dynamic(() => import('@/components/PhotoLightbox'), { ssr: false })
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
 const Comments = dynamic(() => import('@/components/Comments'), { ssr: false })
@@ -68,32 +67,27 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
         .single()
 
       if (error) throw error
-
       if (!catchRow) {
         setError(true)
         return
       }
 
-      // Check access rights
       if (catchRow.user_id !== user.id && !catchRow.is_public) {
         setError(true)
         return
       }
 
-      // Get username
       const { data: profile } = await supabase
         .from('profiles')
         .select('username')
         .eq('id', catchRow.user_id)
         .single()
 
-      // Get likes count
       const { count: likesCount } = await supabase
         .from('catch_likes')
         .select('*', { count: 'exact', head: true })
         .eq('catch_id', params.id)
 
-      // Check if user has liked
       const { data: userLike } = await supabase
         .from('catch_likes')
         .select('id')
@@ -101,7 +95,6 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
         .eq('user_id', user.id)
         .single()
 
-      // Get comments count
       const { count: commentsCount } = await supabase
         .from('catch_comments')
         .select('*', { count: 'exact', head: true })
@@ -131,7 +124,6 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
         .order('order_index')
 
       if (error) throw error
-
       if (data && data.length > 0) {
         setPhotos(data)
       }
@@ -216,55 +208,164 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
         Zurück
       </Link>
 
-      {/* Photos Section */}
-      {displayPhotos.length > 0 && (
-        <div>
-          {/* Main Photo */}
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-ocean-dark mb-4 cursor-pointer group" onClick={() => setSelectedPhotoIndex(0)}>
-            <Image
-              src={displayPhotos[0].photo_url}
-              alt={catchData.species}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-lg font-semibold">
-                Vergrößern
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Photos */}
+        <div className="lg:col-span-2 space-y-4">
+          {displayPhotos.length > 0 && (
+            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+              {/* Photo Grid - ALL PHOTOS VISIBLE */}
+              <div className={`grid gap-3 ${displayPhotos.length === 1 ? 'grid-cols-1' : 'grid-cols-2 md:grid-cols-3'}`}>
+                {displayPhotos.map((photo, index) => (
+                  <div
+                    key={photo.id}
+                    className="relative aspect-square rounded-lg overflow-hidden bg-ocean-dark cursor-pointer group"
+                    onClick={() => setSelectedPhotoIndex(index)}
+                  >
+                    <Image
+                      src={photo.photo_url}
+                      alt={`Foto ${index + 1}`}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    {index === 0 && displayPhotos.length > 1 && (
+                      <div className="absolute top-2 left-2 bg-ocean-light px-2 py-1 rounded text-white text-xs font-semibold">
+                        Hauptfoto
+                      </div>
+                    )}
+                    {photo.caption && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p className="text-white text-xs line-clamp-2">{photo.caption}</p>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            {displayPhotos.length > 1 && (
-              <div className="absolute bottom-4 right-4 bg-ocean-deeper/90 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm">
-                +{displayPhotos.length - 1} {displayPhotos.length === 2 ? 'Foto' : 'Fotos'}
+          )}
+
+          {/* Comments Section */}
+          <Comments catchId={params.id} />
+        </div>
+
+        {/* Right Column - Info */}
+        <div className="space-y-4">
+          {/* Header Card */}
+          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <h1 className="text-3xl font-bold text-white flex items-center gap-2 mb-2">
+              <FishIcon className="w-8 h-8 text-ocean-light" />
+              {catchData.species}
+            </h1>
+            <Link href={`/user/${catchData.username}`}>
+              <p className="text-ocean-light hover:text-white transition-colors">
+                von @{catchData.username}
+              </p>
+            </Link>
+
+            {/* Actions */}
+            <div className="flex items-center gap-6 pt-4 mt-4 border-t border-ocean-light/20">
+              <button
+                onClick={toggleLike}
+                className={`flex items-center gap-2 transition-all ${
+                  catchData.user_has_liked
+                    ? 'text-red-400 scale-110'
+                    : 'text-ocean-light hover:text-red-400 hover:scale-110'
+                }`}
+              >
+                <Heart className={`w-6 h-6 ${catchData.user_has_liked ? 'fill-current' : ''}`} />
+                <span className="font-semibold">{catchData.likes_count}</span>
+              </button>
+              <div className="flex items-center gap-2 text-ocean-light">
+                <MessageCircle className="w-6 h-6" />
+                <span className="font-semibold">{catchData.comments_count}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Card */}
+          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <Ruler className="w-5 h-5 text-ocean-light" />
+              <div>
+                <div className="text-ocean-light text-sm">Länge</div>
+                <div className="text-2xl font-bold text-white">{catchData.length} cm</div>
+              </div>
+            </div>
+
+            {catchData.weight && (
+              <div className="flex items-center gap-3">
+                <Scale className="w-5 h-5 text-ocean-light" />
+                <div>
+                  <div className="text-ocean-light text-sm">Gewicht</div>
+                  <div className="text-xl font-bold text-white">
+                    {catchData.weight > 1000
+                      ? `${(catchData.weight / 1000).toFixed(2)} kg`
+                      : `${catchData.weight} g`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-ocean-light" />
+              <div>
+                <div className="text-ocean-light text-sm">Datum & Zeit</div>
+                <div className="text-white font-semibold">
+                  {format(new Date(catchData.date), 'dd.MM.yyyy', { locale: de })}
+                </div>
+                <div className="text-ocean-light text-sm">
+                  {format(new Date(catchData.date), 'HH:mm', { locale: de })} Uhr
+                </div>
+              </div>
+            </div>
+
+            {catchData.location && (
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-ocean-light" />
+                <div>
+                  <div className="text-ocean-light text-sm">Ort</div>
+                  <div className="text-white font-semibold">
+                    {catchData.location}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {catchData.bait && (
+              <div className="pt-4 border-t border-ocean-light/20">
+                <div className="text-ocean-light text-sm mb-1">Köder</div>
+                <div className="text-white">{catchData.bait}</div>
+              </div>
+            )}
+
+            {catchData.notes && (
+              <div className="pt-4 border-t border-ocean-light/20">
+                <div className="text-ocean-light text-sm mb-1">Notizen</div>
+                <div className="text-white">{catchData.notes}</div>
               </div>
             )}
           </div>
 
-          {/* Additional Photos Grid */}
-          {displayPhotos.length > 1 && (
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-              {displayPhotos.slice(1).map((photo, index) => (
-                <div
-                  key={photo.id}
-                  className="relative aspect-square rounded-lg overflow-hidden bg-ocean-dark cursor-pointer group"
-                  onClick={() => setSelectedPhotoIndex(index + 1)}
-                >
-                  <Image
-                    src={photo.photo_url}
-                    alt={`Foto ${index + 2}`}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform"
-                  />
-                  {photo.caption && (
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
-                      <p className="text-white text-xs text-center line-clamp-3">{photo.caption}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
+          {/* Map Card */}
+          {catchData.coordinates && (
+            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-ocean-light" />
+                Fangort
+              </h3>
+              <div className="h-48 rounded-lg overflow-hidden">
+                <Map
+                  coordinates={catchData.coordinates}
+                  location={catchData.location}
+                />
+              </div>
             </div>
           )}
         </div>
-      )}
+      </div>
 
       {/* Lightbox */}
       {selectedPhotoIndex !== null && (
@@ -279,130 +380,6 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
           onClose={() => setSelectedPhotoIndex(null)}
         />
       )}
-
-      {/* Info Card */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-              <FishIcon className="w-8 h-8 text-ocean-light" />
-              {catchData.species}
-            </h1>
-            <Link href={`/user/${catchData.username}`}>
-              <p className="text-ocean-light mt-1 hover:text-white transition-colors">
-                von @{catchData.username}
-              </p>
-            </Link>
-          </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-ocean-dark/50 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-ocean-light text-sm mb-1">
-              <Ruler className="w-4 h-4" />
-              Länge
-            </div>
-            <div className="text-2xl font-bold text-white">{catchData.length} cm</div>
-          </div>
-          
-          {catchData.weight && (
-            <div className="bg-ocean-dark/50 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-ocean-light text-sm mb-1">
-                <Scale className="w-4 h-4" />
-                Gewicht
-              </div>
-              <div className="text-2xl font-bold text-white">
-                {catchData.weight > 1000 
-                  ? `${(catchData.weight / 1000).toFixed(2)} kg`
-                  : `${catchData.weight} g`
-                }
-              </div>
-            </div>
-          )}
-
-          <div className="bg-ocean-dark/50 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-ocean-light text-sm mb-1">
-              <Calendar className="w-4 h-4" />
-              Datum
-            </div>
-            <div className="text-white font-semibold">
-              {format(new Date(catchData.date), 'dd.MM.yyyy', { locale: de })}
-            </div>
-            <div className="text-ocean-light text-sm">
-              {format(new Date(catchData.date), 'HH:mm', { locale: de })} Uhr
-            </div>
-          </div>
-
-          {catchData.location && (
-            <div className="bg-ocean-dark/50 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-ocean-light text-sm mb-1">
-                <MapPin className="w-4 h-4" />
-                Ort
-              </div>
-              <div className="text-white font-semibold text-sm">
-                {catchData.location}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Additional Info */}
-        {catchData.bait && (
-          <div className="mb-4">
-            <div className="text-ocean-light text-sm mb-1">Köder</div>
-            <div className="text-white">{catchData.bait}</div>
-          </div>
-        )}
-
-        {catchData.notes && (
-          <div className="mb-4">
-            <div className="text-ocean-light text-sm mb-1">Notizen</div>
-            <div className="text-white">{catchData.notes}</div>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex items-center gap-6 pt-4 border-t border-ocean-light/20">
-          <button
-            onClick={toggleLike}
-            className={`flex items-center gap-2 transition-all ${
-              catchData.user_has_liked
-                ? 'text-red-400 scale-110'
-                : 'text-ocean-light hover:text-red-400 hover:scale-110'
-            }`}
-          >
-            <Heart className={`w-6 h-6 ${catchData.user_has_liked ? 'fill-current' : ''}`} />
-            <span className="font-semibold">{catchData.likes_count}</span>
-          </button>
-          <div className="flex items-center gap-2 text-ocean-light">
-            <MessageCircle className="w-6 h-6" />
-            <span className="font-semibold">{catchData.comments_count}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Map */}
-      {catchData.coordinates && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <MapPin className="w-6 h-6 text-ocean-light" />
-            Fangort
-          </h2>
-          <div className="h-64 rounded-lg overflow-hidden">
-            <Map
-              coordinates={catchData.coordinates}
-              markers={[{
-                position: catchData.coordinates,
-                title: catchData.species,
-              }]}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Comments */}
-      <Comments catchId={params.id} />
     </div>
   )
 }
