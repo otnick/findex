@@ -1,12 +1,8 @@
-/**
- * Push Notification Service
- * Uses Browser Notification API
- */
-
-export interface NotificationOptions {
+interface NotificationOptions {
   title: string
   body: string
   icon?: string
+  image?: string
   badge?: string
   tag?: string
   data?: any
@@ -15,23 +11,10 @@ export interface NotificationOptions {
 class NotificationService {
   private permission: NotificationPermission = 'default'
 
-  constructor() {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      this.permission = Notification.permission
-    }
-  }
-
-  /**
-   * Request notification permission from user
-   */
   async requestPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
       console.warn('Browser does not support notifications')
       return false
-    }
-
-    if (this.permission === 'granted') {
-      return true
     }
 
     const permission = await Notification.requestPermission()
@@ -39,133 +22,137 @@ class NotificationService {
     return permission === 'granted'
   }
 
-  /**
-   * Check if notifications are supported and granted
-   */
-  isSupported(): boolean {
-    return 'Notification' in window
-  }
-
-  /**
-   * Check if permission is granted
-   */
-  isGranted(): boolean {
-    return this.permission === 'granted'
-  }
-
-  /**
-   * Send a notification
-   */
-  async send(options: NotificationOptions): Promise<Notification | null> {
-    if (!this.isSupported()) {
-      console.warn('Notifications not supported')
-      return null
-    }
-
-    if (!this.isGranted()) {
+  async send(options: NotificationOptions): Promise<void> {
+    if (this.permission !== 'granted') {
       const granted = await this.requestPermission()
-      if (!granted) {
-        return null
-      }
+      if (!granted) return
     }
 
     try {
       const notification = new Notification(options.title, {
         body: options.body,
         icon: options.icon || '/icon-192x192.png',
+        image: options.image,
         badge: options.badge || '/icon-192x192.png',
         tag: options.tag,
         data: options.data,
         requireInteraction: false,
+        silent: false,
       })
 
-      // Auto close after 5 seconds
-      setTimeout(() => notification.close(), 5000)
+      notification.onclick = () => {
+        window.focus()
+        if (options.data?.url) {
+          window.location.href = options.data.url
+        }
+        notification.close()
+      }
 
-      return notification
+      setTimeout(() => notification.close(), 5000)
     } catch (error) {
-      console.error('Error sending notification:', error)
-      return null
+      console.error('Notification error:', error)
     }
   }
 
-  /**
-   * Notification for new comment
-   */
-  async notifyNewComment(userName: string, catchSpecies: string) {
-    return this.send({
-      title: '💬 Neuer Kommentar',
-      body: `${userName} hat deinen ${catchSpecies}-Fang kommentiert`,
-      tag: 'comment',
-    })
-  }
-
-  /**
-   * Notification for new like
-   */
-  async notifyNewLike(userName: string, catchSpecies: string) {
-    return this.send({
-      title: '❤️ Neuer Like',
-      body: `${userName} gefällt dein ${catchSpecies}-Fang`,
+  // Rich notification templates
+  async newLike(username: string, catchSpecies: string, photoUrl?: string, catchId?: string): Promise<void> {
+    await this.send({
+      title: '❤️ Neuer Like!',
+      body: `${username} hat deinen ${catchSpecies} geliked`,
+      image: photoUrl,
       tag: 'like',
+      data: { url: catchId ? `/catch/${catchId}` : '/catches' },
     })
   }
 
-  /**
-   * Notification for new friend request
-   */
-  async notifyFriendRequest(userName: string) {
-    return this.send({
-      title: '👥 Neue Freundschaftsanfrage',
-      body: `${userName} möchte mit dir befreundet sein`,
-      tag: 'friend_request',
+  async newComment(username: string, catchSpecies: string, comment: string, photoUrl?: string, catchId?: string): Promise<void> {
+    await this.send({
+      title: '💬 Neuer Kommentar!',
+      body: `${username} zu ${catchSpecies}: "${comment.substring(0, 50)}${comment.length > 50 ? '...' : ''}"`,
+      image: photoUrl,
+      tag: 'comment',
+      data: { url: catchId ? `/catch/${catchId}` : '/catches' },
     })
   }
 
-  /**
-   * Notification for friend request accepted
-   */
-  async notifyFriendAccepted(userName: string) {
-    return this.send({
-      title: '✅ Freundschaftsanfrage angenommen',
-      body: `${userName} hat deine Freundschaftsanfrage angenommen`,
-      tag: 'friend_accepted',
+  async friendRequest(username: string): Promise<void> {
+    await this.send({
+      title: '👥 Neue Freundschaftsanfrage!',
+      body: `${username} möchte dein Freund sein`,
+      tag: 'friend-request',
+      data: { url: '/friends' },
     })
   }
 
-  /**
-   * Notification for new catch from friend
-   */
-  async notifyFriendCatch(userName: string, species: string, length: number) {
-    return this.send({
-      title: `🎣 ${userName} hat gefangen!`,
-      body: `${species} - ${length} cm`,
-      tag: 'friend_catch',
+  async friendAccepted(username: string): Promise<void> {
+    await this.send({
+      title: '🤝 Freundschaftsanfrage angenommen!',
+      body: `${username} hat deine Anfrage angenommen`,
+      tag: 'friend-accepted',
+      data: { url: `/user/${username}` },
     })
   }
 
-  /**
-   * Notification reminder
-   */
-  async notifyReminder(message: string) {
-    return this.send({
-      title: '⏰ Erinnerung',
-      body: message,
+  async friendCatch(username: string, species: string, length: number, photoUrl?: string, catchId?: string): Promise<void> {
+    await this.send({
+      title: '🎣 Freund hat gefangen!',
+      body: `${username} hat einen ${species} (${length}cm) gefangen!`,
+      image: photoUrl,
+      tag: 'friend-catch',
+      data: { url: catchId ? `/catch/${catchId}` : '/social' },
+    })
+  }
+
+  async dailySummary(catchCount: number, likeCount: number, commentCount: number): Promise<void> {
+    const parts: string[] = []
+    if (catchCount > 0) parts.push(`${catchCount} neue Fänge`)
+    if (likeCount > 0) parts.push(`${likeCount} Likes`)
+    if (commentCount > 0) parts.push(`${commentCount} Kommentare`)
+
+    if (parts.length === 0) return
+
+    await this.send({
+      title: '📊 Dein Tag auf FishBox',
+      body: parts.join(' • '),
+      tag: 'daily-summary',
+      data: { url: '/dashboard' },
+    })
+  }
+
+  async achievementUnlocked(achievement: string, description: string): Promise<void> {
+    await this.send({
+      title: '🏆 Achievement freigeschaltet!',
+      body: `${achievement}: ${description}`,
+      tag: 'achievement',
+      data: { url: '/profile' },
+    })
+  }
+
+  async reminder(title: string, body: string): Promise<void> {
+    await this.send({
+      title: `⏰ ${title}`,
+      body,
       tag: 'reminder',
     })
   }
+
+  async testNotification(): Promise<void> {
+    await this.send({
+      title: '🎣 FishBox Benachrichtigungen',
+      body: 'Du erhältst jetzt Updates zu Likes, Kommentaren und mehr!',
+      tag: 'test',
+    })
+  }
 }
 
-// Singleton instance
 export const notificationService = new NotificationService()
 
-// Helper to check if user wants notifications (stored in localStorage)
 export function getNotificationPreference(): boolean {
   if (typeof window === 'undefined') return false
-  return localStorage.getItem('notifications_enabled') === 'true'
+  return localStorage.getItem('notifications-enabled') === 'true'
 }
 
-export function setNotificationPreference(enabled: boolean) {
+export function setNotificationPreference(enabled: boolean): void {
   if (typeof window === 'undefined') return
-  localStorage.setItem('notifications_enabled', enabled.toString())
+  localStorage.setItem('notifications-enabled', enabled ? 'true' : 'false')
 }

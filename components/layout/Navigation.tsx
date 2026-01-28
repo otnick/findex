@@ -13,12 +13,14 @@ import {
   UserCircle,
   UserPlus,
   Menu,
-  X
+  X,
+  Image as ImageIcon
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Fänge', href: '/catches', icon: Fish },
+  { name: 'Galerie', href: '/gallery', icon: ImageIcon },
   { name: 'Karte', href: '/map', icon: Map },
   { name: 'Statistiken', href: '/stats', icon: BarChart3 },
   { name: 'Social', href: '/social', icon: Users },
@@ -27,11 +29,7 @@ const navigation = [
   { name: 'Profil', href: '/profile', icon: UserCircle },
 ]
 
-type NavigationProps = {
-  userEmail?: string;
-};
-
-export default function Navigation({ userEmail }: NavigationProps) {
+export default function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 

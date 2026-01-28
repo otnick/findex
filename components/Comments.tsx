@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
+import Link from 'next/link'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 
@@ -142,9 +143,11 @@ export default function Comments({ catchId }: CommentsProps) {
             <div key={comment.id} className="bg-ocean-dark/50 rounded-lg p-3">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <div className="font-semibold text-white text-sm">
-                    @{comment.user_email}
-                  </div>
+                  <Link href={`/user/${comment.user_email}`}>
+                    <div className="font-semibold text-white text-sm hover:text-ocean-light transition-colors cursor-pointer">
+                      @{comment.user_email}
+                    </div>
+                  </Link>
                   <div className="text-xs text-ocean-light">
                     {format(new Date(comment.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
                   </div>

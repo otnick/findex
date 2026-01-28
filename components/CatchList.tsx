@@ -1,26 +1,51 @@
 'use client'
 
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useCatchStore, type Catch } from '@/lib/store'
+import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import Comments from './Comments'
+import { Eye, Trash2, MapPin, Calendar, Ruler, Image as ImageIcon } from 'lucide-react'
 
-// Lazy load Map component (only when needed)
 const Map = lazy(() => import('./Map'))
 
 interface CatchListProps {
   catches?: Catch[]
 }
 
+interface CatchWithPhotos extends Catch {
+  photoCount?: number
+}
+
 export default function CatchList({ catches: propCatches }: CatchListProps = {}) {
   const storeCatches = useCatchStore((state) => state.catches)
   const catches = propCatches || storeCatches
   const deleteCatch = useCatchStore((state) => state.deleteCatch)
-  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null)
+  const [catchesWithPhotos, setCatchesWithPhotos] = useState<CatchWithPhotos[]>([])
   const [expandedMapId, setExpandedMapId] = useState<string | null>(null)
-  const [expandedCommentsId, setExpandedCommentsId] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadPhotoCounts()
+  }, [catches])
+
+  const loadPhotoCounts = async () => {
+    const catchesWithCounts = await Promise.all(
+      catches.map(async (catchItem) => {
+        const { count } = await supabase
+          .from('catch_photos')
+          .select('*', { count: 'exact', head: true })
+          .eq('catch_id', catchItem.id)
+
+        return {
+          ...catchItem,
+          photoCount: count || 0,
+        }
+      })
+    )
+    setCatchesWithPhotos(catchesWithCounts)
+  }
 
   if (catches.length === 0) {
     return (
@@ -42,263 +67,139 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
     }
   }
 
+  const displayCatches = catchesWithPhotos.length > 0 ? catchesWithPhotos : catches
+
   return (
-    <>
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-white mb-4">
-          Meine Fänge ({catches.length})
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {catches.map((catchData) => (
-            <div
-              key={catchData.id}
-              className="bg-ocean/30 backdrop-blur-sm rounded-lg overflow-hidden hover:bg-ocean/40 transition-colors"
-            >
-              {/* Photo */}
-              {catchData.photo && (
-                <div className="relative h-48 bg-ocean-dark">
-                  <Image
-                    src={catchData.photo}
-                    alt={catchData.species}
-                    fill
-                    className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => setLightboxPhoto(catchData.photo!)}
-                  />
-                  <div className="absolute top-2 right-2 bg-ocean-dark/80 px-2 py-1 rounded text-xs text-white">
-                    📸 Klicken zum Vergrößern
-                  </div>
-                </div>
-              )}
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold text-white mb-4">
+        Meine Fänge ({catches.length})
+      </h2>
 
-              <div className="p-6">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-white">
-                      {catchData.species}
-                    </h3>
-                    <p className="text-ocean-light text-sm">
-                      {format(new Date(catchData.date), 'dd. MMMM yyyy', { locale: de })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Public/Private Toggle */}
-                    <button
-                      onClick={async () => {
-                        const newPublicState = !catchData.is_public
-                        await useCatchStore.getState().updateCatch(catchData.id, { 
-                          is_public: newPublicState 
-                        })
-                      }}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                        catchData.is_public
-                          ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                          : 'bg-gray-500/20 text-gray-400 hover:bg-gray-500/30'
-                      }`}
-                      title={catchData.is_public ? 'Öffentlich - Klicken um privat zu machen' : 'Privat - Klicken um zu teilen'}
-                    >
-                      {catchData.is_public ? '🌍 Öffentlich' : '🔒 Privat'}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(catchData.id)}
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                      title="Löschen"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-ocean-light">Länge:</span>
-                    <span className="text-white font-semibold">{catchData.length} cm</span>
-                  </div>
-                  
-                  {catchData.weight && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-ocean-light">Gewicht:</span>
-                      <span className="text-white font-semibold">
-                        {catchData.weight > 1000
-                          ? `${(catchData.weight / 1000).toFixed(2)} kg`
-                          : `${catchData.weight} g`}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {catchData.location && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-ocean-light">Ort:</span>
-                      <span className="text-white font-semibold truncate ml-2">
-                        {catchData.location}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {catchData.bait && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-ocean-light">Köder:</span>
-                      <span className="text-white font-semibold truncate ml-2">
-                        {catchData.bait}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Weather */}
-                  {catchData.weather && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-ocean-light">Wetter:</span>
-                      <span className="text-white font-semibold">
-                        {catchData.weather.icon} {catchData.weather.temperature}°C
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* GPS Map */}
-                {catchData.coordinates && (
-                  <div className="mb-4">
-                    {expandedMapId === catchData.id ? (
-                      <Suspense fallback={<div className="text-ocean-light text-sm">Karte lädt...</div>}>
-                        <div className="space-y-2">
-                          <Map
-                            coordinates={catchData.coordinates}
-                            location={catchData.location}
-                            height="200px"
-                          />
-                          <button
-                            onClick={() => setExpandedMapId(null)}
-                            className="text-ocean-light text-sm hover:text-white"
-                          >
-                            Karte ausblenden
-                          </button>
-                        </div>
-                      </Suspense>
-                    ) : (
-                      <button
-                        onClick={() => setExpandedMapId(catchData.id)}
-                        className="w-full px-3 py-2 bg-ocean-dark/50 rounded text-ocean-light hover:bg-ocean-dark hover:text-white transition-colors text-sm"
-                      >
-                        📍 Karte anzeigen
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Comments Section */}
-                <div className="mb-4">
-                  {expandedCommentsId === catchData.id ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-white font-semibold text-sm">
-                          💬 Kommentare ({catchData.comments_count || 0})
-                        </div>
-                        <button
-                          onClick={() => setExpandedCommentsId(null)}
-                          className="text-ocean-light text-xs hover:text-white"
-                        >
-                          Ausblenden
-                        </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {displayCatches.map((catchItem) => (
+          <div
+            key={catchItem.id}
+            className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group"
+          >
+            {/* Photo */}
+            <Link href={`/catch/${catchItem.id}`}>
+              <div className="relative h-48 bg-ocean-dark cursor-pointer">
+                {catchItem.photo ? (
+                  <>
+                    <Image
+                      src={catchItem.photo}
+                      alt={catchItem.species}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {/* Photo Count Badge */}
+                    {(catchItem as CatchWithPhotos).photoCount && (catchItem as CatchWithPhotos).photoCount! > 1 && (
+                      <div className="absolute top-3 right-3 bg-ocean-deeper/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                        <ImageIcon className="w-3 h-3 text-white" />
+                        <span className="text-white text-xs font-semibold">
+                          {(catchItem as CatchWithPhotos).photoCount}
+                        </span>
                       </div>
-                      <Suspense fallback={<div className="text-ocean-light text-sm">Laden...</div>}>
-                        <Comments catchId={catchData.id} />
-                      </Suspense>
+                    )}
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Eye className="w-12 h-12 text-white" />
+                      </div>
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => setExpandedCommentsId(catchData.id)}
-                      className="w-full px-3 py-2 bg-ocean-dark/50 rounded text-ocean-light hover:bg-ocean-dark hover:text-white transition-colors text-sm"
-                    >
-                      💬 Kommentare anzeigen ({catchData.comments_count || 0})
-                    </button>
-                  )}
-                </div>
-
-                {/* Share Button */}
-                {catchData.is_public && (
-                  <div className="mb-4">
-                    <button
-                      onClick={async () => {
-                        const shareUrl = `${window.location.origin}/catch/${catchData.id}`
-                        if (navigator.share) {
-                          try {
-                            await navigator.share({
-                              title: `${catchData.species} - ${catchData.length} cm`,
-                              text: `Schau dir diesen ${catchData.species}-Fang an!`,
-                              url: shareUrl,
-                            })
-                          } catch (err) {
-                            // User cancelled
-                          }
-                        } else {
-                          await navigator.clipboard.writeText(shareUrl)
-                          alert('Link in Zwischenablage kopiert!')
-                        }
-                      }}
-                      className="w-full px-3 py-2 bg-ocean-dark/50 rounded text-ocean-light hover:bg-ocean-dark hover:text-white transition-colors text-sm"
-                    >
-                      🔗 Fang teilen
-                    </button>
-                  </div>
-                )}
-
-                {/* Notes */}
-                {catchData.notes && (
-                  <div className="pt-4 border-t border-ocean-light/20">
-                    <p className="text-ocean-light text-sm italic">
-                      &quot;{catchData.notes}&quot;
-                    </p>
+                  </>
+                ) : (
+                  <div className="h-full flex items-center justify-center">
+                    <span className="text-6xl opacity-50">🎣</span>
                   </div>
                 )}
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            </Link>
 
-      {/* Photo Lightbox */}
-      {lightboxPhoto && (
-        <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-          onClick={() => setLightboxPhoto(null)}
-        >
-          <div className="relative w-full max-w-4xl h-[90vh]">
-            <Image
-              src={lightboxPhoto}
-              alt="Vergrößertes Foto"
-              fill
-              className="object-contain"
-            />
-            <button
-              onClick={() => setLightboxPhoto(null)}
-              className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            {/* Content */}
+            <div className="p-4">
+              <Link href={`/catch/${catchItem.id}`}>
+                <h3 className="text-xl font-bold text-white mb-2 hover:text-ocean-light transition-colors cursor-pointer">
+                  {catchItem.species}
+                </h3>
+              </Link>
+
+              <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                <div className="flex items-center gap-1 text-ocean-light">
+                  <Ruler className="w-4 h-4" />
+                  <span>{catchItem.length} cm</span>
+                </div>
+                {catchItem.weight && (
+                  <div className="text-ocean-light">
+                    {catchItem.weight > 1000
+                      ? `${(catchItem.weight / 1000).toFixed(2)} kg`
+                      : `${catchItem.weight} g`}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-ocean-light mb-3">
+                <Calendar className="w-3 h-3" />
+                <span>
+                  {format(new Date(catchItem.date), 'dd.MM.yyyy HH:mm', { locale: de })}
+                </span>
+              </div>
+
+              {catchItem.location && (
+                <div className="flex items-center gap-2 text-xs text-ocean-light mb-3">
+                  <MapPin className="w-3 h-3" />
+                  <span className="truncate">{catchItem.location}</span>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-3 border-t border-ocean-light/20">
+                <Link href={`/catch/${catchItem.id}`} className="flex-1">
+                  <button className="w-full px-3 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    Details
+                  </button>
+                </Link>
+
+                {catchItem.coordinates && (
+                  <button
+                    onClick={() => setExpandedMapId(
+                      expandedMapId === catchItem.id ? null : catchItem.id
+                    )}
+                    className="px-3 py-2 bg-ocean-dark hover:bg-ocean text-white rounded-lg transition-colors"
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </button>
+                )}
+
+                <button
+                  onClick={() => handleDelete(catchItem.id)}
+                  className="px-3 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Expanded Map */}
+            {expandedMapId === catchItem.id && catchItem.coordinates && (
+              <div className="border-t border-ocean-light/20">
+                <Suspense fallback={<div className="h-48 bg-ocean-dark animate-pulse" />}>
+                  <div className="h-48">
+                    <Map
+                      coordinates={catchItem.coordinates}
+                      markers={[{
+                        position: catchItem.coordinates,
+                        title: catchItem.species,
+                      }]}
+                    />
+                  </div>
+                </Suspense>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </>
+        ))}
+      </div>
+    </div>
   )
 }

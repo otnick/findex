@@ -6,6 +6,8 @@ import { useCatchStore } from '@/lib/store'
 import { uploadPhoto, compressImage } from '@/lib/utils/photoUpload'
 import { getCurrentPosition, getLocationName, formatCoordinates } from '@/lib/utils/geolocation'
 import { getCurrentWeather } from '@/lib/utils/weather'
+import { X, Upload, MapPin, Cloud } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 import type { Coordinates } from '@/lib/utils/geolocation'
 
 interface CatchFormProps {
@@ -27,6 +29,12 @@ const FISH_SPECIES = [
   'Andere',
 ]
 
+interface PhotoWithPreview {
+  file: File
+  preview: string
+  caption?: string
+}
+
 export default function CatchForm({ onSuccess }: CatchFormProps) {
   const addCatch = useCatchStore((state) => state.addCatch)
   const user = useCatchStore((state) => state.user)
@@ -38,11 +46,10 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
     location: '',
     bait: '',
     notes: '',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
   })
 
-  const [photo, setPhoto] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photos, setPhotos] = useState<PhotoWithPreview[]>([])
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null)
   const [gettingLocation, setGettingLocation] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -50,96 +57,128 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
   const [fetchingWeather, setFetchingWeather] = useState(false)
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setPhoto(file)
-      // Create preview
+    const files = Array.from(e.target.files || [])
+    
+    files.forEach(file => {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setPhotoPreview(reader.result as string)
+        setPhotos(prev => [...prev, {
+          file,
+          preview: reader.result as string,
+        }])
       }
       reader.readAsDataURL(file)
-    }
+    })
   }
 
-  const removePhoto = () => {
-    setPhoto(null)
-    setPhotoPreview(null)
+  const removePhoto = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index))
   }
 
-  const getGPSLocation = async () => {
+  const updateCaption = (index: number, caption: string) => {
+    setPhotos(prev => prev.map((photo, i) => 
+      i === index ? { ...photo, caption } : photo
+    ))
+  }
+
+  const getLocation = async () => {
     setGettingLocation(true)
-    
-    const coords = await getCurrentPosition()
-    
-    if (coords) {
-      setCoordinates(coords)
+    try {
+      const position = await getCurrentPosition()
+      setCoordinates(position)
       
-      // Try to get location name
-      const locationName = await getLocationName(coords)
-      if (locationName && !formData.location) {
-        setFormData({ ...formData, location: locationName })
-      }
+      const locationName = await getLocationName(position)
+      setFormData(prev => ({ ...prev, location: locationName }))
 
-      // Auto-fetch weather for current location
-      setFetchingWeather(true)
-      const weatherData = await getCurrentWeather(coords)
-      if (weatherData) {
-        setWeather(weatherData)
-      }
-      setFetchingWeather(false)
-    } else {
-      alert('GPS-Position konnte nicht ermittelt werden. Bitte erlaube Standortzugriff.')
+      // Also fetch weather for this location
+      const weatherData = await getCurrentWeather(position)
+      setWeather(weatherData)
+    } catch (error) {
+      console.error('Location error:', error)
+      alert('Konnte Standort nicht ermitteln')
+    } finally {
+      setGettingLocation(false)
     }
-    
-    setGettingLocation(false)
   }
 
-  const removeGPS = () => {
-    setCoordinates(null)
-    setWeather(null)
+  const getWeatherData = async () => {
+    if (!coordinates) {
+      alert('Bitte zuerst Standort aktivieren')
+      return
+    }
+
+    setFetchingWeather(true)
+    try {
+      const weatherData = await getCurrentWeather(coordinates)
+      setWeather(weatherData)
+    } catch (error) {
+      console.error('Weather error:', error)
+      alert('Konnte Wetter nicht laden')
+    } finally {
+      setFetchingWeather(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!user) {
-      alert('Du musst angemeldet sein!')
+      alert('Bitte melde dich an')
+      return
+    }
+
+    if (!formData.species || !formData.length) {
+      alert('Bitte Fischart und Länge angeben')
       return
     }
 
     setUploading(true)
 
     try {
-      let photoUrl: string | undefined = undefined
-
-      // Upload photo if provided
-      if (photo) {
-        // Compress image first
-        const compressed = await compressImage(photo)
-        photoUrl = await uploadPhoto(compressed, user.id) || undefined
-        
-        if (!photoUrl) {
-          alert('Fehler beim Hochladen des Fotos. Versuche es erneut.')
-          setUploading(false)
-          return
+      // Upload all photos
+      let photoUrls: string[] = []
+      if (photos.length > 0) {
+        for (const photo of photos) {
+          const compressed = await compressImage(photo.file)
+          const url = await uploadPhoto(compressed, user.id)
+          photoUrls.push(url)
         }
       }
 
-      // Add catch
-      await addCatch({
+      // Create catch with first photo (backward compatibility)
+      const catchData = {
         species: formData.species,
-        length: Number(formData.length),
-        weight: formData.weight ? Number(formData.weight) : undefined,
+        length: parseInt(formData.length),
+        weight: formData.weight ? parseInt(formData.weight) : undefined,
         location: formData.location || undefined,
         bait: formData.bait || undefined,
         notes: formData.notes || undefined,
-        date: new Date(formData.date),
-        photo: photoUrl,
+        date: new Date(formData.date).toISOString(),
+        photo: photoUrls[0] || undefined, // First photo
         coordinates: coordinates || undefined,
         weather: weather || undefined,
-        is_public: false, // Default to private
-      })
+      }
+
+      const newCatch = await addCatch(catchData)
+
+      // If multiple photos, save to catch_photos table
+      if (photoUrls.length > 0 && newCatch) {
+        const catchPhotos = photoUrls.map((url, index) => ({
+          catch_id: newCatch.id,
+          photo_url: url,
+          caption: photos[index]?.caption || null,
+          order_index: index,
+        }))
+
+        const { error } = await supabase
+          .from('catch_photos')
+          .insert(catchPhotos)
+
+        if (error) {
+          console.error('Error saving photos:', error)
+          // Don't fail the whole operation, photos are stored in catches.photo_url
+        }
+      }
 
       // Reset form
       setFormData({
@@ -149,220 +188,240 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
         location: '',
         bait: '',
         notes: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().slice(0, 16),
       })
-      setPhoto(null)
-      setPhotoPreview(null)
+      setPhotos([])
       setCoordinates(null)
+      setWeather(null)
 
       onSuccess()
     } catch (error) {
-      console.error('Error submitting catch:', error)
-      alert('Fehler beim Speichern!')
+      console.error('Submit error:', error)
+      alert('Fehler beim Speichern')
     } finally {
       setUploading(false)
     }
   }
 
   return (
-    <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-white mb-6">Neuer Fang</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Photo Upload */}
-        <div>
-          <label className="block text-ocean-light mb-2">📸 Foto</label>
-          
-          {!photoPreview ? (
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handlePhotoChange}
-                className="hidden"
-                id="photo-upload"
-              />
-              <label
-                htmlFor="photo-upload"
-                className="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-ocean-light/30 rounded-lg cursor-pointer hover:border-ocean-light/60 transition-colors"
-              >
-                <div className="text-center">
-                  <div className="text-4xl mb-2">📷</div>
-                  <div className="text-ocean-light">Foto aufnehmen oder hochladen</div>
-                  <div className="text-ocean-light/60 text-sm mt-1">Optional</div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Photo Upload - Multiple */}
+      <div>
+        <label className="block text-ocean-light text-sm mb-2">
+          Fotos ({photos.length})
+        </label>
+        
+        {/* Photo Grid */}
+        {photos.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+            {photos.map((photo, index) => (
+              <div key={index} className="relative group">
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-ocean-dark">
+                  <Image
+                    src={photo.preview}
+                    alt={`Photo ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(index)}
+                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                  {index === 0 && (
+                    <div className="absolute top-2 left-2 bg-ocean-light px-2 py-1 rounded text-white text-xs">
+                      Hauptfoto
+                    </div>
+                  )}
                 </div>
-              </label>
-            </div>
-          ) : (
-            <div className="relative w-full h-64">
-              <Image
-                src={photoPreview}
-                alt="Preview"
-                fill
-                className="object-cover rounded-lg"
-              />
-              <button
-                type="button"
-                onClick={removePhoto}
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
+                <input
+                  type="text"
+                  placeholder="Beschreibung (optional)"
+                  value={photo.caption || ''}
+                  onChange={(e) => updateCaption(index, e.target.value)}
+                  className="mt-2 w-full px-3 py-1 rounded bg-ocean-dark text-white text-sm border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* GPS Location */}
+        {/* Upload Button */}
+        <label className="flex items-center justify-center gap-2 px-4 py-3 bg-ocean/30 hover:bg-ocean/50 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-ocean-light/30">
+          <Upload className="w-5 h-5 text-ocean-light" />
+          <span className="text-ocean-light">
+            {photos.length === 0 ? 'Fotos hochladen' : 'Weitere Fotos hinzufügen'}
+          </span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handlePhotoChange}
+            className="hidden"
+          />
+        </label>
+        <p className="text-xs text-ocean-light mt-1">
+          Mehrere Fotos auswählen. Erstes Foto = Hauptfoto
+        </p>
+      </div>
+
+      {/* Species */}
+      <div>
+        <label className="block text-ocean-light text-sm mb-2">
+          Fischart *
+        </label>
+        <select
+          value={formData.species}
+          onChange={(e) => setFormData({ ...formData, species: e.target.value })}
+          className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+          required
+        >
+          <option value="">Wähle eine Art</option>
+          {FISH_SPECIES.map((species) => (
+            <option key={species} value={species}>
+              {species}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Length & Weight */}
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-ocean-light mb-2">📍 GPS-Position</label>
-          
-          {!coordinates ? (
-            <button
-              type="button"
-              onClick={getGPSLocation}
-              disabled={gettingLocation}
-              className="w-full px-4 py-3 border border-ocean-light/30 rounded-lg text-ocean-light hover:bg-ocean-light/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {gettingLocation ? 'Ermittle Position...' : '🎯 Aktuelle Position erfassen'}
-            </button>
-          ) : (
-            <div className="bg-ocean-dark/50 p-4 rounded-lg space-y-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="text-white font-semibold">Position erfasst ✓</div>
-                  <div className="text-ocean-light text-sm">
-                    {formatCoordinates(coordinates)}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={removeGPS}
-                  className="text-red-400 hover:text-red-300"
-                >
-                  Entfernen
-                </button>
+          <label className="block text-ocean-light text-sm mb-2">
+            Länge (cm) *
+          </label>
+          <input
+            type="number"
+            value={formData.length}
+            onChange={(e) => setFormData({ ...formData, length: e.target.value })}
+            className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            required
+            min="1"
+          />
+        </div>
+        <div>
+          <label className="block text-ocean-light text-sm mb-2">
+            Gewicht (g)
+          </label>
+          <input
+            type="number"
+            value={formData.weight}
+            onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+            className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            min="1"
+          />
+        </div>
+      </div>
+
+      {/* Date & Time */}
+      <div>
+        <label className="block text-ocean-light text-sm mb-2">
+          Datum & Uhrzeit
+        </label>
+        <input
+          type="datetime-local"
+          value={formData.date}
+          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+        />
+        <p className="text-xs text-ocean-light mt-1">
+          Standardmäßig aktuelle Zeit - anpassbar
+        </p>
+      </div>
+
+      {/* Location */}
+      <div>
+        <label className="block text-ocean-light text-sm mb-2">
+          Standort
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={formData.location}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            className="flex-1 px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            placeholder="z.B. Müggelsee, Berlin"
+          />
+          <button
+            type="button"
+            onClick={getLocation}
+            disabled={gettingLocation}
+            className="px-4 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            <MapPin className="w-4 h-4" />
+            {gettingLocation ? '...' : 'GPS'}
+          </button>
+        </div>
+        {coordinates && (
+          <p className="text-xs text-ocean-light mt-1">
+            📍 {formatCoordinates(coordinates)}
+          </p>
+        )}
+      </div>
+
+      {/* Weather */}
+      {coordinates && (
+        <div>
+          <button
+            type="button"
+            onClick={getWeatherData}
+            disabled={fetchingWeather}
+            className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors"
+          >
+            <Cloud className="w-4 h-4" />
+            <span className="text-sm">
+              {weather ? 'Wetter aktualisieren' : 'Wetter laden'}
+            </span>
+          </button>
+          {weather && (
+            <div className="mt-2 p-3 bg-ocean-dark/50 rounded-lg text-sm">
+              <div className="text-white">
+                🌡️ {weather.temperature}°C • 💨 {weather.windSpeed} km/h
               </div>
             </div>
           )}
         </div>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Species */}
-          <div>
-            <label className="block text-ocean-light mb-2">Fischart *</label>
-            <select
-              required
-              value={formData.species}
-              onChange={(e) => setFormData({ ...formData, species: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-            >
-              <option value="">Wähle eine Art</option>
-              {FISH_SPECIES.map((species) => (
-                <option key={species} value={species}>
-                  {species}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Bait */}
+      <div>
+        <label className="block text-ocean-light text-sm mb-2">
+          Köder
+        </label>
+        <input
+          type="text"
+          value={formData.bait}
+          onChange={(e) => setFormData({ ...formData, bait: e.target.value })}
+          className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+          placeholder="z.B. Wobbler, Gummifisch, Wurm"
+        />
+      </div>
 
-          {/* Length */}
-          <div>
-            <label className="block text-ocean-light mb-2">Länge (cm) *</label>
-            <input
-              type="number"
-              required
-              min="1"
-              value={formData.length}
-              onChange={(e) => setFormData({ ...formData, length: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-              placeholder="z.B. 45"
-            />
-          </div>
+      {/* Notes */}
+      <div>
+        <label className="block text-ocean-light text-sm mb-2">
+          Notizen
+        </label>
+        <textarea
+          value={formData.notes}
+          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          rows={3}
+          className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none resize-none"
+          placeholder="Zusätzliche Infos..."
+        />
+      </div>
 
-          {/* Weight */}
-          <div>
-            <label className="block text-ocean-light mb-2">Gewicht (g)</label>
-            <input
-              type="number"
-              min="1"
-              value={formData.weight}
-              onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-              placeholder="z.B. 1200"
-            />
-          </div>
-
-          {/* Date */}
-          <div>
-            <label className="block text-ocean-light mb-2">Datum *</label>
-            <input
-              type="date"
-              required
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-            />
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-ocean-light mb-2">Gewässer</label>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-              placeholder="z.B. Elbe bei Hamburg"
-            />
-          </div>
-
-          {/* Bait */}
-          <div>
-            <label className="block text-ocean-light mb-2">Köder</label>
-            <input
-              type="text"
-              value={formData.bait}
-              onChange={(e) => setFormData({ ...formData, bait: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-              placeholder="z.B. Wobbler, Wurm"
-            />
-          </div>
-        </div>
-
-        {/* Notes */}
-        <div>
-          <label className="block text-ocean-light mb-2">Notizen</label>
-          <textarea
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            rows={3}
-            className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none resize-none"
-            placeholder="Zusätzliche Informationen..."
-          />
-        </div>
-
-        {/* Submit */}
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            disabled={uploading}
-            className="flex-1 bg-ocean hover:bg-ocean-light text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {uploading ? 'Speichere...' : 'Fang speichern'}
-          </button>
-          <button
-            type="button"
-            onClick={onSuccess}
-            disabled={uploading}
-            className="px-6 py-3 rounded-lg border border-ocean-light/30 text-ocean-light hover:bg-ocean-light/10 transition-colors disabled:opacity-50"
-          >
-            Abbrechen
-          </button>
-        </div>
-      </form>
-    </div>
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={uploading}
+        className="w-full bg-gradient-to-r from-ocean-light to-ocean hover:from-ocean hover:to-ocean-dark text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
+      >
+        {uploading ? 'Speichern...' : 'Fang speichern'}
+      </button>
+    </form>
   )
 }
