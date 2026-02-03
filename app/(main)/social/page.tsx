@@ -172,7 +172,10 @@ export default function SocialPage() {
     <div className="space-y-6 pb-20 md:pb-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Social Feed</h1>
+        <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+          <MessageCircle className="w-8 h-8 text-ocean-light" />
+          Social Feed
+        </h1>
         <p className="text-ocean-light">
           {activities.length} {activities.length === 1 ? 'Fang' : 'Fänge'}
         </p>

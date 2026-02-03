@@ -34,6 +34,7 @@ export default function UserProfilePage({ params }: { params: { username: string
   const [catches, setCatches] = useState<PublicCatch[]>([])
   const [fishdexEntries, setFishdexEntries] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState<'gallery' | 'fishdex'>('gallery')
+  const [showPublicOnly, setShowPublicOnly] = useState(true)
   const [stats, setStats] = useState({
     totalCatches: 0,
     uniqueSpecies: 0,
@@ -47,7 +48,7 @@ export default function UserProfilePage({ params }: { params: { username: string
   useEffect(() => {
     fetchProfile()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.username])
+  }, [params.username, showPublicOnly, currentUser?.id])
 
   const fetchProfile = async () => {
     try {
@@ -62,13 +63,21 @@ export default function UserProfilePage({ params }: { params: { username: string
 
       setProfile(profileData)
 
-      // Get public catches
-      const { data: catchesData, error: catchesError } = await supabase
+      const isOwnProfile = currentUser?.id === profileData.id
+      const publicOnly = !isOwnProfile || showPublicOnly
+
+      // Get catches
+      let catchesQuery = supabase
         .from('catches')
         .select('*')
         .eq('user_id', profileData.id)
-        .eq('is_public', true)
         .order('date', { ascending: false })
+
+      if (publicOnly) {
+        catchesQuery = catchesQuery.eq('is_public', true)
+      }
+
+      const { data: catchesData, error: catchesError } = await catchesQuery
 
       if (catchesError) throw catchesError
 
@@ -97,7 +106,36 @@ export default function UserProfilePage({ params }: { params: { username: string
         .order('discovered_at', { ascending: false })
 
       if (fishdexData) {
-        setFishdexEntries(fishdexData)
+        const progressWithPhotos = await Promise.all(
+          fishdexData.map(async (entry: any) => {
+            const speciesName = entry.species?.name || ''
+            if (!speciesName) {
+              return { ...entry, photo_url: null }
+            }
+
+            let biggestCatchQuery = supabase
+              .from('catches')
+              .select('photo_url, length')
+              .eq('user_id', profileData.id)
+              .eq('species', speciesName)
+              .eq('verification_status', 'verified')
+              .order('length', { ascending: false })
+              .limit(1)
+
+            if (publicOnly) {
+              biggestCatchQuery = biggestCatchQuery.eq('is_public', true)
+            }
+
+            const { data: biggestCatch } = await biggestCatchQuery.single()
+
+            return {
+              ...entry,
+              photo_url: biggestCatch?.photo_url || null,
+            }
+          })
+        )
+
+        setFishdexEntries(progressWithPhotos)
       }
     } catch (err) {
       console.error('Error fetching profile:', err)
@@ -208,33 +246,66 @@ export default function UserProfilePage({ params }: { params: { username: string
 
       {/* Tabs */}
       <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-2">
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab('gallery')}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
-              activeTab === 'gallery'
-                ? 'bg-ocean text-white'
-                : 'text-ocean-light hover:text-white'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Fish className="w-5 h-5" />
-              Galerie ({catches.length})
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {isOwnProfile && (
+            <div className="flex items-center justify-between rounded-lg bg-ocean-dark/40 px-4 py-3 sm:order-2 sm:w-[260px]">
+              <div>
+                <div className="text-white font-semibold text-sm">Nur öffentlich</div>
+                <div className="text-ocean-light text-xs">Privates ausblenden</div>
+              </div>
+              <label className="inline-flex cursor-pointer items-center gap-3">
+                <span className="sr-only">Öffentliche Fänge umschalten</span>
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={showPublicOnly}
+                  onChange={() => setShowPublicOnly(prev => !prev)}
+                />
+                <span
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
+                    showPublicOnly
+                      ? 'bg-green-500/90 border-green-400/60'
+                      : 'bg-gray-700 border-gray-500/60'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                      showPublicOnly ? 'translate-x-5' : 'translate-x-1'
+                    }`}
+                  />
+                </span>
+              </label>
             </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('fishdex')}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
-              activeTab === 'fishdex'
-                ? 'bg-ocean text-white'
-                : 'text-ocean-light hover:text-white'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Award className="w-5 h-5" />
-              FishDex ({fishdexEntries.length})
-            </div>
-          </button>
+          )}
+
+          <div className="flex gap-2 sm:flex-1">
+            <button
+              onClick={() => setActiveTab('gallery')}
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                activeTab === 'gallery'
+                  ? 'bg-ocean text-white'
+                  : 'text-ocean-light hover:text-white'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Fish className="w-5 h-5" />
+                Galerie ({catches.length})
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('fishdex')}
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                activeTab === 'fishdex'
+                  ? 'bg-ocean text-white'
+                  : 'text-ocean-light hover:text-white'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Award className="w-5 h-5" />
+                FishDex ({fishdexEntries.length})
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -244,10 +315,19 @@ export default function UserProfilePage({ params }: { params: { username: string
           {catches.length === 0 ? (
             <EmptyState
               icon={Fish}
-              title={isOwnProfile ? 'Keine öffentlichen Fänge' : 'Noch keine öffentlichen Fänge'}
-              description={isOwnProfile 
-                ? 'Mache deine Fänge öffentlich, um sie hier zu zeigen.'
-                : 'Dieser Angler hat noch keine öffentlichen Fänge geteilt.'
+              title={
+                isOwnProfile
+                  ? showPublicOnly
+                    ? 'Keine öffentlichen Fänge'
+                    : 'Keine Fänge'
+                  : 'Noch keine öffentlichen Fänge'
+              }
+              description={
+                isOwnProfile
+                  ? showPublicOnly
+                    ? 'Mache deine Fänge öffentlich, um sie hier zu zeigen.'
+                    : 'Du hast noch keine Fänge gespeichert.'
+                  : 'Dieser Angler hat noch keine öffentlichen Fänge geteilt.'
               }
               actionLabel={isOwnProfile ? 'Zu meinen Fängen' : undefined}
               actionHref={isOwnProfile ? '/catches' : undefined}
@@ -292,18 +372,18 @@ export default function UserProfilePage({ params }: { params: { username: string
                         <span className="flex items-center gap-1">
                           <MessageCircle className="w-4 h-4" />
                           {catchData.comments_count || 0}
-                      </span>
-                      <span className="ml-auto">
-                        {format(new Date(catchData.date), 'dd.MM.yyyy')}
-                      </span>
+                        </span>
+                        <span className="ml-auto">
+                          {format(new Date(catchData.date), 'dd.MM.yyyy')}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* FishDex Tab */}
@@ -318,14 +398,17 @@ export default function UserProfilePage({ params }: { params: { username: string
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {fishdexEntries.map((entry) => (
-                <div
+                <Link
                   key={entry.id}
-                  className="bg-ocean/30 backdrop-blur-sm rounded-xl p-3 hover:bg-ocean/40 transition-all duration-300 hover:scale-105"
+                  href={entry.species?.id ? `/fishdex/${entry.species.id}` : '#'}
+                  className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-3 hover:bg-ocean/40 transition-all duration-300 hover:scale-105 ${
+                    entry.species?.id ? '' : 'pointer-events-none'
+                  }`}
                 >
                   <div className="aspect-square bg-ocean-dark rounded-lg mb-2 flex items-center justify-center relative overflow-hidden">
-                    {entry.species?.image_url ? (
+                    {entry.photo_url || entry.species?.image_url ? (
                       <Image
-                        src={entry.species.image_url}
+                        src={entry.photo_url || entry.species.image_url}
                         alt={entry.species.name}
                         fill
                         className="object-cover"
@@ -351,7 +434,7 @@ export default function UserProfilePage({ params }: { params: { username: string
                       </div>
                     )}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

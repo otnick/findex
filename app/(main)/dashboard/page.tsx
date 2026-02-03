@@ -7,7 +7,7 @@ import { useCatchStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, isAfter } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Plus, MapPin, BarChart3, User, BookOpen, Trophy } from 'lucide-react'
+import { Plus, MapPin, BarChart3, User, BookOpen, Trophy, LayoutDashboard } from 'lucide-react'
 import FishAquarium from '@/components/FishAquarium'
 
 export default function DashboardPage() {
@@ -62,7 +62,10 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <LayoutDashboard className="w-8 h-8 text-ocean-light" />
+          Dashboard
+        </h1>
         <p className="text-ocean-light mt-1">Willkommen zurück! Hier ist deine Übersicht.</p>
       </div>
 

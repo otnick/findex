@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import CatchForm from '@/components/CatchForm'
 import CatchList from '@/components/CatchList'
 import { useCatchStore } from '@/lib/store'
+import { Fish } from 'lucide-react'
 
 export default function CatchesPage() {
   const [showForm, setShowForm] = useState(false)
@@ -55,14 +56,17 @@ export default function CatchesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Meine Fänge</h1>
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <Fish className="w-8 h-8 text-ocean-light" />
+            Meine Fänge
+          </h1>
           <p className="text-ocean-light mt-1">{catches.length} Fänge insgesamt</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-ocean hover:bg-ocean-light text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg"
+          className="w-full sm:w-auto bg-ocean hover:bg-ocean-light text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg"
         >
           {showForm ? 'Abbrechen' : '+ Neuer Fang'}
         </button>

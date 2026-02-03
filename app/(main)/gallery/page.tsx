@@ -106,7 +106,7 @@ export default function GalleryPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <ImageIcon className="w-8 h-8 text-ocean-light" />
@@ -119,7 +119,7 @@ export default function GalleryPage() {
         {filteredPhotos.length > 0 && (
           <button
             onClick={downloadAll}
-            className="flex items-center gap-2 bg-ocean hover:bg-ocean-light text-white px-4 py-2 rounded-lg transition-colors text-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-ocean hover:bg-ocean-light text-white px-4 py-2 rounded-lg transition-colors text-sm"
           >
             <Download className="w-4 h-4" />
             Alle herunterladen

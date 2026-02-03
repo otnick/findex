@@ -170,6 +170,10 @@ CREATE POLICY "Users can view activities from friends and own"
         )
     );
 
+CREATE POLICY "Users can create activities"
+    ON public.activities FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
 -- Update catches policy to allow viewing public catches
 DROP POLICY IF EXISTS "Users can view own catches" ON public.catches;
 

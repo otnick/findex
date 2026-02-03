@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useCatchStore } from '@/lib/store'
@@ -15,6 +15,8 @@ export default function MapPage() {
   const [filterSpecies, setFilterSpecies] = useState<string>('all')
   const [filterTimeframe, setFilterTimeframe] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'catches' | 'species' | 'recent'>('catches')
+  const [selectedSpot, setSelectedSpot] = useState<{ lat: number; lng: number } | null>(null)
+  const [showHeatmap, setShowHeatmap] = useState(false)
 
   // Filter catches
   const filteredCatches = useMemo(() => {
@@ -106,11 +108,22 @@ export default function MapPage() {
     return [...new Set(catches.filter(c => c.coordinates).map(c => c.species))].sort()
   }, [catches])
 
+  useEffect(() => {
+    if (!selectedSpot) return
+    const stillExists = spotStats.some(
+      spot => spot.coordinates.lat === selectedSpot.lat && spot.coordinates.lng === selectedSpot.lng
+    )
+    if (!stillExists) setSelectedSpot(null)
+  }, [spotStats, selectedSpot])
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Angelkarte</h1>
+        <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+          <MapPin className="w-8 h-8 text-ocean-light" />
+          Angelkarte
+        </h1>
         <p className="text-ocean-light">
           {filteredCatches.length} {filteredCatches.length === 1 ? 'Fang' : 'Fänge'} • {spotStats.length} {spotStats.length === 1 ? 'Spot' : 'Spots'}
         </p>
@@ -170,13 +183,46 @@ export default function MapPage() {
             </select>
           </div>
         </div>
+
+        <div className="mt-4 flex items-center justify-between rounded-lg bg-ocean-dark/40 px-4 py-3">
+          <div>
+            <div className="text-white font-semibold">Heatmap</div>
+            <div className="text-ocean-light text-sm">Dichte der Fänge visualisieren</div>
+          </div>
+          <label className="inline-flex cursor-pointer items-center gap-3">
+            <span className="sr-only">Heatmap umschalten</span>
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={showHeatmap}
+              onChange={() => setShowHeatmap(prev => !prev)}
+            />
+            <span
+              className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
+                showHeatmap
+                  ? 'bg-amber-500/90 border-amber-400/60'
+                  : 'bg-gray-700 border-gray-500/60'
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                  showHeatmap ? 'translate-x-5' : 'translate-x-1'
+                }`}
+              />
+            </span>
+          </label>
+        </div>
       </div>
 
       {/* Map */}
       {filteredCatches.length > 0 ? (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
           <div className="h-[500px] rounded-lg overflow-hidden">
-            <SpotsMap catches={filteredCatches} />
+            <SpotsMap
+              catches={filteredCatches}
+              selectedSpot={selectedSpot}
+              showHeatmap={showHeatmap}
+            />
           </div>
         </div>
       ) : (
@@ -202,14 +248,26 @@ export default function MapPage() {
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-ocean-light" />
-            <h2 className="text-xl font-bold text-white">Top Spots</h2>
+            <h2 className="text-xl font-bold text-white">Spots</h2>
           </div>
 
+          <p className="text-ocean-light text-sm mb-4">
+            Tippe auf einen Spot, um die Karte dorthin zu zoomen.
+          </p>
+
           <div className="space-y-3">
-            {spotStats.slice(0, 5).map((spot, index) => (
-              <div
+            {spotStats.map((spot, index) => (
+              <button
                 key={`${spot.coordinates.lat}-${spot.coordinates.lng}`}
-                className="bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors"
+                type="button"
+                onClick={() => setSelectedSpot(spot.coordinates)}
+                className={`w-full text-left bg-ocean-dark/50 rounded-lg p-4 transition-colors ${
+                  selectedSpot &&
+                  selectedSpot.lat === spot.coordinates.lat &&
+                  selectedSpot.lng === spot.coordinates.lng
+                    ? 'ring-2 ring-ocean-light'
+                    : 'hover:bg-ocean-dark'
+                }`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-3">
@@ -257,7 +315,7 @@ export default function MapPage() {
                     ))}
                   </div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>

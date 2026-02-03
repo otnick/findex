@@ -19,6 +19,7 @@ import {
 } from 'recharts'
 import { format, startOfMonth, parseISO, getHours, getDay } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { BarChart3 } from 'lucide-react'
 
 const COLORS = ['#4a90e2', '#2c5f8d', '#1a3a52', '#4a7c59', '#d4af37', '#c41e3a', '#8b7355']
 
@@ -159,7 +160,10 @@ export default function StatsPage() {
   if (catches.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-white">Statistiken</h1>
+        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <BarChart3 className="w-8 h-8 text-ocean-light" />
+          Statistiken
+        </h1>
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
           <div className="text-6xl mb-4">📊</div>
           <h3 className="text-2xl font-bold text-white mb-2">
@@ -177,7 +181,10 @@ export default function StatsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Statistiken</h1>
+        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <BarChart3 className="w-8 h-8 text-ocean-light" />
+          Statistiken
+        </h1>
         <p className="text-ocean-light mt-1">Analyse deiner {catches.length} Fänge</p>
       </div>
 

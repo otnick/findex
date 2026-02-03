@@ -6,6 +6,7 @@ import { useCatchStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { User } from 'lucide-react'
 import { 
   notificationService, 
   getNotificationPreference, 
@@ -27,7 +28,6 @@ export default function ProfilePage() {
     bio: '',
   })
   const [saving, setSaving] = useState(false)
-
   useEffect(() => {
     setNotificationsEnabled(getNotificationPreference())
     fetchProfile()
@@ -144,7 +144,10 @@ export default function ProfilePage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Profil</h1>
+        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <User className="w-8 h-8 text-ocean-light" />
+          Profil
+        </h1>
         <p className="text-ocean-light mt-1">Verwalte dein Konto und deine Daten</p>
       </div>
 
@@ -225,7 +228,7 @@ export default function ProfilePage() {
       {/* Public Profile Link */}
       {profile?.username && (
         <div className="bg-gradient-to-r from-ocean-light/20 to-ocean/20 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/30">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
                 <svg className="w-6 h-6 text-ocean-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,26 +239,28 @@ export default function ProfilePage() {
               <p className="text-ocean-light text-sm mb-3">
                 Teile deinen FishDex und deine besten Fänge mit anderen Anglern
               </p>
-              <div className="flex items-center gap-2 bg-ocean-dark/50 rounded-lg px-3 py-2 w-fit">
+              <div className="flex flex-wrap items-center gap-2 bg-ocean-dark/50 rounded-lg px-3 py-2 w-full sm:w-fit">
                 <span className="text-ocean-light text-sm">fishbox.app/user/</span>
-                <span className="text-white font-mono font-semibold">{profile.username}</span>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/user/${profile.username}`)
-                    alert('Link kopiert!')
-                  }}
-                  className="ml-2 text-ocean-light hover:text-white transition-colors"
-                  title="Link kopieren"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-white font-mono font-semibold break-all">{profile.username}</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/user/${profile.username}`)
+                      alert('Link kopiert!')
+                    }}
+                    className="text-ocean-light hover:text-white transition-colors"
+                    title="Link kopieren"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
             <Link 
               href={`/user/${profile.username}`}
-              className="bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-all hover:scale-105 shadow-lg flex items-center gap-2"
+              className="w-full sm:w-auto bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -321,33 +326,43 @@ export default function ProfilePage() {
       <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
         <h2 className="text-xl font-bold text-white mb-4">Einstellungen</h2>
         <div className="space-y-4">
-          <div className="flex items-center justify-between py-3 border-b border-ocean-light/20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-3 border-b border-ocean-light/20">
             <div>
               <div className="text-white font-semibold">Benachrichtigungen</div>
               <div className="text-ocean-light text-sm">
                 Erhalte Updates zu Likes, Kommentaren und Freunden
               </div>
             </div>
-            <button
-              onClick={toggleNotifications}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                notificationsEnabled ? 'bg-green-500' : 'bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
+            <label className="self-start inline-flex cursor-pointer items-center gap-3">
+              <span className="sr-only">Benachrichtigungen umschalten</span>
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={notificationsEnabled}
+                onChange={toggleNotifications}
               />
-            </button>
+              <span
+                className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
+                  notificationsEnabled
+                    ? 'bg-green-500/90 border-green-400/60'
+                    : 'bg-gray-700 border-gray-500/60'
+                }`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                    notificationsEnabled ? 'translate-x-5' : 'translate-x-1'
+                  }`}
+                />
+              </span>
+            </label>
           </div>
           
-          <div className="flex items-center justify-between py-3 border-b border-ocean-light/20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-3 border-b border-ocean-light/20">
             <div>
               <div className="text-white font-semibold">Dark Mode</div>
               <div className="text-ocean-light text-sm">Immer aktiv</div>
             </div>
-            <div className="text-white">✓</div>
+            <div className="self-start sm:self-auto text-white">✓</div>
           </div>
         </div>
       </div>

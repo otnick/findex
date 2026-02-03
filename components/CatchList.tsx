@@ -42,6 +42,27 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
     }
   }
 
+  const handleTogglePublic = async (catchItem: Catch) => {
+    const newPublicState = !catchItem.is_public
+    const { error } = await supabase
+      .from('catches')
+      .update({ is_public: newPublicState })
+      .eq('id', catchItem.id)
+
+    if (error) {
+      return
+    }
+
+    // Update store without page reload
+    useCatchStore.setState((state) => ({
+      catches: state.catches.map((c) =>
+        c.id === catchItem.id
+          ? { ...c, is_public: newPublicState }
+          : c
+      ),
+    }))
+  }
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-white mb-4">
@@ -162,21 +183,11 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
 
                 {/* Public Toggle Button */}
                 <button
-                  onClick={() => {
-                    const newPublicState = !catchItem.is_public
-                    supabase
-                      .from('catches')
-                      .update({ is_public: newPublicState })
-                      .eq('id', catchItem.id)
-                      .then(() => {
-                        // Refresh catches
-                        window.location.reload()
-                      })
-                  }}
+                  onClick={() => handleTogglePublic(catchItem)}
                   className={`px-3 py-2 rounded-lg transition-colors group relative ${
-                    catchItem.is_public
-                      ? 'bg-green-900/30 hover:bg-green-900/50 text-green-400'
-                      : 'bg-ocean-dark hover:bg-ocean text-ocean-light'
+                  catchItem.is_public
+                    ? 'bg-green-900/30 hover:bg-green-900/50 text-green-400'
+                    : 'bg-ocean-dark hover:bg-ocean text-ocean-light'
                   }`}
                   aria-label={catchItem.is_public ? 'Öffentlich' : 'Privat'}
                 >

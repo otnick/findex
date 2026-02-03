@@ -41,13 +41,13 @@ export default function AIVerificationModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4">
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl max-w-2xl w-full p-4 sm:p-6 max-h-[92vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <AlertCircle className="w-8 h-8 text-ocean-light" />
+        <div className="flex items-start gap-3 mb-5 sm:mb-6">
+          <AlertCircle className="w-7 h-7 sm:w-8 sm:h-8 text-ocean-light mt-1" />
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
               AI Fischerkennung
             </h2>
             <p className="text-ocean-light text-sm">
@@ -57,7 +57,7 @@ export default function AIVerificationModal({
         </div>
 
         {/* Photo Preview */}
-        <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 bg-ocean-dark">
+        <div className="relative w-full aspect-[4/3] sm:aspect-video rounded-lg overflow-hidden mb-5 sm:mb-6 bg-ocean-dark">
           <Image
             src={photoPreview}
             alt="Catch"
@@ -74,7 +74,7 @@ export default function AIVerificationModal({
           </div>
         ) : (
           <>
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-5 sm:mb-6">
               <h3 className="text-white font-semibold mb-3">
                 Erkannte Arten (Top {detectionResults.length}):
               </h3>
@@ -83,7 +83,7 @@ export default function AIVerificationModal({
                   key={index}
                   onClick={() => setSelectedSpecies(result.species)}
                   className={`
-                    p-4 rounded-lg cursor-pointer transition-all
+                    p-3 sm:p-4 rounded-lg cursor-pointer transition-all
                     ${selectedSpecies === result.species
                       ? 'bg-ocean border-2 border-ocean-light'
                       : 'bg-ocean-dark/50 border-2 border-transparent hover:border-ocean-light/30'
@@ -93,7 +93,7 @@ export default function AIVerificationModal({
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="text-white font-semibold text-lg">
+                        <span className="text-white font-semibold text-base sm:text-lg">
                           {result.species}
                         </span>
                         {selectedSpecies === result.species && (
@@ -107,7 +107,7 @@ export default function AIVerificationModal({
                       )}
                     </div>
                     <div className="text-right">
-                      <div className={`text-2xl font-bold ${getConfidenceColor(result.accuracy)}`}>
+                      <div className={`text-xl sm:text-2xl font-bold ${getConfidenceColor(result.accuracy)}`}>
                         {(result.accuracy * 100).toFixed(0)}%
                       </div>
                       <div className="text-ocean-light text-xs">
@@ -121,7 +121,7 @@ export default function AIVerificationModal({
 
             {/* Warning for low confidence */}
             {selectedSpecies && detectionResults[0].accuracy < 0.7 && (
-              <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-4 mb-6">
+              <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-4 mb-5 sm:mb-6">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
@@ -139,7 +139,7 @@ export default function AIVerificationModal({
         )}
 
         {/* Info Box */}
-        <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-6">
+        <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-5 sm:mb-6">
           <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             Deine Optionen:
@@ -156,11 +156,11 @@ export default function AIVerificationModal({
 
         {/* Actions */}
         <div className="flex flex-col gap-3">
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => selectedSpecies && onConfirm(selectedSpecies)}
               disabled={!selectedSpecies || detectionLoading}
-              className="flex-1 bg-green-900/30 hover:bg-green-900/50 text-green-400 font-semibold py-4 px-6 rounded-lg transition-colors disabled:opacity-50 flex flex-col items-center justify-center gap-2 group"
+              className="flex-1 bg-green-900/30 hover:bg-green-900/50 text-green-400 font-semibold py-4 px-5 rounded-lg transition-colors disabled:opacity-50 flex flex-col items-center justify-center gap-2 group"
             >
               <CheckCircle2 className="w-8 h-8 group-hover:scale-110 transition-transform" />
               <span className="text-sm">Bestätigen</span>
@@ -168,7 +168,7 @@ export default function AIVerificationModal({
             </button>
             <button
               onClick={onManualOverride}
-              className="flex-1 bg-yellow-900/30 hover:bg-yellow-900/50 text-yellow-400 font-semibold py-4 px-6 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
+              className="flex-1 bg-yellow-900/30 hover:bg-yellow-900/50 text-yellow-400 font-semibold py-4 px-5 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
             >
               <AlertCircle className="w-8 h-8 group-hover:scale-110 transition-transform" />
               <span className="text-sm">Manuell</span>
@@ -176,7 +176,7 @@ export default function AIVerificationModal({
             </button>
             <button
               onClick={onReject}
-              className="flex-1 bg-red-900/30 hover:bg-red-900/50 text-red-400 font-semibold py-4 px-6 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
+              className="flex-1 bg-red-900/30 hover:bg-red-900/50 text-red-400 font-semibold py-4 px-5 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
             >
               <XCircle className="w-8 h-8 group-hover:scale-110 transition-transform" />
               <span className="text-sm">Ablehnen</span>
