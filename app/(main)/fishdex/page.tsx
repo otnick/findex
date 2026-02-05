@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import type { FishDexEntry, FishDexRegion, FishDexCategory, FishDexSortBy } from '@/lib/types/fishdex'
+import { getSpeciesInfo, getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { Search, Filter, Trophy, Star, Lock, Fish, BookOpen } from 'lucide-react'
 
 export default function FishDexPage() {
@@ -32,7 +33,7 @@ export default function FishDexPage() {
       const { data: species, error: speciesError } = await supabase
         .from('fish_species')
         .select('*')
-        .eq('region', selectedRegion)
+        .contains('region', [selectedRegion])
         .order('name')
 
       if (speciesError) throw speciesError
@@ -94,12 +95,21 @@ export default function FishDexPage() {
     // Category filter
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(e => {
-        if (selectedCategory === 'freshwater') return e.habitat === 'freshwater'
-        if (selectedCategory === 'saltwater') return e.habitat === 'saltwater'
+        const info = getSpeciesInfo({ scientificName: e.scientific_name, germanName: e.name })
+        if (selectedCategory === 'freshwater') {
+          if (info?.wasser) return info.wasser.includes('süßwasser')
+          return e.habitat === 'freshwater'
+        }
+        if (selectedCategory === 'saltwater') {
+          if (info?.wasser) return info.wasser.includes('salzwasser')
+          return e.habitat === 'saltwater'
+        }
         if (selectedCategory === 'predator') {
+          if (info?.typ) return info.typ === 'raubfisch'
           return ['Hecht', 'Zander', 'Barsch', 'Wels'].includes(e.name)
         }
         if (selectedCategory === 'peaceful') {
+          if (info?.typ) return info.typ === 'friedfisch'
           return ['Karpfen', 'Brassen', 'Rotauge', 'Schleie'].includes(e.name)
         }
         return true
@@ -119,8 +129,19 @@ export default function FishDexPage() {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name)
-        case 'rarity':
-          return b.rarity - a.rarity
+        case 'rarity': {
+          const aRarity = getSpeciesRarity({
+            scientificName: a.scientific_name,
+            germanName: a.name,
+            fallback: a.rarity,
+          })
+          const bRarity = getSpeciesRarity({
+            scientificName: b.scientific_name,
+            germanName: b.name,
+            fallback: b.rarity,
+          })
+          return bRarity - aRarity
+        }
         case 'discovered':
           if (a.discovered === b.discovered) return 0
           return a.discovered ? -1 : 1
@@ -280,9 +301,18 @@ export default function FishDexPage() {
             </div>
 
             {/* Rarity Badge */}
-            <div className={`absolute top-2 right-2 ${getRarityColor(entry.rarity)} z-10 text-xs`}>
-              {getRarityStars(entry.rarity)}
-            </div>
+            {(() => {
+              const rarity = getSpeciesRarity({
+                scientificName: entry.scientific_name,
+                germanName: entry.name,
+                fallback: entry.rarity,
+              })
+              return (
+                <div className={`absolute top-2 right-2 ${getRarityColor(rarity)} z-10 text-xs`}>
+                  {getRarityStars(rarity)}
+                </div>
+              )
+            })()}
 
             {/* Image */}
             <div className="w-full h-full relative">

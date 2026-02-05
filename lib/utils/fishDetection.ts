@@ -1,5 +1,6 @@
 // lib/utils/fishDetection.ts
 import { supabase } from '@/lib/supabase'
+import speciesInfo from '@/public/fish/species_info.json'
 
 export interface FishDetectionResult {
   species: string
@@ -24,11 +25,9 @@ if (!API_KEY) {
 }
 
 /**
- * Local mapping tables
- * - map common english/latin names to German catalog names
- * - add scientific name -> German fallback when possible
- *
- * Extend these maps as you discover more species.
+ * Mapping tables
+ * - Latin -> German is sourced from species_info.json
+ * - Common English -> German remains as a small fallback for non-latin API outputs
  */
 const COMMON_TO_GERMAN: Record<string, string> = {
   pike: 'Hecht',
@@ -42,19 +41,34 @@ const COMMON_TO_GERMAN: Record<string, string> = {
   bream: 'Brassen',
   tench: 'Schleie',
   dace: 'Döbel',
-  // add more english common names...
+  // extend only for common-name outputs from the AI
 }
 
-const SCIENTIFIC_TO_GERMAN: Record<string, string> = {
-  'esox lucius': 'Hecht',
-  'salmo salar': 'Lachs',
-  'salmo trutta': 'Forelle',
-  'silurus glanis': 'Wels',
-  'cyprinus carpio': 'Karpfen',
-  'perca fluviatilis': 'Barsch',
-  'sander lucioperca': 'Zander',
-  // add more latin -> german mappings as needed
-}
+const LATIN_TO_GERMAN: Record<string, string> = Object.entries(
+  speciesInfo as Record<string, { name_de?: string }>
+).reduce((acc, [latin, info]) => {
+  if (info?.name_de) {
+    acc[latin.toLowerCase()] = info.name_de
+  }
+  return acc
+}, {} as Record<string, string>)
+
+const GERMAN_SET = new Set(
+  Object.values(speciesInfo as Record<string, { name_de?: string }>)
+    .map((v) => v?.name_de)
+    .filter(Boolean)
+    .map((v) => (v as string).toLowerCase())
+)
+
+export const ALL_GERMAN_SPECIES = [
+  ...new Set(
+    Object.values(speciesInfo as Record<string, { name_de?: string }>)
+      .map((v) => v?.name_de)
+      .filter(Boolean) as string[]
+  ),
+]
+  .filter(Boolean)
+  .sort((a, b) => a.localeCompare(b, 'de'))
 
 /**
  * Normalize incoming API candidate object to FishDetectionResult
@@ -101,13 +115,13 @@ function normalizeCandidate(candidate: any): FishDetectionResult {
   let species = 'Andere'
   if (maybeScientific) {
     const key = maybeScientific.toString().toLowerCase()
-    species = SCIENTIFIC_TO_GERMAN[key] || titleCase(maybeScientific)
+    species = LATIN_TO_GERMAN[key] || titleCase(maybeScientific)
   } else if (raw.species) {
     const key = raw.species.toString().toLowerCase()
     species = COMMON_TO_GERMAN[key] || titleCase(raw.species)
   } else if (maybeName) {
     const key = maybeName.toLowerCase()
-    species = SCIENTIFIC_TO_GERMAN[key] || COMMON_TO_GERMAN[key] || titleCase(maybeName)
+    species = LATIN_TO_GERMAN[key] || COMMON_TO_GERMAN[key] || titleCase(maybeName)
   }
 
   return {
@@ -225,20 +239,15 @@ export async function detectFishSpeciesFromUrl(
  * Map AI species name to database species name (keeps backwards compat)
  */
 export function mapSpeciesToDatabase(aiSpecies: string): string {
-  const mapping: Record<string, string> = {
-    pike: 'Hecht',
-    perch: 'Barsch',
-    zander: 'Zander',
-    carp: 'Karpfen',
-    catfish: 'Wels',
-    trout: 'Forelle',
-    eel: 'Aal',
-    roach: 'Rotauge',
-    bream: 'Brassen',
-    tench: 'Schleie',
-    dace: 'Döbel',
+  const normalized = aiSpecies.toLowerCase().trim()
+
+  if (LATIN_TO_GERMAN[normalized]) {
+    return LATIN_TO_GERMAN[normalized]
   }
 
-  const normalized = aiSpecies.toLowerCase().trim()
-  return mapping[normalized] || aiSpecies
+  if (GERMAN_SET.has(normalized)) {
+    return aiSpecies
+  }
+
+  return COMMON_TO_GERMAN[normalized] || aiSpecies
 }

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import type { FishDexEntry } from '@/lib/types/fishdex'
+import { getSpeciesInfo, getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { ArrowLeft, MapPin, Calendar, Ruler, Scale, Trophy, Info, Lightbulb, Lock, Fish, Droplet, Waves, HelpCircle, RotateCcw, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -142,6 +143,20 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
       </div>
     )
   }
+
+  const info = getSpeciesInfo({
+    scientificName: entry.scientific_name,
+    germanName: entry.name,
+  })
+
+  const baits = entry.baits && entry.baits.length > 0 ? entry.baits : info?.köder
+  const rarity = getSpeciesRarity({
+    scientificName: entry.scientific_name,
+    germanName: entry.name,
+    fallback: entry.rarity,
+  })
+
+  const waterLabels = info?.wasser || []
 
   return (
     <div className="space-y-6 pb-20 md:pb-6">
@@ -288,8 +303,8 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
             </h1>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-ocean-light">Seltenheit:</span>
-              <span className="text-yellow-400">{getRarityStars(entry.rarity)}</span>
-              <span className="text-ocean-light">({getRarityLabel(entry.rarity)})</span>
+              <span className="text-yellow-400">{getRarityStars(rarity)}</span>
+              <span className="text-ocean-light">({getRarityLabel(rarity)})</span>
             </div>
           </div>
 
@@ -350,22 +365,41 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
               <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
                 <span className="text-ocean-light text-sm">Lebensraum</span>
                 <span className="text-white text-sm flex items-center gap-2">
-                  {entry.habitat === 'freshwater' && (
+                  {waterLabels.length > 0 ? (
+                    <span className="flex flex-wrap items-center gap-2">
+                      {waterLabels.map((water) => (
+                        <span key={water} className="inline-flex items-center gap-1">
+                          {water === 'süßwasser' && <Droplet className="w-4 h-4" />}
+                          {(water === 'salzwasser' || water === 'brackwasser') && (
+                            <Waves className="w-4 h-4" />
+                          )}
+                          {water === 'süßwasser' && 'Süßwasser'}
+                          {water === 'salzwasser' && 'Salzwasser'}
+                          {water === 'brackwasser' && 'Brackwasser'}
+                          {water !== 'süßwasser' && water !== 'salzwasser' && water !== 'brackwasser' && water}
+                        </span>
+                      ))}
+                    </span>
+                  ) : (
                     <>
-                      <Droplet className="w-4 h-4" />
-                      Süßwasser
-                    </>
-                  )}
-                  {entry.habitat === 'saltwater' && (
-                    <>
-                      <Waves className="w-4 h-4" />
-                      Salzwasser
-                    </>
-                  )}
-                  {entry.habitat === 'brackish' && (
-                    <>
-                      <Waves className="w-4 h-4" />
-                      Brackwasser
+                      {entry.habitat === 'freshwater' && (
+                        <>
+                          <Droplet className="w-4 h-4" />
+                          Süßwasser
+                        </>
+                      )}
+                      {entry.habitat === 'saltwater' && (
+                        <>
+                          <Waves className="w-4 h-4" />
+                          Salzwasser
+                        </>
+                      )}
+                      {entry.habitat === 'brackish' && (
+                        <>
+                          <Waves className="w-4 h-4" />
+                          Brackwasser
+                        </>
+                      )}
                     </>
                   )}
                 </span>
@@ -401,11 +435,11 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
           </div>
 
           {/* Recommended Baits */}
-          {entry.baits && entry.baits.length > 0 && (
+          {baits && baits.length > 0 && (
             <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
               <h3 className="text-white font-semibold mb-3">Empfohlene Köder</h3>
               <div className="flex flex-wrap gap-2">
-                {entry.baits.map(bait => (
+                {baits.map(bait => (
                   <span
                     key={bait}
                     className="px-3 py-1 bg-ocean-dark rounded-full text-ocean-light text-sm"
@@ -413,6 +447,77 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
                     {bait}
                   </span>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Fishing Tips */}
+          {info && (
+            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+              <h3 className="text-white font-semibold mb-4">Angel-Infos</h3>
+              <div className="space-y-3">
+                {info.typ && (
+                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                    <span className="text-ocean-light text-sm">Typ</span>
+                    <span className="text-white text-sm">
+                      {info.typ === 'raubfisch' ? 'Raubfisch' : 'Friedfisch'}
+                    </span>
+                  </div>
+                )}
+
+                {info.gewässertyp && info.gewässertyp.length > 0 && (
+                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                    <span className="text-ocean-light text-sm">Gewässer</span>
+                    <span className="text-white text-sm text-right">
+                      {info.gewässertyp.join(', ')}
+                    </span>
+                  </div>
+                )}
+
+                {info.saison && info.saison.length > 0 && (
+                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                    <span className="text-ocean-light text-sm">Saison</span>
+                    <span className="text-white text-sm text-right">
+                      {info.saison.join(', ')}
+                    </span>
+                  </div>
+                )}
+
+                {info.tageszeit && info.tageszeit.length > 0 && (
+                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                    <span className="text-ocean-light text-sm">Tageszeit</span>
+                    <span className="text-white text-sm text-right">
+                      {info.tageszeit.join(', ')}
+                    </span>
+                  </div>
+                )}
+
+                {info.fangmethode && info.fangmethode.length > 0 && (
+                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                    <span className="text-ocean-light text-sm">Fangmethode</span>
+                    <span className="text-white text-sm text-right">
+                      {info.fangmethode.join(', ')}
+                    </span>
+                  </div>
+                )}
+
+                {info.wassertemperatur && (
+                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                    <span className="text-ocean-light text-sm">Wassertemperatur</span>
+                    <span className="text-white text-sm">
+                      {info.wassertemperatur.min ?? '-'}–{info.wassertemperatur.max ?? '-'}°C
+                    </span>
+                  </div>
+                )}
+
+                {typeof info.schwierigkeit === 'number' && (
+                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                    <span className="text-ocean-light text-sm">Schwierigkeit</span>
+                    <span className="text-white text-sm">
+                      {info.schwierigkeit}/5
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}

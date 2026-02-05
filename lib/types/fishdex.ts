@@ -4,7 +4,7 @@ export interface FishSpecies {
   id: string
   name: string
   scientific_name?: string
-  region: 'deutschland' | 'europa' | 'weltweit'
+  region: Array<'deutschland' | 'europa' | 'weltweit'>
   habitat?: 'freshwater' | 'saltwater' | 'brackish'
   rarity: 1 | 2 | 3 | 4 | 5
   description?: string

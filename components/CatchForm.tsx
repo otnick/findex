@@ -7,10 +7,16 @@ import { supabase } from '@/lib/supabase'
 import { uploadPhoto, compressImage } from '@/lib/utils/photoUpload'
 import { getCurrentPosition, getLocationName, formatCoordinates } from '@/lib/utils/geolocation'
 import { getCurrentWeather } from '@/lib/utils/weather'
-import { detectFishSpecies, mapSpeciesToDatabase, type FishDetectionResult } from '@/lib/utils/fishDetection'
+import {
+  ALL_GERMAN_SPECIES,
+  detectFishSpecies,
+  mapSpeciesToDatabase,
+  type FishDetectionResult
+} from '@/lib/utils/fishDetection'
 import ScanAnimation from '@/components/ScanAnimation'
 import AIVerificationModal from '@/components/AIVerificationModal'
 import NoDetectionModal from '@/components/NoDetectionModal'
+import SpeciesPickerDialog from '@/components/SpeciesPickerDialog'
 import type { Coordinates } from '@/lib/utils/geolocation'
 import type { FishSpecies, Achievement } from '@/lib/types/fishdex'
 
@@ -18,20 +24,7 @@ interface CatchFormProps {
   onSuccess: () => void
 }
 
-const FISH_SPECIES = [
-  'Hecht',
-  'Zander',
-  'Barsch',
-  'Karpfen',
-  'Forelle',
-  'Aal',
-  'Wels',
-  'Döbel',
-  'Rotauge',
-  'Brassen',
-  'Schleie',
-  'Andere',
-]
+const FISH_SPECIES = Array.from(new Set([...ALL_GERMAN_SPECIES, 'Andere']))
 
 export default function CatchForm({ onSuccess }: CatchFormProps) {
   const addCatch = useCatchStore((state) => state.addCatch)
@@ -67,6 +60,7 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
   const [aiDetectionLoading, setAIDetectionLoading] = useState(false)
   const [manualMode, setManualMode] = useState(false)
   const [aiVerified, setAIVerified] = useState(false)
+  const [showSpeciesPicker, setShowSpeciesPicker] = useState(false)
 
   // Debug: Watch newDiscovery changes
   useEffect(() => {
@@ -75,6 +69,12 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
       console.log('ScanAnimation should render NOW!')
     }
   }, [newDiscovery])
+
+  useEffect(() => {
+    if (manualMode && !aiVerified && !formData.species) {
+      setShowSpeciesPicker(true)
+    }
+  }, [manualMode, aiVerified, formData.species])
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -441,6 +441,15 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
         />
       )}
 
+      {/* Species Picker Dialog */}
+      <SpeciesPickerDialog
+        isOpen={showSpeciesPicker}
+        species={FISH_SPECIES}
+        selected={formData.species}
+        onSelect={(species) => setFormData({ ...formData, species })}
+        onClose={() => setShowSpeciesPicker(false)}
+      />
+
       <form onSubmit={handleSubmit} className="space-y-6">
       {/* Photo Upload */}
       <div>
@@ -553,25 +562,27 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
             </span>
           )}
         </label>
-        <select
-          value={formData.species}
-          onChange={(e) => setFormData({ ...formData, species: e.target.value })}
-          className={`w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none ${
-            aiVerified ? 'opacity-60 cursor-not-allowed' : ''
-          }`}
-          required
-          disabled={aiVerified}
-        >
-          <option value="">Wähle eine Art</option>
-          {FISH_SPECIES.map((species) => (
-            <option key={species} value={species}>
-              {species}
-            </option>
-          ))}
-        </select>
+        {aiVerified ? (
+          <div className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 opacity-60">
+            {formData.species}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowSpeciesPicker(true)}
+            className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-left hover:border-ocean-light transition-colors"
+          >
+            {formData.species || 'Wähle eine Art'}
+          </button>
+        )}
         {aiVerified && (
           <p className="text-ocean-light text-xs mt-1">
             Die Art wurde durch KI verifiziert und kann nicht mehr geändert werden.
+          </p>
+        )}
+        {!aiVerified && manualMode && (
+          <p className="text-ocean-light text-xs mt-1">
+            Manuelle Auswahl öffnet den Arten-Dialog mit Filtern.
           </p>
         )}
       </div>

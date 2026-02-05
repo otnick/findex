@@ -30,7 +30,7 @@ export default function DashboardPage() {
       const { count: total } = await supabase
         .from('fish_species')
         .select('*', { count: 'exact', head: true })
-        .eq('region', 'deutschland')
+        .contains('region', ['deutschland'])
 
       // Get user's discovered species
       const { count: discovered } = await supabase

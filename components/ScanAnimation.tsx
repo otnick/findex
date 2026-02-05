@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { FishSpecies, Achievement } from '@/lib/types/fishdex'
+import { getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { Trophy, Star, ArrowRight } from 'lucide-react'
 
 interface ScanAnimationProps {
@@ -53,6 +54,18 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
 
   const getRarityStars = (rarity: number) => {
     return '⭐'.repeat(rarity)
+  }
+
+  const rarity = getSpeciesRarity({
+    scientificName: species.scientific_name,
+    germanName: species.name,
+    fallback: species.rarity,
+  })
+
+  const getRegionLabel = (regions: string[]) => {
+    if (regions.includes('deutschland')) return 'Deutschland'
+    if (regions.includes('europa')) return 'Europa'
+    return 'Weltweit'
   }
 
   return (
@@ -131,16 +144,16 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
             
             <div className="flex items-center justify-center gap-2">
               <span className="text-ocean-light text-sm">Seltenheit:</span>
-              <span className="text-yellow-400">{getRarityStars(species.rarity)}</span>
+              <span className="text-yellow-400">{getRarityStars(rarity)}</span>
             </div>
           </div>
 
           {/* Rewards */}
           <div className="bg-ocean-dark/50 rounded-lg p-4 mb-6">
             <div className="text-green-400 font-bold mb-2">+100 XP</div>
-            <div className="text-ocean-light text-sm">
-              +1 zur FishDex ({species.region})
-            </div>
+          <div className="text-ocean-light text-sm">
+              +1 zur FishDex ({getRegionLabel(species.region || [])})
+          </div>
           </div>
 
           {/* Buttons */}

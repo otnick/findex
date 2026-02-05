@@ -10,6 +10,7 @@ import { de } from 'date-fns/locale'
 import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit } from 'lucide-react'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
+import { getSpeciesRarity } from '@/lib/utils/speciesInfo'
 
 interface UserProfile {
   id: string
@@ -430,7 +431,13 @@ export default function UserProfilePage({ params }: { params: { username: string
                     {/* Rarity Stars */}
                     {entry.species?.rarity && (
                       <div className="mt-1 text-xs">
-                        {'⭐'.repeat(entry.species.rarity)}
+                        {'⭐'.repeat(
+                          getSpeciesRarity({
+                            scientificName: entry.species?.scientific_name,
+                            germanName: entry.species?.name,
+                            fallback: entry.species?.rarity,
+                          })
+                        )}
                       </div>
                     )}
                   </div>
