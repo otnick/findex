@@ -152,11 +152,11 @@ INSERT INTO fish_species (name, scientific_name, region, habitat, rarity, descri
 -- ============================================
 
 INSERT INTO achievements (name, description, icon, category, requirement, xp_reward, badge_color) VALUES
-('Anfänger', 'Entdecke deine erste Fischart', '🎣', 'collection', '{"species_count": 1}', 50, 'bronze'),
+('Erstfang', 'Fange deine erste Fischart', '🎣', 'collection', '{"species_count": 1}', 50, 'bronze'),
 ('Kenner', 'Entdecke 5 verschiedene Fischarten', '🐟', 'collection', '{"species_count": 5}', 100, 'silver'),
 ('Experte', 'Entdecke 10 verschiedene Fischarten', '🎯', 'collection', '{"species_count": 10}', 200, 'gold'),
 ('Meister', 'Entdecke 25 verschiedene Fischarten', '👑', 'collection', '{"species_count": 25}', 500, 'platinum'),
-('Deutschland Meister', 'Entdecke alle Deutschland-Fischarten', '🇩🇪', 'collection', '{"region": "deutschland", "complete": true}', 1000, 'diamond'),
+('Deutschland komplett III', 'Entdecke 100% der deutschen Arten', '🇩🇪', 'collection', '{"region": "deutschland", "percent": 100}', 800, 'platinum'),
 
 ('Nachtangler', 'Fange 5 Fische nach 20 Uhr', '🌙', 'skill', '{"night_catches": 5}', 150, 'silver'),
 ('Frühaufsteher', 'Fange 5 Fische vor 6 Uhr', '🌅', 'skill', '{"early_catches": 5}', 150, 'silver'),
@@ -165,7 +165,7 @@ INSERT INTO achievements (name, description, icon, category, requirement, xp_rew
 
 ('Seltener Fang', 'Fange eine 4-Sterne Fischart', '⭐', 'special', '{"rarity": 4}', 250, 'gold'),
 ('Legendär', 'Fange eine 5-Sterne Fischart', '💎', 'special', '{"rarity": 5}', 500, 'diamond'),
-('Riesen-Fang', 'Fange einen Fisch über 100cm', '📏', 'special', '{"length": 100}', 200, 'gold'),
+('Großer Fang', 'Fange einen Fisch über 100 cm', '📏', 'skill', '{"length_min": 100}', 200, 'gold'),
 ('Schwergewicht', 'Fange einen Fisch über 10kg', '⚖️', 'special', '{"weight": 10000}', 200, 'gold');
 
 -- ============================================
@@ -184,9 +184,9 @@ BEGIN
   FROM user_fishdex
   WHERE user_id = p_user_id;
 
-  -- Check "Anfänger" (1 species)
+  -- Check "Erstfang" (1 species)
   IF v_species_count >= 1 THEN
-    SELECT id INTO v_achievement_id FROM achievements WHERE name = 'Anfänger';
+    SELECT id INTO v_achievement_id FROM achievements WHERE name = 'Erstfang';
     INSERT INTO user_achievements (user_id, achievement_id)
     VALUES (p_user_id, v_achievement_id)
     ON CONFLICT (user_id, achievement_id) DO NOTHING;
