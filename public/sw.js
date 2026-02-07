@@ -1,14 +1,8 @@
 // Service Worker for FishBox PWA
-const CACHE_NAME = 'fishbox-v2'
+const CACHE_NAME = 'fishbox-static-v3'
 const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/catches',
-  '/map',
-  '/stats',
-  '/social',
-  '/leaderboard',
-  '/profile',
+  '/manifest.json',
+  '/icon-192x192.png',
 ]
 
 // Install service worker
@@ -35,25 +29,31 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (event.request.mode === 'navigate') {
+    // Network-only for HTML to avoid stale app shells causing reload loops.
+    event.respondWith(fetch(event.request))
+    return
+  }
+
+  if (url.pathname.startsWith('/_next/')) {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached
+        return fetch(event.request).then((response) => {
+          if (!response || response.status !== 200) return response
           const responseToCache = response.clone()
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache)
           })
           return response
         })
-        .catch(() =>
-          caches.match(event.request).then((response) => response || caches.match('/'))
-        )
+      })
     )
     return
   }
 
-  if (url.pathname.startsWith('/_next/')) {
+  if (url.pathname === '/manifest.json' || url.pathname.startsWith('/icon-')) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
+      caches.match(event.request).then((cached) => cached || fetch(event.request))
     )
     return
   }
@@ -66,6 +66,11 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(event.request).then((response) => {
         if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response
+        }
+
+        const contentType = response.headers.get('content-type') || ''
+        if (!contentType.startsWith('image/') && !contentType.includes('font') && !contentType.includes('text/css') && !contentType.includes('application/javascript')) {
           return response
         }
 
