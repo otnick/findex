@@ -8,7 +8,21 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Heart, MessageCircle, MapPin, Calendar, Ruler, Scale, Fish as FishIcon, ArrowLeft } from 'lucide-react'
+import {
+  Heart,
+  MessageCircle,
+  MapPin,
+  Calendar,
+  Ruler,
+  Scale,
+  Fish as FishIcon,
+  ArrowLeft,
+  CloudSun,
+  Thermometer,
+  Wind,
+  Gauge,
+  Droplets,
+} from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
@@ -34,6 +48,18 @@ interface CatchDetail {
   likes_count: number
   comments_count: number
   user_has_liked: boolean
+}
+
+function getWeatherSourceLabel(source?: 'historical' | 'forecast' | 'current'): string {
+  if (source === 'historical') return 'Archivwetter (Fotozeit)'
+  if (source === 'current') return 'Aktuelles Wetter'
+  return 'Prognose (Zeitpunkt)'
+}
+
+function getWeatherSourceClass(source?: 'historical' | 'forecast' | 'current'): string {
+  if (source === 'historical') return 'text-amber-300'
+  if (source === 'current') return 'text-emerald-300'
+  return 'text-sky-300'
 }
 
 export default function CatchDetailPage({ params }: { params: { id: string } }) {
@@ -330,6 +356,44 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
               <div className="mb-4">
                 <div className="text-ocean-light text-sm mb-1">Notizen</div>
                 <div className="text-white text-sm">{catchData.notes}</div>
+              </div>
+            )}
+
+            {catchData.weather && (
+              <div className="mb-4 p-4 rounded-lg bg-ocean-dark/50 border border-ocean-light/20">
+                <div className="flex items-center gap-2 text-white font-semibold mb-3">
+                  <CloudSun className="w-4 h-4 text-ocean-light" />
+                  Wetter zum Fangzeitpunkt
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-ocean-light inline-flex items-center gap-1">
+                    <Thermometer className="w-4 h-4" />
+                    Temperatur
+                  </div>
+                  <div className="text-white text-right">{catchData.weather.temperature}°C</div>
+
+                  <div className="text-ocean-light inline-flex items-center gap-1">
+                    <Wind className="w-4 h-4" />
+                    Wind
+                  </div>
+                  <div className="text-white text-right">{catchData.weather.windSpeed} km/h</div>
+
+                  <div className="text-ocean-light inline-flex items-center gap-1">
+                    <Gauge className="w-4 h-4" />
+                    Luftdruck
+                  </div>
+                  <div className="text-white text-right">{catchData.weather.pressure} hPa</div>
+
+                  <div className="text-ocean-light inline-flex items-center gap-1">
+                    <Droplets className="w-4 h-4" />
+                    Luftfeuchte
+                  </div>
+                  <div className="text-white text-right">{catchData.weather.humidity}%</div>
+                </div>
+                <div className="text-ocean-light text-xs mt-2">{catchData.weather.description}</div>
+                <div className={`text-xs mt-1 ${getWeatherSourceClass(catchData.weather.source)}`}>
+                  Quelle: {getWeatherSourceLabel(catchData.weather.source)}
+                </div>
               </div>
             )}
 

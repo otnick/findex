@@ -142,6 +142,21 @@ export default function StatsPage() {
       weatherTypes.set(desc, (weatherTypes.get(desc) || 0) + 1)
     })
 
+    // By weather source (historical/forecast/current)
+    const sourceMap = new Map<string, number>()
+    catchesWithWeather.forEach(c => {
+      const source = c.weather?.source || 'unknown'
+      sourceMap.set(source, (sourceMap.get(source) || 0) + 1)
+    })
+
+    const sourceEntries = Array.from(sourceMap.entries())
+    const sourceLabel = (source: string) => {
+      if (source === 'historical') return 'Archiv'
+      if (source === 'forecast') return 'Prognose'
+      if (source === 'current') return 'Aktuell'
+      return 'Unbekannt'
+    }
+
     return {
       byTemp: Array.from(tempRanges.entries())
         .map(([range, count]) => ({ bereich: range, faenge: count }))
@@ -153,7 +168,23 @@ export default function StatsPage() {
       avgTemp: Math.round(
         catchesWithWeather.reduce((sum, c) => sum + c.weather!.temperature, 0) / catchesWithWeather.length
       ),
+      avgWind: Math.round(
+        catchesWithWeather.reduce((sum, c) => sum + (c.weather!.windSpeed || 0), 0) / catchesWithWeather.length
+      ),
+      avgPressure: Math.round(
+        catchesWithWeather.reduce((sum, c) => sum + (c.weather!.pressure || 0), 0) / catchesWithWeather.length
+      ),
+      avgHumidity: Math.round(
+        catchesWithWeather.reduce((sum, c) => sum + (c.weather!.humidity || 0), 0) / catchesWithWeather.length
+      ),
       bestTemp: Array.from(tempRanges.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] || '-',
+      bySource: sourceEntries.map(([source, count]) => ({
+        source,
+        label: sourceLabel(source),
+        faenge: count,
+        anteil: Math.round((count / catchesWithWeather.length) * 100),
+      })),
+      historicalCount: sourceMap.get('historical') || 0,
     }
   }, [catches])
 
@@ -343,10 +374,22 @@ export default function StatsPage() {
             {/* Weather Insight Card */}
             <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 lg:col-span-2">
               <h2 className="text-lg font-bold text-white mb-4 inline-flex items-center gap-2"><CloudSun className="w-5 h-5 text-ocean-light" />Wetter-Einblicke</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
                   <div className="text-ocean-light text-sm">O Temperatur</div>
                   <div className="text-2xl font-bold text-white">{weatherStats.avgTemp}°C</div>
+                </div>
+                <div>
+                  <div className="text-ocean-light text-sm">Wind</div>
+                  <div className="text-2xl font-bold text-white">{weatherStats.avgWind} km/h</div>
+                </div>
+                <div>
+                  <div className="text-ocean-light text-sm">Luftdruck</div>
+                  <div className="text-2xl font-bold text-white">{weatherStats.avgPressure} hPa</div>
+                </div>
+                <div>
+                  <div className="text-ocean-light text-sm">Luftfeuchte</div>
+                  <div className="text-2xl font-bold text-white">{weatherStats.avgHumidity}%</div>
                 </div>
                 <div>
                   <div className="text-ocean-light text-sm">Beste Temp</div>
@@ -364,6 +407,20 @@ export default function StatsPage() {
                     {Math.round((catches.filter(c => c.weather).length / catches.length) * 100)}%
                   </div>
                 </div>
+                <div>
+                  <div className="text-ocean-light text-sm">Archivdaten</div>
+                  <div className="text-2xl font-bold text-amber-300">{weatherStats.historicalCount}</div>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {weatherStats.bySource.map((entry) => (
+                  <div
+                    key={entry.source}
+                    className="px-3 py-1.5 rounded-full bg-ocean-dark/60 text-xs text-ocean-light border border-ocean-light/20"
+                  >
+                    {entry.label}: <span className="text-white">{entry.faenge}</span> ({entry.anteil}%)
+                  </div>
+                ))}
               </div>
             </div>
 
