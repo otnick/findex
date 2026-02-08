@@ -105,7 +105,7 @@ export default function FishDexPage() {
         userProgress: progressMap.get(s.id),
         // Use photo from biggest catch if available
         image_url: progressMap.get(s.id)?.photo_url || s.image_url,
-        verified: progressMap.get(s.id)?.verified ?? true,
+        verified: progressMap.get(s.id)?.verified ? true : false,
       }))
 
       setEntries(fishDexEntries)
@@ -486,7 +486,7 @@ export default function FishDexPage() {
               <div className={`text-sm font-bold text-center ${
                 entry.discovered ? 'text-white' : 'text-gray-400'
               }`}>
-                {entry.discovered ? entry.name : '???'}
+                {entry.discovered ? entry.name : '??'}
               </div>
               {entry.discovered && entry.userProgress && (
                 <div className="text-xs text-ocean-light text-center mt-1">

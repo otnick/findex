@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { FishSpecies, Achievement } from '@/lib/types/fishdex'
 import { getSpeciesRarity } from '@/lib/utils/speciesInfo'
-import { Trophy, Star, ArrowRight } from 'lucide-react'
+import { Trophy, Star, ArrowRight, Radio, PartyPopper, Fish as FishIcon, X } from 'lucide-react'
 
 interface ScanAnimationProps {
   species: FishSpecies
@@ -19,8 +19,8 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
 
   // Debug: Component mounted
   useEffect(() => {
-    console.log('🎬 ScanAnimation MOUNTED!', { species: species.name, achievements: newAchievements.length })
-    return () => console.log('🎬 ScanAnimation UNMOUNTED')
+    console.log('ScanAnimation mounted', { species: species.name, achievements: newAchievements.length })
+    return () => console.log('ScanAnimation unmounted')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -52,9 +52,13 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
     }
   }, [stage, newAchievements.length])
 
-  const getRarityStars = (rarity: number) => {
-    return '⭐'.repeat(rarity)
-  }
+  const renderRarityStars = (value: number) => (
+    <span className="inline-flex items-center gap-1">
+      {Array.from({ length: value }).map((_, idx) => (
+        <Star key={`rarity-star-${idx}`} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+      ))}
+    </span>
+  )
 
   const rarity = getSpeciesRarity({
     scientificName: species.scientific_name,
@@ -74,7 +78,9 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
       {stage === 'scanning' && (
         <div className="text-center max-w-md w-full">
           <div className="mb-8">
-            <div className="text-6xl mb-4 animate-bounce">📡</div>
+            <div className="mb-4 flex justify-center">
+              <Radio className="w-14 h-14 text-ocean-light animate-bounce" />
+            </div>
             <h2 className="text-2xl font-bold text-white mb-2">
               Scanne Fischart...
             </h2>
@@ -106,7 +112,9 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
       {stage === 'reveal' && (
         <div className="text-center max-w-md w-full animate-scale-in">
           <div className="mb-6">
-            <div className="text-6xl mb-4 animate-bounce">🎉</div>
+            <div className="mb-4 flex justify-center">
+              <PartyPopper className="w-14 h-14 text-yellow-400 animate-bounce" />
+            </div>
             <h2 className="text-3xl font-bold text-white mb-2">
               NEUE ENTDECKUNG!
             </h2>
@@ -124,11 +132,12 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
                   src={species.image_url}
                   alt={species.name}
                   fill
-                  className="object-contain animate-fade-in"
+                  sizes="100vw"
+            className="object-contain animate-fade-in"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-9xl">🐟</span>
+                  <FishIcon className="w-24 h-24 text-ocean-light" />
                 </div>
               )}
             </div>
@@ -144,7 +153,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
             
             <div className="flex items-center justify-center gap-2">
               <span className="text-ocean-light text-sm">Seltenheit:</span>
-              <span className="text-yellow-400">{getRarityStars(rarity)}</span>
+              <span className="text-yellow-400">{renderRarityStars(rarity)}</span>
             </div>
           </div>
 
@@ -193,7 +202,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
                 key={achievement.id}
                 className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border-2 border-yellow-400/50"
               >
-                <div className="text-4xl mb-3">{achievement.icon || '🏆'}</div>
+                <div className="mb-3 flex justify-center"><Trophy className="w-9 h-9 text-yellow-400" /></div>
                 <h3 className="text-xl font-bold text-white mb-2">
                   {achievement.name}
                 </h3>
@@ -228,9 +237,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
       <button
         onClick={onClose}
         className="absolute top-4 right-4 text-ocean-light hover:text-white transition-colors z-10 text-2xl font-bold w-10 h-10 flex items-center justify-center"
-      >
-        ✕
-      </button>
+      ><X className="w-6 h-6" /></button>
 
       <style jsx>{`
         @keyframes scan {
@@ -265,3 +272,4 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
     </div>
   )
 }
+

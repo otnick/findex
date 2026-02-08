@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -162,9 +162,9 @@ export default function LeaderboardPage() {
   }
 
   const getMedal = (index: number) => {
-    if (index === 0) return '🥇'
-    if (index === 1) return '🥈'
-    if (index === 2) return '🥉'
+    if (index === 0) return '#1'
+    if (index === 1) return '#2'
+    if (index === 2) return '#3'
     return null
   }
 
@@ -242,7 +242,7 @@ export default function LeaderboardPage() {
         <EmptyState
           icon={Trophy}
           title="Noch keine Einträge"
-          description="Sei der Erste im Ranking! Mache deine Fänge öffentlich und zeig was du drauf hast."
+          description="Sei der Erste im Ranking! Mache deine Fänge Öffentlich und zeig was du drauf hast."
           actionLabel="Zu meinen Fängen"
           actionHref="/catches"
         />
@@ -270,7 +270,8 @@ export default function LeaderboardPage() {
                         src={entry.recent_catch_photo}
                         alt="Recent catch"
                         fill
-                        className="object-cover"
+                        sizes="100vw"
+            className="object-cover"
                       />
                       <div className="absolute top-2 left-2">
                         <VerificationBadge
@@ -357,3 +358,4 @@ export default function LeaderboardPage() {
     </div>
   )
 }
+

@@ -56,7 +56,7 @@ function ZoomToSpot({
 
   useEffect(() => {
     if (!spot) return
-    map.flyTo([spot.lat, spot.lng], zoom ?? 15, { duration: 0.6 })
+    map.flyTo([spot.lat, spot.lng], zoom ? zoom : 15, { duration: 0.6 })
   }, [map, spot, zoom])
 
   return null

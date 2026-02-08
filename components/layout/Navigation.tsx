@@ -1,22 +1,23 @@
-'use client'
+﻿'use client'
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useCatchStore } from '@/lib/store'
-import { 
-  Home, 
-  Fish, 
-  Map, 
-  BarChart3, 
-  Users, 
-  Trophy, 
+import {
+  Home,
+  Fish,
+  Map,
+  BarChart3,
+  Users,
+  Trophy,
   UserCircle,
   UserPlus,
   X,
   Image as ImageIcon,
   BookOpen,
-  Plus
+  Plus,
+  Menu,
 } from 'lucide-react'
 
 const navigation = [
@@ -89,28 +90,39 @@ export default function Navigation() {
             { name: 'Dashboard', href: '/dashboard', icon: Home, colClass: 'col-start-1' },
             { name: 'Fänge', href: '/catches', icon: Fish, colClass: 'col-start-2' },
             { name: 'FishDex', href: '/fishdex', icon: BookOpen, colClass: 'col-start-4' },
-            { name: 'Galerie', href: '/gallery', icon: ImageIcon, colClass: 'col-start-5' },
+            { name: 'Menü', href: '#', icon: Menu, colClass: 'col-start-5', action: 'menu' as const },
           ].map((item) => {
-            const isActive = pathname === item.href
+            const isActive = item.action === 'menu' ? mobileMenuOpen : pathname === item.href
             const Icon = item.icon
+            const className = `
+              ${item.colClass}
+              flex flex-col items-center justify-end gap-1 px-3 py-2 pb-3 rounded-xl transition-all
+              ${isActive ? 'text-white' : 'text-ocean-light'}
+            `
+
+            if (item.action === 'menu') {
+              return (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => setMobileMenuOpen(true)}
+                  className={className}
+                  aria-label="Mehr Navigation öffnen"
+                >
+                  <Icon className={`w-6 h-6 -translate-y-1 ${isActive ? 'text-ocean-light' : ''}`} />
+                  <span className="text-xs font-medium leading-none -translate-y-0.5">{item.name}</span>
+                </button>
+              )
+            }
+
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`
-                  ${item.colClass}
-                  flex flex-col items-center justify-end gap-1 px-3 py-2 pb-3 rounded-xl transition-all
-                  ${isActive
-                    ? 'text-white'
-                    : 'text-ocean-light'
-                  }
-                `}
-              >
+              <Link key={item.name} href={item.href} className={className}>
                 <Icon className={`w-6 h-6 -translate-y-1 ${isActive ? 'text-ocean-light' : ''}`} />
                 <span className="text-xs font-medium leading-none -translate-y-0.5">{item.name}</span>
               </Link>
             )
           })}
+
           <button
             type="button"
             onClick={toggleCatchModal}
@@ -121,7 +133,7 @@ export default function Navigation() {
           </button>
           <span
             className={`absolute left-1/2 -translate-x-1/2 text-xs font-medium leading-none ${isCatchModalOpen ? 'text-white' : 'text-ocean-light'}`}
-            style={{ bottom: '1.2rem' }}
+            style={{ bottom: '1.45rem' }}
           >
             Fang
           </span>
@@ -131,7 +143,7 @@ export default function Navigation() {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div 
+          <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />

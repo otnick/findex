@@ -175,7 +175,7 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
     return (
       <div className="space-y-6">
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <div className="text-6xl mb-4">🎣</div>
+          <div className="mb-4 flex justify-center"><FishIcon className="w-14 h-14 text-ocean-light" /></div>
           <h1 className="text-2xl font-bold text-white mb-4">Fang nicht gefunden</h1>
           <p className="text-ocean-light mb-6">
             Dieser Fang existiert nicht oder ist privat.
@@ -213,7 +213,8 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
                   src={catchData.photo_url}
                   alt={catchData.species}
                   fill
-                  className="object-cover"
+                  sizes="100vw"
+            className="object-cover"
                 />
               </div>
             </div>
@@ -387,3 +388,4 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
     </div>
   )
 }
+

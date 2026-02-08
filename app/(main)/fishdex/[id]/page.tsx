@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -151,7 +151,7 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
     germanName: entry.name,
   })
 
-  const baits = entry.baits && entry.baits.length > 0 ? entry.baits : info?.köder
+  const baits = entry.baits && entry.baits.length > 0 ? entry.baits : info?.['köder']
   const rarity = getSpeciesRarity({
     scientificName: entry.scientific_name,
     germanName: entry.name,
@@ -186,7 +186,8 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
                     src={entry.image_url}
                     alt={entry.name}
                     fill
-                    className="object-contain"
+                    sizes="100vw"
+            className="object-contain"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -209,7 +210,7 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
                 </div>
               ) : (
                 <div className="inline-flex items-center gap-2 bg-gray-900/30 text-gray-400 px-4 py-2 rounded-full">
-                  🔒 <span className="font-bold">NICHT ENTDECKT</span>
+                  ðŸ”’ <span className="font-bold">NICHT ENTDECKT</span>
                 </div>
               )}
             </div>
@@ -264,7 +265,8 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
                             src={catchItem.photo_url}
                             alt="Fang"
                             fill
-                            className="object-cover"
+                            sizes="100vw"
+            className="object-cover"
                           />
                         </div>
                       )}
@@ -304,7 +306,7 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
           {/* Title */}
           <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
             <h1 className="text-3xl font-bold text-white mb-2">
-              {entry.discovered ? entry.name : '???'}
+              {entry.discovered ? entry.name : '??'}
             </h1>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-ocean-light">Seltenheit:</span>
@@ -330,7 +332,7 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
                 )}
                 {info.wassertemperatur && (
                   <span className="px-3 py-1 bg-ocean-dark rounded-full text-ocean-light text-sm">
-                    {info.wassertemperatur.min ?? '-'}–{info.wassertemperatur.max ?? '-'}°C
+                    {info.wassertemperatur.min ? info.wassertemperatur.min : '-'}–{info.wassertemperatur.max ? info.wassertemperatur.max : '-'}°C
                   </span>
                 )}
                 {methods.length > 0 && (
@@ -499,11 +501,11 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
                   </div>
                 )}
 
-                {info.gewässertyp && info.gewässertyp.length > 0 && (
+                {info?.['gewässertyp'] && info['gewässertyp'].length > 0 && (
                   <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
                     <span className="text-ocean-light text-sm">Gewässer</span>
                     <span className="text-white text-sm text-right">
-                      {info.gewässertyp.join(', ')}
+                      {info['gewässertyp'].join(', ')}
                     </span>
                   </div>
                 )}
@@ -539,7 +541,7 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
                   <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
                     <span className="text-ocean-light text-sm">Wassertemperatur</span>
                     <span className="text-white text-sm">
-                      {info.wassertemperatur.min ?? '-'}–{info.wassertemperatur.max ?? '-'}°C
+                      {info.wassertemperatur.min ? info.wassertemperatur.min : '-'}–{info.wassertemperatur.max ? info.wassertemperatur.max : '-'}°C
                     </span>
                   </div>
                 )}
@@ -581,3 +583,4 @@ export default function FishDexDetailPage({ params }: { params: { id: string } }
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -7,7 +7,7 @@ import { useCatchStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, isAfter } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Plus, MapPin, BarChart3, User, BookOpen, Trophy, LayoutDashboard } from 'lucide-react'
+import { Plus, MapPin, BarChart3, User, BookOpen, Trophy, LayoutDashboard, Lightbulb, Fish as FishIcon } from 'lucide-react'
 import FishAquarium from '@/components/FishAquarium'
 import VerificationBadge from '@/components/VerificationBadge'
 
@@ -171,9 +171,7 @@ export default function DashboardPage() {
 
           {fishDexStats.discovered === 0 && (
             <div className="mt-4 text-center p-4 bg-ocean-dark/30 rounded-lg">
-              <p className="text-ocean-light text-sm">
-                💡 Fange deinen ersten Fisch um die FishDex zu starten!
-              </p>
+              <p className="text-ocean-light text-sm"><span className="inline-flex items-center gap-1"><Lightbulb className="w-4 h-4" />Fange deinen ersten Fisch um die FishDex zu starten!</span></p>
             </div>
           )}
         </div>
@@ -193,7 +191,7 @@ export default function DashboardPage() {
 
         {recentCatchesList.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎣</div>
+            <div className="mb-4 flex justify-center"><FishIcon className="w-14 h-14 text-ocean-light" /></div>
             <p className="text-ocean-light mb-4">Noch keine Fänge</p>
             <Link
               href="/catches"
@@ -213,7 +211,8 @@ export default function DashboardPage() {
                         src={catchData.photo}
                         alt={catchData.species}
                         fill
-                        className="object-cover rounded-lg group-hover:scale-105 transition-transform"
+                        sizes="100vw"
+            className="object-cover rounded-lg group-hover:scale-105 transition-transform"
                       />
                       <div className="absolute -top-1 -left-1">
                         <VerificationBadge
@@ -250,9 +249,7 @@ export default function DashboardPage() {
                       {format(new Date(catchData.date), 'dd.MM.yyyy', { locale: de })}
                     </div>
                     {catchData.location && (
-                      <div className="text-xs text-ocean-light/70 truncate max-w-[100px]">
-                        📍 {catchData.location}
-                      </div>
+                      <div className="text-xs text-ocean-light/70 truncate max-w-[100px]"><span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" />{catchData.location}</span></div>
                     )}
                   </div>
                 </div>
@@ -299,3 +296,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

@@ -201,7 +201,8 @@ export default function GalleryPage() {
                 src={photo.url}
                 alt={photo.species}
                 fill
-                className="object-cover group-hover:scale-110 transition-transform duration-300"
+                sizes="100vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-300"
               />
               
               {/* Overlay */}

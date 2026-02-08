@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -7,7 +7,7 @@ import { useCatchStore, type Catch } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Eye, Trash2, MapPin, Calendar, Ruler } from 'lucide-react'
+import { Eye, Trash2, MapPin, Calendar, Ruler, Fish } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import VerificationBadge from '@/components/VerificationBadge'
 
@@ -26,7 +26,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
   if (catches.length === 0) {
     return (
       <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-12 text-center">
-        <div className="text-6xl mb-4">🎣</div>
+        <div className="mb-4 flex justify-center"><Fish className="w-14 h-14 text-ocean-light" /></div>
         <h3 className="text-2xl font-bold text-white mb-2">
           Noch keine Fänge
         </h3>
@@ -104,7 +104,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                   </>
                 ) : (
                   <div className="h-full flex items-center justify-center">
-                    <span className="text-6xl opacity-50">🎣</span>
+                    <Fish className="w-14 h-14 opacity-50 text-ocean-light" />
                   </div>
                 )}
               </div>
@@ -227,3 +227,4 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
     </div>
   )
 }
+

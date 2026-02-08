@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -197,7 +197,7 @@ export default function SocialPage() {
           Social Feed
         </h1>
         <p className="text-ocean-light">
-          {activities.length} {activities.length === 1 ? 'Fang' : 'F?nge'}
+          {activities.length} {activities.length === 1 ? 'Fang' : 'Fänge'}
         </p>
       </div>
 
@@ -227,12 +227,12 @@ export default function SocialPage() {
 
       {showEmptyState ? (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <div className="text-6xl mb-4">??</div>
-          <h3 className="text-2xl font-bold text-white mb-2">Keine Aktivit?ten</h3>
+          <div className="text-6xl mb-4">?</div>
+          <h3 className="text-2xl font-bold text-white mb-2">Keine Aktivitäten</h3>
           <p className="text-ocean-light">
             {activeTab === 'friends'
-              ? 'Noch keine ?ffentlichen F?nge von deinen Freunden.'
-              : 'Noch keine ?ffentlichen F?nge verf?gbar.'}
+              ? 'Noch keine öffentlichen Fänge von deinen Freunden.'
+              : 'Noch keine öffentlichen Fänge verfügbar.'}
           </p>
         </div>
       ) : (
@@ -252,7 +252,8 @@ export default function SocialPage() {
                   src={activity.photo_url}
                   alt={activity.species}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="100vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <VerificationBadge
                   status={activity.verification_status}
@@ -307,7 +308,7 @@ export default function SocialPage() {
                     <div className="bg-ocean-dark/50 rounded p-2">
                       <div className="text-ocean-light text-xs flex items-center gap-1">
                         <Ruler className="w-3 h-3" />
-                        L?nge
+                        Länge
                       </div>
                       <div className="text-white font-semibold">{activity.length} cm</div>
                     </div>

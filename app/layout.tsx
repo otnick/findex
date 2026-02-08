@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import AuthProvider from '@/components/auth/AuthProvider'
@@ -10,7 +10,6 @@ export const metadata: Metadata = {
   description: 'Tracke deine Angelfänge mit 3D-Visualisierung',
   manifest: '/manifest.json',
   appleWebApp: {
-    capable: true,
     statusBarStyle: 'black-translucent',
     title: 'FishBox',
   },
@@ -32,6 +31,7 @@ export default function RootLayout({
         <meta charSet="utf-8" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2c5f8d" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
       <body className={inter.className}>
@@ -59,3 +59,4 @@ export default function RootLayout({
     </html>
   )
 }
+

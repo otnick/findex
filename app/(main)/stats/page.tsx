@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo } from 'react'
 import { useCatchStore } from '@/lib/store'
@@ -19,7 +19,7 @@ import {
 } from 'recharts'
 import { format, startOfMonth, parseISO, getHours, getDay } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, CloudSun } from 'lucide-react'
 
 const COLORS = ['#4a90e2', '#2c5f8d', '#1a3a52', '#4a7c59', '#d4af37', '#c41e3a', '#8b7355']
 
@@ -40,7 +40,7 @@ export default function StatsPage() {
       .slice(-6) // Last 6 months
       .map(([month, count]) => ({
         month,
-        fänge: count,
+        faenge: count,
       }))
   }, [catches])
 
@@ -72,10 +72,10 @@ export default function StatsPage() {
 
     return Array.from(baitMap.entries())
       .map(([bait, count]) => ({
-        köder: bait,
-        fänge: count,
+        koeder: bait,
+        faenge: count,
       }))
-      .sort((a, b) => b.fänge - a.fänge)
+      .sort((a, b) => b.faenge - a.faenge)
       .slice(0, 5)
   }, [catches])
 
@@ -92,7 +92,7 @@ export default function StatsPage() {
     for (let i = 0; i < 24; i++) {
       data.push({
         stunde: `${i}:00`,
-        fänge: hourMap.get(i) || 0,
+        faenge: hourMap.get(i) || 0,
       })
     }
 
@@ -144,11 +144,11 @@ export default function StatsPage() {
 
     return {
       byTemp: Array.from(tempRanges.entries())
-        .map(([range, count]) => ({ bereich: range, fänge: count }))
-        .sort((a, b) => b.fänge - a.fänge),
+        .map(([range, count]) => ({ bereich: range, faenge: count }))
+        .sort((a, b) => b.faenge - a.faenge),
       byType: Array.from(weatherTypes.entries())
-        .map(([type, count]) => ({ wetter: type, fänge: count }))
-        .sort((a, b) => b.fänge - a.fänge)
+        .map(([type, count]) => ({ wetter: type, faenge: count }))
+        .sort((a, b) => b.faenge - a.faenge)
         .slice(0, 5),
       avgTemp: Math.round(
         catchesWithWeather.reduce((sum, c) => sum + c.weather!.temperature, 0) / catchesWithWeather.length
@@ -165,12 +165,12 @@ export default function StatsPage() {
           Statistiken
         </h1>
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <div className="text-6xl mb-4">📊</div>
+          <div className="mb-4 flex justify-center"><BarChart3 className="w-14 h-14 text-ocean-light" /></div>
           <h3 className="text-2xl font-bold text-white mb-2">
             Noch keine Daten
           </h3>
           <p className="text-ocean-light">
-            Füge Fänge hinzu, um deine Statistiken zu sehen.
+            Füge faenge hinzu, um deine Statistiken zu sehen.
           </p>
         </div>
       </div>
@@ -185,13 +185,13 @@ export default function StatsPage() {
           <BarChart3 className="w-8 h-8 text-ocean-light" />
           Statistiken
         </h1>
-        <p className="text-ocean-light mt-1">Analyse deiner {catches.length} Fänge</p>
+        <p className="text-ocean-light mt-1">Analyse deiner {catches.length} faenge</p>
       </div>
 
       {/* Key Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
-          <div className="text-ocean-light text-sm">Ø Größe</div>
+          <div className="text-ocean-light text-sm">O Groesse</div>
           <div className="text-3xl font-bold text-white mt-1">
             {Math.round(catches.reduce((sum, c) => sum + c.length, 0) / catches.length)}
           </div>
@@ -199,7 +199,7 @@ export default function StatsPage() {
         </div>
 
         <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
-          <div className="text-ocean-light text-sm">Ø Gewicht</div>
+          <div className="text-ocean-light text-sm">O Gewicht</div>
           <div className="text-3xl font-bold text-white mt-1">
             {catches.filter(c => c.weight).length > 0
               ? Math.round(
@@ -223,12 +223,12 @@ export default function StatsPage() {
         </div>
 
         <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
-          <div className="text-ocean-light text-sm">Top Köder</div>
+          <div className="text-ocean-light text-sm">Top koeder</div>
           <div className="text-2xl font-bold text-white mt-1 truncate">
-            {baitSuccess[0]?.köder || '-'}
+            {baitSuccess[0]?.koeder || '-'}
           </div>
           <div className="text-ocean-light text-xs mt-1">
-            {baitSuccess[0]?.fänge || 0}x erfolgreich
+            {baitSuccess[0]?.faenge || 0}x erfolgreich
           </div>
         </div>
       </div>
@@ -238,7 +238,7 @@ export default function StatsPage() {
         {/* Catches per Month */}
         {catchesPerMonth.length > 0 && (
           <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Fänge pro Monat</h2>
+            <h2 className="text-lg font-bold text-white mb-4">faenge pro Monat</h2>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={catchesPerMonth}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2c5f8d" />
@@ -248,7 +248,7 @@ export default function StatsPage() {
                   contentStyle={{ backgroundColor: '#1a3a52', border: 'none', borderRadius: '8px' }}
                   labelStyle={{ color: '#4a90e2' }}
                 />
-                <Line type="monotone" dataKey="fänge" stroke="#4a90e2" strokeWidth={2} />
+                <Line type="monotone" dataKey="faenge" stroke="#4a90e2" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -285,23 +285,23 @@ export default function StatsPage() {
         {/* Best Baits */}
         {baitSuccess.length > 0 && (
           <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Erfolgreichste Köder</h2>
+            <h2 className="text-lg font-bold text-white mb-4">Erfolgreichste koeder</h2>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={baitSuccess}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2c5f8d" />
-                <XAxis dataKey="köder" stroke="#4a90e2" />
+                <XAxis dataKey="koeder" stroke="#4a90e2" />
                 <YAxis stroke="#4a90e2" />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1a3a52', border: 'none', borderRadius: '8px' }}
                 />
-                <Bar dataKey="fänge" fill="#4a90e2" />
+                <Bar dataKey="faenge" fill="#4a90e2" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         )}
 
         {/* Best Times */}
-        {bestTimes.some(t => t.fänge > 0) && (
+        {bestTimes.some(t => t.faenge > 0) && (
           <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
             <h2 className="text-lg font-bold text-white mb-4">Beste Fangzeiten</h2>
             <ResponsiveContainer width="100%" height={250}>
@@ -312,7 +312,7 @@ export default function StatsPage() {
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1a3a52', border: 'none', borderRadius: '8px' }}
                 />
-                <Bar dataKey="fänge" fill="#2c5f8d" />
+                <Bar dataKey="faenge" fill="#2c5f8d" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -321,7 +321,7 @@ export default function StatsPage() {
         {/* Average Size per Species */}
         {avgSizePerSpecies.length > 0 && (
           <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 lg:col-span-2">
-            <h2 className="text-lg font-bold text-white mb-4">Durchschnittsgröße pro Art</h2>
+            <h2 className="text-lg font-bold text-white mb-4">DurchschnittsGroesse pro Art</h2>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={avgSizePerSpecies}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2c5f8d" />
@@ -329,7 +329,7 @@ export default function StatsPage() {
                 <YAxis stroke="#4a90e2" />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1a3a52', border: 'none', borderRadius: '8px' }}
-                  formatter={(value) => [`${value} cm`, 'Ø Größe']}
+                  formatter={(value) => [`${value} cm`, 'O Groesse']}
                 />
                 <Bar dataKey="durchschnitt" fill="#4a7c59" />
               </BarChart>
@@ -342,10 +342,10 @@ export default function StatsPage() {
           <>
             {/* Weather Insight Card */}
             <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 lg:col-span-2">
-              <h2 className="text-lg font-bold text-white mb-4">🌤️ Wetter-Einblicke</h2>
+              <h2 className="text-lg font-bold text-white mb-4 inline-flex items-center gap-2"><CloudSun className="w-5 h-5 text-ocean-light" />Wetter-Einblicke</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <div className="text-ocean-light text-sm">Ø Temperatur</div>
+                  <div className="text-ocean-light text-sm">O Temperatur</div>
                   <div className="text-2xl font-bold text-white">{weatherStats.avgTemp}°C</div>
                 </div>
                 <div>
@@ -369,7 +369,7 @@ export default function StatsPage() {
 
             {/* Catches by Temperature */}
             <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-4">Fänge nach Temperatur</h2>
+              <h2 className="text-lg font-bold text-white mb-4">faenge nach Temperatur</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={weatherStats.byTemp}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2c5f8d" />
@@ -378,14 +378,14 @@ export default function StatsPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1a3a52', border: 'none', borderRadius: '8px' }}
                   />
-                  <Bar dataKey="fänge" fill="#d4af37" />
+                  <Bar dataKey="faenge" fill="#d4af37" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             {/* Catches by Weather Type */}
             <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-4">Fänge nach Wetter</h2>
+              <h2 className="text-lg font-bold text-white mb-4">faenge nach Wetter</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={weatherStats.byType}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2c5f8d" />
@@ -394,7 +394,7 @@ export default function StatsPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1a3a52', border: 'none', borderRadius: '8px' }}
                   />
-                  <Bar dataKey="fänge" fill="#4a7c59" />
+                  <Bar dataKey="faenge" fill="#4a7c59" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -404,3 +404,5 @@ export default function StatsPage() {
     </div>
   )
 }
+
+

@@ -1,9 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { 
-  Fish, 
+import {
+  Fish,
+  Sparkles,
 } from 'lucide-react'
 
 interface AuthProps {
@@ -168,9 +169,10 @@ export default function Auth({ onSuccess }: AuthProps) {
             type="button"
             onClick={handleMagicLink}
             disabled={loading}
-            className="w-full border border-ocean-light/30 text-ocean-light hover:bg-ocean-light/10 font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+            className="w-full border border-ocean-light/30 text-ocean-light hover:bg-ocean-light/10 font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
-            🪄 Magic Link senden
+            <Sparkles className="w-4 h-4" />
+            Magic Link senden
           </button>
           <p className="text-xs text-ocean-light text-center mt-2">
             Login ohne Passwort per E-Mail
@@ -209,3 +211,4 @@ export default function Auth({ onSuccess }: AuthProps) {
     </div>
   )
 }
+

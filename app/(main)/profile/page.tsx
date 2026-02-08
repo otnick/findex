@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -6,7 +6,7 @@ import { useCatchStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { User } from 'lucide-react'
+import { User, Package, FileSpreadsheet } from 'lucide-react'
 import { 
   notificationService, 
   getNotificationPreference, 
@@ -85,7 +85,7 @@ export default function ProfilePage() {
         setNotificationPreference(true)
         setNotificationsEnabled(true)
         await notificationService.send({
-          title: '🎣 Benachrichtigungen aktiviert!',
+          title: 'Benachrichtigungen aktiviert!',
           body: 'Du erhältst jetzt Updates zu Likes, Kommentaren und mehr.',
         })
       }
@@ -309,15 +309,17 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={handleExportJSON}
-            className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors inline-flex items-center justify-center gap-2"
           >
-            📦 Als JSON exportieren
+            <Package className="w-4 h-4" />
+            Als JSON exportieren
           </button>
           <button
             onClick={handleExportCSV}
-            className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors inline-flex items-center justify-center gap-2"
           >
-            📊 Als CSV exportieren
+            <FileSpreadsheet className="w-4 h-4" />
+            Als CSV exportieren
           </button>
         </div>
       </div>
@@ -362,7 +364,7 @@ export default function ProfilePage() {
               <div className="text-white font-semibold">Dark Mode</div>
               <div className="text-ocean-light text-sm">Immer aktiv</div>
             </div>
-            <div className="self-start sm:self-auto text-white">✓</div>
+            <div className="self-start sm:self-auto text-white">?</div>
           </div>
         </div>
       </div>
@@ -393,3 +395,5 @@ export default function ProfilePage() {
     </div>
   )
 }
+
+

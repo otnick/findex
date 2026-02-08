@@ -1,7 +1,19 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import {
+  Bot,
+  Camera,
+  CheckCircle2,
+  Cloud,
+  Lock,
+  MapPin,
+  PencilLine,
+  Thermometer,
+  AlertTriangle,
+  Wind,
+} from 'lucide-react'
 import { useCatchStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { uploadPhoto, compressImage } from '@/lib/utils/photoUpload'
@@ -87,7 +99,7 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
       reader.readAsDataURL(file)
 
       // Run AI detection
-      console.log('🤖 Starting AI detection...')
+      console.log('Starting AI detection...')
       setAIDetectionLoading(true)
       try {
         const results = await detectFishSpecies(file)
@@ -96,9 +108,9 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
         if (results.detections > 0 && results.results.length > 0) {
           setAIDetectionResults(results.results)
           setShowAIVerification(true)
-          console.log('✅ Fish detected! Showing verification modal')
+          console.log('Fish detected. Showing verification modal')
         } else {
-          console.log('❌ No fish detected - showing NoDetectionModal')
+          console.log('No fish detected. Showing NoDetectionModal')
           setShowNoDetection(true)
         }
       } catch (error) {
@@ -188,21 +200,21 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
           verified_at: new Date().toISOString(),
           verification_status: 'verified'
         }
-        console.log('✅ Saving as AI verified catch')
+        console.log('Saving as AI verified catch')
       } else if (manualMode) {
         // Manual mode
         verificationData = {
           ai_verified: false,
           verification_status: 'manual'
         }
-        console.log('📝 Saving as manual catch')
+        console.log('Saving as manual catch')
       } else {
         // Rejected or unverified
         verificationData = {
           ai_verified: false,
           verification_status: 'pending'
         }
-        console.log('⏳ Saving as pending catch')
+        console.log('Saving as pending catch')
       }
 
       const catchData = {
@@ -343,14 +355,14 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
           detectionResults={aiDetectionResults}
           detectionLoading={aiDetectionLoading}
           onConfirm={(species) => {
-            console.log('✅ User confirmed:', species)
+            console.log('User confirmed:', species)
             const mappedSpecies = mapSpeciesToDatabase(species)
             setFormData({ ...formData, species: mappedSpecies })
             setAIVerified(true)
             setShowAIVerification(false)
           }}
           onReject={() => {
-            console.log('❌ User rejected catch - discarding')
+            console.log('User rejected catch. Discarding')
             setShowAIVerification(false)
             setPhoto(null)
             setPhotoPreview(null)
@@ -359,7 +371,7 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
             setAIDetectionResults([])
           }}
           onRetry={async () => {
-            console.log('🔄 Retrying AI detection...')
+            console.log('Retrying AI detection...')
             if (photo) {
               setAIDetectionLoading(true)
               try {
@@ -379,7 +391,7 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
             }
           }}
           onManualOverride={() => {
-            console.log('📝 User chose manual mode from verification')
+            console.log('User chose manual mode from verification')
             setShowAIVerification(false)
             setManualMode(true)
             setAIVerified(false)
@@ -392,7 +404,7 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
         <NoDetectionModal
           photoPreview={photoPreview}
           onRetry={async () => {
-            console.log('🔄 Retrying AI detection from NoDetectionModal...')
+            console.log('Retrying AI detection from NoDetectionModal...')
             if (photo) {
               setShowNoDetection(false)
               setAIDetectionLoading(true)
@@ -413,13 +425,13 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
             }
           }}
           onManualOverride={() => {
-            console.log('📝 User chose manual mode from NoDetectionModal')
+            console.log('User chose manual mode from NoDetectionModal')
             setShowNoDetection(false)
             setManualMode(true)
             setAIVerified(false)
           }}
           onReject={() => {
-            console.log('❌ User rejected from NoDetectionModal - discarding')
+            console.log('User rejected from NoDetectionModal. Discarding')
             setShowNoDetection(false)
             setPhoto(null)
             setPhotoPreview(null)
@@ -462,6 +474,7 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
               src={photoPreview}
               alt="Preview"
               fill
+              sizes="(max-width: 640px) 100vw, 640px"
               className="object-cover"
             />
             
@@ -486,7 +499,10 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
                 </svg>
                 {/* Tooltip */}
                 <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/90 text-white text-xs px-3 py-1.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  ✅ KI-verifiziert → FishDex
+                  <span className="inline-flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" />
+                    KI-verifiziert → FishDex
+                  </span>
                 </div>
               </div>
             )}
@@ -498,7 +514,10 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
                 </svg>
                 {/* Tooltip */}
                 <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/90 text-white text-xs px-3 py-1.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  ✋ Manuell → Kein FishDex
+                  <span className="inline-flex items-center gap-1">
+                    <PencilLine className="w-4 h-4" />
+                    Manuell → Kein FishDex
+                  </span>
                 </div>
               </div>
             )}
@@ -520,7 +539,9 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
         ) : (
           <label className="flex items-center justify-center w-full h-48 border-2 border-dashed border-ocean-light/30 rounded-lg cursor-pointer hover:border-ocean-light transition-colors">
             <div className="text-center">
-              <div className="text-4xl mb-2">📷</div>
+              <div className="mb-2 flex justify-center">
+                <Camera className="w-9 h-9 text-ocean-light" />
+              </div>
               <div className="text-ocean-light">Foto hochladen</div>
             </div>
             <input
@@ -536,7 +557,10 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
         {photoPreview && (
           <div className="mt-2 text-sm text-ocean-light">
             {aiDetectionLoading && (
-              <p>🤖 Die KI analysiert dein Foto...</p>
+              <p className="inline-flex items-center gap-1">
+                <Bot className="w-4 h-4" />
+                Die KI analysiert dein Foto...
+              </p>
             )}
             {!aiDetectionLoading && aiVerified && formData.species && (
               <p className="text-green-400">
@@ -545,7 +569,10 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
             )}
             {!aiDetectionLoading && manualMode && (
               <p className="text-yellow-400">
-                ⚠️ Manuelle Eingabe - Fang wird gespeichert, aber NICHT im FishDex gewertet
+                <span className="inline-flex items-center gap-1">
+                  <AlertTriangle className="w-4 h-4" />
+                  Manuelle Eingabe - Fang wird gespeichert, aber NICHT im FishDex gewertet
+                </span>
               </p>
             )}
           </div>
@@ -558,7 +585,10 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
           Fischart *
           {aiVerified && (
             <span className="ml-2 text-xs text-green-400">
-              🔒 KI-verifiziert
+              <span className="inline-flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5" />
+                KI-verifiziert
+              </span>
             </span>
           )}
         </label>
@@ -648,12 +678,15 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
             disabled={gettingLocation}
             className="px-4 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors disabled:opacity-50"
           >
-            {gettingLocation ? '...' : '📍'}
+            {gettingLocation ? '...' : <MapPin className="w-4 h-4" />}
           </button>
         </div>
         {coordinates && (
           <p className="text-xs text-ocean-light mt-1">
-            📍 {formatCoordinates(coordinates)}
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" />
+              {formatCoordinates(coordinates)}
+            </span>
           </p>
         )}
       </div>
@@ -667,12 +700,25 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
             disabled={fetchingWeather}
             className="text-ocean-light hover:text-white text-sm transition-colors"
           >
-            {weather ? '☁️ Wetter aktualisieren' : '☁️ Wetter laden'}
+            <span className="inline-flex items-center gap-1">
+              <Cloud className="w-4 h-4" />
+              {weather ? 'Wetter aktualisieren' : 'Wetter laden'}
+            </span>
           </button>
           {weather && (
             <div className="mt-2 p-3 bg-ocean-dark/50 rounded-lg text-sm">
               <div className="text-white">
-                🌡️ {weather.temperature}°C • 💨 {weather.windSpeed} km/h
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1">
+                    <Thermometer className="w-4 h-4" />
+                    {weather.temperature}°C
+                  </span>
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Wind className="w-4 h-4" />
+                    {weather.windSpeed} km/h
+                  </span>
+                </span>
               </div>
             </div>
           )}
@@ -748,3 +794,5 @@ export default function CatchForm({ onSuccess }: CatchFormProps) {
     </>
   )
 }
+
+

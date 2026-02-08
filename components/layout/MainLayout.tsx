@@ -39,7 +39,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-catchOverlayIn"
             onClick={closeCatchModal}
           />
-          <div className="relative w-full max-w-2xl max-h-[calc(100vh-8.5rem)] sm:max-h-[75vh] overflow-x-hidden overflow-y-auto bg-ocean/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl animate-catchModalIn">
+          <div className="relative mb-[5.25rem] sm:mb-0 w-full max-w-2xl max-h-[calc(100vh-10rem)] sm:max-h-[75vh] overflow-x-hidden overflow-y-auto bg-ocean/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl animate-catchModalIn">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Neuen Fang hinzufügen</h2>
               <button

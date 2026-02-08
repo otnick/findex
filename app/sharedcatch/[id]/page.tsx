@@ -8,6 +8,7 @@ import { de } from 'date-fns/locale'
 import Link from 'next/link'
 import Map from '@/components/Map'
 import VerificationBadge from '@/components/VerificationBadge'
+import { Fish, Heart, Share2 } from 'lucide-react'
 
 interface SharedCatch {
   id: string
@@ -97,10 +98,10 @@ export default function SharePage({ params }: { params: { id: string } }) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark flex items-center justify-center p-4">
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center max-w-md">
-          <div className="text-6xl mb-4">🎣</div>
+          <div className="mb-4 flex justify-center"><Fish className="w-14 h-14 text-ocean-light" /></div>
           <h1 className="text-2xl font-bold text-white mb-4">Fang nicht gefunden</h1>
           <p className="text-ocean-light mb-6">
-            Dieser Fang existiert nicht oder ist nicht öffentlich geteilt.
+            Dieser Fang existiert nicht oder ist nicht Öffentlich geteilt.
           </p>
           <Link
             href="/"
@@ -118,7 +119,7 @@ export default function SharePage({ params }: { params: { id: string } }) {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-5xl mb-4">🎣</div>
+          <div className="mb-4 flex justify-center"><Fish className="w-12 h-12 text-ocean-light" /></div>
           <h1 className="text-3xl font-bold text-white mb-2">FishBox</h1>
           <p className="text-ocean-light">Geteilter Fang von {catchData.user_email?.split('@')[0]}</p>
         </div>
@@ -132,7 +133,8 @@ export default function SharePage({ params }: { params: { id: string } }) {
                 src={catchData.photo_url}
                 alt={catchData.species}
                 fill
-                className="object-cover"
+                sizes="100vw"
+            className="object-cover"
               />
             </div>
           )}
@@ -162,7 +164,7 @@ export default function SharePage({ params }: { params: { id: string } }) {
                 </p>
               </div>
               <div className="flex items-center gap-2 text-ocean-light">
-                <span>❤️</span>
+                <Heart className="w-4 h-4" />
                 <span>{catchData.likes_count || 0}</span>
               </div>
             </div>
@@ -189,7 +191,7 @@ export default function SharePage({ params }: { params: { id: string } }) {
                 <div className="bg-ocean-dark/50 rounded-lg p-4">
                   <div className="text-ocean-light text-sm">Wetter</div>
                   <div className="text-xl font-bold text-white">
-                    {catchData.weather.icon} {catchData.weather.temperature}°C
+                    {catchData.weather.temperature}°C
                   </div>
                 </div>
               )}
@@ -223,9 +225,10 @@ export default function SharePage({ params }: { params: { id: string } }) {
             {/* Share Button */}
             <button
               onClick={handleShare}
-              className="w-full bg-ocean hover:bg-ocean-light text-white font-bold py-4 px-8 rounded-lg transition-colors mb-4"
+              className="w-full bg-ocean hover:bg-ocean-light text-white font-bold py-4 px-8 rounded-lg transition-colors mb-4 inline-flex items-center justify-center gap-2"
             >
-              🔗 Teilen
+              <Share2 className="w-5 h-5" />
+              Teilen
             </button>
 
             {/* CTA */}
@@ -246,3 +249,4 @@ export default function SharePage({ params }: { params: { id: string } }) {
     </div>
   )
 }
+

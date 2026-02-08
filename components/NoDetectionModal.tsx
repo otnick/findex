@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
-import { RefreshCw, Edit3, XCircle, AlertTriangle } from 'lucide-react'
+import { RefreshCw, Edit3, XCircle, AlertTriangle, Lightbulb } from 'lucide-react'
 
 interface NoDetectionModalProps {
   photoPreview: string
@@ -14,46 +14,39 @@ export default function NoDetectionModal({
   photoPreview,
   onRetry,
   onManualOverride,
-  onReject
+  onReject,
 }: NoDetectionModalProps) {
   return (
-    <div className="fixed inset-0 bg-black/90 z-[45] flex items-end sm:items-center justify-center p-2 sm:p-4">
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl max-w-2xl w-full p-4 sm:p-6 max-h-[calc(100vh-8.5rem)] sm:max-h-[90vh] overflow-x-hidden overflow-y-auto break-words">
-        {/* Header */}
+    <div className="fixed inset-0 bg-black/90 z-[45] flex items-end sm:items-center justify-center p-2 pt-3 pb-[calc(env(safe-area-inset-bottom)+4.75rem)] sm:p-4">
+      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl max-w-2xl w-full p-4 sm:p-6 max-h-[82dvh] sm:max-h-[90vh] overflow-x-hidden overflow-y-auto break-words">
         <div className="flex items-center gap-3 mb-6">
           <AlertTriangle className="w-8 h-8 text-red-400" />
           <div>
-            <h2 className="text-2xl font-bold text-white">
-              Kein Fisch erkannt
-            </h2>
-            <p className="text-ocean-light text-sm">
-              Die KI konnte keinen Fisch im Bild erkennen
-            </p>
+            <h2 className="text-2xl font-bold text-white">Kein Fisch erkannt</h2>
+            <p className="text-ocean-light text-sm">Die KI konnte keinen Fisch im Bild erkennen</p>
           </div>
         </div>
 
-        {/* Photo Preview */}
         <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 bg-ocean-dark">
           <Image
             src={photoPreview}
             alt="Catch"
             fill
+            sizes="(max-width: 768px) 100vw, 768px"
             className="object-cover"
           />
         </div>
 
-        {/* Info Box */}
         <div className="bg-red-900/20 border border-red-600/30 rounded-lg p-4 mb-6">
           <h4 className="text-white font-semibold mb-2">Mögliche Gründe:</h4>
           <ul className="text-ocean-light text-sm space-y-1">
-            <li>• Foto zu unscharf oder zu dunkel</li>
-            <li>• Fisch ist nicht vollständig sichtbar</li>
-            <li>• Fischart nicht in der Datenbank</li>
-            <li>• Hintergrund zu unruhig</li>
+            <li>- Foto zu unscharf oder zu dunkel</li>
+            <li>- Fisch ist nicht vollständig sichtbar</li>
+            <li>- Fischart nicht in der Datenbank</li>
+            <li>- Hintergrund zu unruhig</li>
           </ul>
         </div>
 
-        {/* Actions */}
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
@@ -81,11 +74,13 @@ export default function NoDetectionModal({
               <span className="text-xs text-red-300/70">Verwerfen</span>
             </button>
           </div>
-          
-          {/* Tip */}
+
           <div className="bg-ocean/20 rounded-lg p-3 text-center">
-            <p className="text-ocean-light text-xs">
-              💡 <strong>Tipp:</strong> Für beste Ergebnisse fotografiere den Fisch von der Seite mit gutem Licht
+            <p className="text-ocean-light text-xs inline-flex items-center gap-1">
+              <Lightbulb className="w-4 h-4" />
+              <span>
+                <strong>Tipp:</strong> Für beste Ergebnisse fotografiere den Fisch von der Seite mit gutem Licht
+              </span>
             </p>
           </div>
         </div>

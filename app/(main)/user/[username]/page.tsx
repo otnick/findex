@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit } from 'lucide-react'
+import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit, Star } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
@@ -274,11 +274,11 @@ export default function UserProfilePage({ params }: { params: { username: string
           {isOwnProfile && (
             <div className="flex items-center justify-between rounded-lg bg-ocean-dark/40 px-4 py-3 sm:order-2 sm:w-[260px]">
               <div>
-                <div className="text-white font-semibold text-sm">Nur öffentlich</div>
+                <div className="text-white font-semibold text-sm">Nur Öffentlich</div>
                 <div className="text-ocean-light text-xs">Privates ausblenden</div>
               </div>
               <label className="inline-flex cursor-pointer items-center gap-3">
-                <span className="sr-only">Öffentliche Fänge umschalten</span>
+                <span className="sr-only">öffentliche Fänge umschalten</span>
                 <input
                   type="checkbox"
                   className="sr-only"
@@ -349,7 +349,7 @@ export default function UserProfilePage({ params }: { params: { username: string
               description={
                 isOwnProfile
                   ? showPublicOnly
-                    ? 'Mache deine Fänge öffentlich, um sie hier zu zeigen.'
+                    ? 'Mache deine Fänge Öffentlich, um sie hier zu zeigen.'
                     : 'Du hast noch keine Fänge gespeichert.'
                   : 'Dieser Angler hat noch keine öffentlichen Fänge geteilt.'
               }
@@ -367,7 +367,8 @@ export default function UserProfilePage({ params }: { params: { username: string
                           src={catchData.photo_url}
                           alt={catchData.species}
                           fill
-                          className="object-cover"
+                          sizes="100vw"
+            className="object-cover"
                         />
                         <VerificationBadge
                           status={catchData.verification_status}
@@ -449,7 +450,8 @@ export default function UserProfilePage({ params }: { params: { username: string
                         src={entry.photo_url || entry.species.image_url}
                         alt={entry.species.name}
                         fill
-                        className="object-cover"
+                        sizes="100vw"
+            className="object-cover"
                       />
                     ) : (
                       <Fish className="w-12 h-12 text-ocean-light/50" />
@@ -467,14 +469,19 @@ export default function UserProfilePage({ params }: { params: { username: string
                     </div>
                     {/* Rarity Stars */}
                     {entry.species?.rarity && (
-                      <div className="mt-1 text-xs">
-                        {'⭐'.repeat(
-                          getSpeciesRarity({
+                      <div className="mt-1 inline-flex items-center gap-0.5">
+                        {Array.from({
+                          length: getSpeciesRarity({
                             scientificName: entry.species?.scientific_name,
                             germanName: entry.species?.name,
                             fallback: entry.species?.rarity,
-                          })
-                        )}
+                          }),
+                        }).map((_, idx) => (
+                          <Star
+                            key={`rarity-${entry.id}-${idx}`}
+                            className="w-3 h-3 fill-yellow-400 text-yellow-400"
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
@@ -487,3 +494,4 @@ export default function UserProfilePage({ params }: { params: { username: string
     </div>
   )
 }
+

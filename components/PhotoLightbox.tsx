@@ -140,6 +140,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             src={currentPhoto.url}
             alt={currentPhoto.species || 'Catch'}
             fill
+            sizes="100vw"
             className="object-contain"
             priority
           />
@@ -187,7 +188,8 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
                   src={photo.url}
                   alt={`Thumbnail ${index + 1}`}
                   fill
-                  className="object-cover"
+                  sizes="100vw"
+            className="object-cover"
                 />
               </button>
             ))}
