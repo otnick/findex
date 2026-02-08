@@ -8,6 +8,7 @@ export interface WeatherData {
   humidity: number // %
   description: string // Clear, Cloudy, Rain, etc.
   icon: string // Weather icon emoji
+  source?: 'historical' | 'forecast' | 'current'
 }
 
 const HOURLY_FIELDS =
@@ -39,10 +40,15 @@ function getClosestTimeIndex(times: string[], targetDate: Date): number {
 async function fetchHourlyWeather(
   endpoint: 'forecast' | 'archive',
   coordinates: Coordinates,
-  targetDate: Date
+  targetDate: Date,
+  source: 'historical' | 'forecast'
 ): Promise<WeatherData | null> {
   const dateStr = toDateParam(targetDate)
-  const url = new URL(`https://api.open-meteo.com/v1/${endpoint}`)
+  const baseUrl =
+    endpoint === 'archive'
+      ? 'https://archive-api.open-meteo.com/v1/archive'
+      : 'https://api.open-meteo.com/v1/forecast'
+  const url = new URL(baseUrl)
   url.searchParams.append('latitude', coordinates.lat.toString())
   url.searchParams.append('longitude', coordinates.lng.toString())
   url.searchParams.append('hourly', HOURLY_FIELDS)
@@ -71,6 +77,7 @@ async function fetchHourlyWeather(
     humidity: Math.round(hourly.relative_humidity_2m[timeIndex]),
     description,
     icon,
+    source,
   }
 }
 
@@ -91,11 +98,11 @@ export async function getWeatherData(
     const isPast = targetDate.getTime() < now.getTime() - 60 * 60 * 1000
 
     if (isPast) {
-      const archiveWeather = await fetchHourlyWeather('archive', coordinates, targetDate)
+      const archiveWeather = await fetchHourlyWeather('archive', coordinates, targetDate, 'historical')
       if (archiveWeather) return archiveWeather
     }
 
-    return await fetchHourlyWeather('forecast', coordinates, targetDate)
+    return await fetchHourlyWeather('forecast', coordinates, targetDate, 'forecast')
   } catch (error) {
     console.error('Error fetching weather data:', error)
     return null
@@ -134,6 +141,7 @@ export async function getCurrentWeather(
       humidity: Math.round(current.relative_humidity_2m),
       description,
       icon,
+      source: 'current',
     }
   } catch (error) {
     console.error('Error fetching current weather:', error)

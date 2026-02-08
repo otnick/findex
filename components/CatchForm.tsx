@@ -45,6 +45,18 @@ function toDateTimeLocalValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+function getWeatherSourceLabel(source?: 'historical' | 'forecast' | 'current'): string {
+  if (source === 'historical') return 'Archivwetter (Fotozeit)'
+  if (source === 'current') return 'Aktuelles Wetter'
+  return 'Prognose (Zeitpunkt)'
+}
+
+function getWeatherSourceClass(source?: 'historical' | 'forecast' | 'current'): string {
+  if (source === 'historical') return 'text-amber-300'
+  if (source === 'current') return 'text-emerald-300'
+  return 'text-sky-300'
+}
+
 export default function CatchForm({ onSuccess, embeddedFlow = false }: CatchFormProps) {
   const addCatch = useCatchStore((state) => state.addCatch)
   const user = useCatchStore((state) => state.user)
@@ -807,6 +819,9 @@ export default function CatchForm({ onSuccess, embeddedFlow = false }: CatchForm
                     {weather.windSpeed} km/h
                   </span>
                 </span>
+              </div>
+              <div className={`text-xs mt-1 ${getWeatherSourceClass(weather.source)}`}>
+                Quelle: {getWeatherSourceLabel(weather.source)}
               </div>
             </div>
           )}
