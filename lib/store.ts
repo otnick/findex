@@ -40,6 +40,7 @@ interface CatchStore {
   user: User | null
   loading: boolean
   isCatchModalOpen: boolean
+  isAiAnalyzing: boolean
   
   // Auth methods
   setUser: (user: User | null) => void
@@ -49,6 +50,7 @@ interface CatchStore {
   openCatchModal: () => void
   closeCatchModal: () => void
   toggleCatchModal: () => void
+  setAiAnalyzing: (value: boolean) => void
   
   // Catch methods
   fetchCatches: () => Promise<void>
@@ -62,6 +64,7 @@ export const useCatchStore = create<CatchStore>((set, get) => ({
   user: null,
   loading: false,
   isCatchModalOpen: false,
+  isAiAnalyzing: false,
 
   setUser: (user) => {
     set({ user })
@@ -80,6 +83,7 @@ export const useCatchStore = create<CatchStore>((set, get) => ({
   openCatchModal: () => set({ isCatchModalOpen: true }),
   closeCatchModal: () => set({ isCatchModalOpen: false }),
   toggleCatchModal: () => set((state) => ({ isCatchModalOpen: !state.isCatchModalOpen })),
+  setAiAnalyzing: (value) => set({ isAiAnalyzing: value }),
 
   fetchCatches: async () => {
     const { user } = get()

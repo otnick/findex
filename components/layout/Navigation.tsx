@@ -18,6 +18,7 @@ import {
   BookOpen,
   Plus,
   Menu,
+  Loader2,
 } from 'lucide-react'
 
 const navigation = [
@@ -37,6 +38,7 @@ export default function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const isCatchModalOpen = useCatchStore((state) => state.isCatchModalOpen)
+  const isAiAnalyzing = useCatchStore((state) => state.isAiAnalyzing)
   const toggleCatchModal = useCatchStore((state) => state.toggleCatchModal)
 
   return (
@@ -126,16 +128,21 @@ export default function Navigation() {
           <button
             type="button"
             onClick={toggleCatchModal}
+            disabled={isAiAnalyzing}
             className="absolute left-1/2 -translate-x-1/2 -top-4 w-14 h-14 rounded-full bg-gradient-to-br from-ocean-light to-ocean text-white shadow-2xl flex items-center justify-center border-4 border-ocean-deeper transition-transform duration-200"
             aria-label="Neuer Fang"
           >
-            <Plus className={`w-7 h-7 transition-transform duration-200 ${isCatchModalOpen ? 'rotate-45' : ''}`} />
+            {isAiAnalyzing ? (
+              <Loader2 className="w-7 h-7 animate-spin" />
+            ) : (
+              <Plus className={`w-7 h-7 transition-transform duration-200 ${isCatchModalOpen ? 'rotate-45' : ''}`} />
+            )}
           </button>
           <span
-            className={`absolute left-1/2 -translate-x-1/2 text-xs font-medium leading-none ${isCatchModalOpen ? 'text-white' : 'text-ocean-light'}`}
+            className={`absolute left-1/2 -translate-x-1/2 text-xs font-medium leading-none ${isCatchModalOpen || isAiAnalyzing ? 'text-white' : 'text-ocean-light'}`}
             style={{ bottom: '1.45rem' }}
           >
-            Fang
+            {isAiAnalyzing ? 'Analyse...' : 'Fang'}
           </span>
         </div>
       </div>

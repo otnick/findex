@@ -42,6 +42,7 @@ const FISH_SPECIES = Array.from(new Set([...ALL_GERMAN_SPECIES, 'Andere']))
 export default function CatchForm({ onSuccess, embeddedFlow = false }: CatchFormProps) {
   const addCatch = useCatchStore((state) => state.addCatch)
   const user = useCatchStore((state) => state.user)
+  const setAiAnalyzing = useCatchStore((state) => state.setAiAnalyzing)
   
   const [formData, setFormData] = useState({
     species: '',
@@ -110,6 +111,12 @@ export default function CatchForm({ onSuccess, embeddedFlow = false }: CatchForm
       sheet.style.overscrollBehavior = originalOverscroll
     }
   }, [embeddedFlow, isOverlayActive])
+
+  useEffect(() => {
+    if (!embeddedFlow) return
+    setAiAnalyzing(aiDetectionLoading)
+    return () => setAiAnalyzing(false)
+  }, [embeddedFlow, aiDetectionLoading, setAiAnalyzing])
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
