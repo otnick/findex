@@ -68,21 +68,35 @@ const DEFAULT_WEATHER: WeatherFilter = 'all'
 const DEFAULT_BAIT = 'all'
 const DEFAULT_WEATHER_DESC = 'all'
 
-const baseOptions: ChartOptions<'bar' | 'line' | 'doughnut'> = {
+const basePlugins = {
+  legend: {
+    labels: { color: TICK },
+  },
+  tooltip: {
+    backgroundColor: '#0f3047',
+    borderColor: '#2c5f8d',
+    borderWidth: 1,
+    titleColor: '#ffffff',
+    bodyColor: '#e6f4ff',
+  },
+}
+
+const lineBaseOptions: ChartOptions<'line'> = {
   responsive: true,
   maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      labels: { color: TICK },
-    },
-    tooltip: {
-      backgroundColor: '#0f3047',
-      borderColor: '#2c5f8d',
-      borderWidth: 1,
-      titleColor: '#ffffff',
-      bodyColor: '#e6f4ff',
-    },
-  },
+  plugins: basePlugins,
+}
+
+const barBaseOptions: ChartOptions<'bar'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: basePlugins,
+}
+
+const doughnutBaseOptions: ChartOptions<'doughnut'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: basePlugins,
 }
 
 function weatherSourceLabel(source?: string) {
@@ -427,7 +441,7 @@ export default function StatsPage() {
     list.forEach((c) => {
       if (c.length > currentPb) {
         currentPb = c.length
-        pbSeries.push({ date: c.date, value: c.length })
+        pbSeries.push({ date: new Date(c.date).toISOString(), value: c.length })
       }
     })
 
@@ -523,7 +537,7 @@ export default function StatsPage() {
     a.click()
   }
 
-  const csvValue = (value: string | number | null | undefined) => {
+  const csvValue = (value: string | number | Date | null | undefined) => {
     if (value === null || value === undefined) return ''
     const text = String(value)
     if (text.includes(';') || text.includes('"') || text.includes('\n')) {
@@ -883,7 +897,7 @@ export default function StatsPage() {
                 <Line
                   ref={overviewTrendRef}
                   options={{
-                    ...baseOptions,
+                    ...lineBaseOptions,
                     scales: {
                       x: { ticks: { color: TICK }, grid: { color: GRID } },
                       y: { ticks: { color: TICK }, grid: { color: GRID }, beginAtZero: true },
@@ -910,16 +924,19 @@ export default function StatsPage() {
               <h2 className="text-lg font-bold text-white mb-4">Arten-Verteilung (Top 10)</h2>
               <div className="h-72">
                 <Doughnut
-                  onClick={(_, elements) => {
-                    const el = elements?.[0]
-                    if (!el) return
-                    const idx = el.index
-                    const species = overview.speciesDist[idx]?.[0]
-                    if (!species) return
-                    setSelectedSpecies(species)
-                    setTab('species')
+                  options={{
+                    ...doughnutBaseOptions,
+                    cutout: '58%',
+                    onClick: (_, elements) => {
+                      const el = elements?.[0]
+                      if (!el) return
+                      const idx = el.index
+                      const species = overview.speciesDist[idx]?.[0]
+                      if (!species) return
+                      setSelectedSpecies(species)
+                      setTab('species')
+                    },
                   }}
-                  options={{ ...baseOptions, cutout: '58%' }}
                   data={{
                     labels: overview.speciesDist.map((s) => s[0]),
                     datasets: [
@@ -940,16 +957,8 @@ export default function StatsPage() {
               <h2 className="text-lg font-bold text-white mb-4">Beste Fangzeiten</h2>
               <div className="h-72">
                 <Bar
-                  onClick={(_, elements) => {
-                    const el = elements?.[0]
-                    if (!el) return
-                    const idx = el.index
-                    const bait = overview.baitTop[idx]?.[0]
-                    if (!bait) return
-                    setBaitFilter(bait)
-                  }}
                   options={{
-                    ...baseOptions,
+                    ...barBaseOptions,
                     scales: {
                       x: { ticks: { color: TICK, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } },
                       y: { ticks: { color: TICK }, grid: { color: GRID }, beginAtZero: true },
@@ -975,8 +984,16 @@ export default function StatsPage() {
               <div className="h-72">
                 <Bar
                   options={{
-                    ...baseOptions,
+                    ...barBaseOptions,
                     indexAxis: 'y',
+                    onClick: (_, elements) => {
+                      const el = elements?.[0]
+                      if (!el) return
+                      const idx = el.index
+                      const bait = overview.baitTop[idx]?.[0]
+                      if (!bait) return
+                      setBaitFilter(bait)
+                    },
                     scales: {
                       x: { ticks: { color: TICK }, grid: { color: GRID }, beginAtZero: true },
                       y: { ticks: { color: TICK }, grid: { display: false } },
@@ -1123,7 +1140,7 @@ export default function StatsPage() {
                     <Line
                       ref={speciesTrendRef}
                       options={{
-                        ...baseOptions,
+                        ...lineBaseOptions,
                         scales: {
                           x: { ticks: { color: TICK }, grid: { color: GRID } },
                           y: { ticks: { color: TICK }, grid: { color: GRID }, beginAtZero: true },
@@ -1163,7 +1180,7 @@ export default function StatsPage() {
                   <div className="h-72">
                     <Bar
                       options={{
-                        ...baseOptions,
+                        ...barBaseOptions,
                         scales: {
                           x: { ticks: { color: TICK, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } },
                           y: { ticks: { color: TICK }, grid: { color: GRID }, beginAtZero: true },
@@ -1199,7 +1216,7 @@ export default function StatsPage() {
                   <div className="h-72">
                     <Bar
                       options={{
-                        ...baseOptions,
+                        ...barBaseOptions,
                         scales: {
                           x: { ticks: { color: TICK }, grid: { display: false } },
                           y: { ticks: { color: TICK }, grid: { color: GRID }, beginAtZero: true },
@@ -1224,16 +1241,19 @@ export default function StatsPage() {
                   <h2 className="text-lg font-bold text-white mb-4">Wetter ({primarySpeciesStats.species})</h2>
                   <div className="h-72 mb-4">
                     <Doughnut
-                      onClick={(_, elements) => {
-                        const el = elements?.[0]
-                        if (!el) return
-                        const idx = el.index
-                        const weatherLabel = primarySpeciesStats.weatherTypes[idx]?.[0]
-                        if (!weatherLabel) return
-                        setWeatherFilter('with')
-                        setWeatherDescFilter(weatherLabel)
+                      options={{
+                        ...doughnutBaseOptions,
+                        cutout: '62%',
+                        onClick: (_, elements) => {
+                          const el = elements?.[0]
+                          if (!el) return
+                          const idx = el.index
+                          const weatherLabel = primarySpeciesStats.weatherTypes[idx]?.[0]
+                          if (!weatherLabel) return
+                          setWeatherFilter('with')
+                          setWeatherDescFilter(weatherLabel)
+                        },
                       }}
-                      options={{ ...baseOptions, cutout: '62%' }}
                       data={{
                         labels: primarySpeciesStats.weatherTypes.map((w) => w[0]),
                         datasets: [
