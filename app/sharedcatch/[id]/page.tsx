@@ -1,10 +1,5 @@
 import SharedCatchClient from './SharedCatchClient'
 
-export default async function SharePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-  return <SharedCatchClient id={id} />
+export default function SharePage({ params }: { params: { id: string } }) {
+  return <SharedCatchClient id={params.id} />
 }

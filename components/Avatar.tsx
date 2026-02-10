@@ -1,6 +1,7 @@
 'use client'
 
-import { Avatar as FacehashAvatar, AvatarImage, AvatarFallback } from 'facehash'
+import { createAvatar } from '@dicebear/core'
+import { identicon } from '@dicebear/collection'
 
 interface AvatarProps {
   seed: string
@@ -11,21 +12,32 @@ interface AvatarProps {
 }
 
 export default function Avatar({ seed, src, size = 48, className = '', alt = 'Avatar' }: AvatarProps) {
-  const dimensionStyle = { width: size, height: size }
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        width={size}
+        height={size}
+        className={`rounded-full object-cover ${className}`}
+      />
+    )
+  }
+
+  const svg = createAvatar(identicon, {
+    seed,
+    size,
+  }).toString()
+
+  const dataUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
 
   return (
-    <FacehashAvatar
-      className={`inline-flex items-center justify-center rounded-full overflow-hidden align-middle ${className}`}
-      style={dimensionStyle}
-    >
-      <AvatarImage src={src ?? undefined} alt={alt} style={dimensionStyle} />
-      <AvatarFallback
-        name={seed}
-        facehash
-        facehashProps={{ size }}
-        className="w-full h-full"
-        style={dimensionStyle}
-      />
-    </FacehashAvatar>
+    <img
+      src={dataUri}
+      alt={alt}
+      width={size}
+      height={size}
+      className={`rounded-full ${className}`}
+    />
   )
 }

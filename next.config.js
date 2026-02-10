@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
+const path = require('path')
+
 const nextConfig = {
-  transpilePackages: ['facehash'],
+  outputFileTracingRoot: path.join(__dirname),
   images: {
     remotePatterns: [
       {
