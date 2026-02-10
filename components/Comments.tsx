@@ -162,19 +162,18 @@ export default function Comments({ catchId }: CommentsProps) {
                     </div>
                   </Link>
                 </div>
-                  <div className="text-xs text-ocean-light">
-                    {format(new Date(comment.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
-                  </div>
+                <div className="text-xs text-ocean-light">
+                  {format(new Date(comment.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
                 </div>
-                {comment.user_id === user?.id && (
-                  <button
-                    onClick={() => handleDelete(comment.id)}
-                    className="text-red-400 hover:text-red-300 text-xs"
-                  >
-                    Löschen
-                  </button>
-                )}
               </div>
+              {comment.user_id === user?.id && (
+                <button
+                  onClick={() => handleDelete(comment.id)}
+                  className="text-red-400 hover:text-red-300 text-xs"
+                >
+                  Löschen
+                </button>
+              )}
               <p className="text-white text-sm">{comment.comment}</p>
             </div>
           ))}
