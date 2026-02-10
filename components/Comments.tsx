@@ -7,11 +7,13 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useToast } from '@/components/ToastProvider'
+import Avatar from '@/components/Avatar'
 
 interface Comment {
   id: string
   user_id: string
   user_email: string
+  avatar_url?: string | null
   comment: string
   created_at: string
 }
@@ -49,12 +51,13 @@ export default function Comments({ catchId }: CommentsProps) {
       // Get profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, username')
+        .select('id, username, avatar_url')
         .in('id', userIds)
 
       const commentsData = data.map((c: any) => ({
         ...c,
         user_email: profiles?.find(p => p.id === c.user_id)?.username || 'angler',
+        avatar_url: profiles?.find(p => p.id === c.user_id)?.avatar_url || null,
       }))
 
       setComments(commentsData)
@@ -145,12 +148,20 @@ export default function Comments({ catchId }: CommentsProps) {
           {comments.map((comment) => (
             <div key={comment.id} className="bg-ocean-dark/50 rounded-lg p-3">
               <div className="flex items-start justify-between mb-2">
-                <div>
+                <div className="flex items-center gap-2">
+                  <Avatar
+                    seed={comment.user_email || comment.user_id}
+                    src={comment.avatar_url}
+                    size={28}
+                    className="w-7 h-7"
+                    alt={`@${comment.user_email}`}
+                  />
                   <Link href={`/user/${comment.user_id}`}>
                     <div className="font-semibold text-white text-sm hover:text-ocean-light transition-colors cursor-pointer">
                       @{comment.user_email}
                     </div>
                   </Link>
+                </div>
                   <div className="text-xs text-ocean-light">
                     {format(new Date(comment.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
                   </div>

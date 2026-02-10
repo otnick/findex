@@ -9,11 +9,13 @@ import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Heart, MessageCircle, MapPin, Ruler, Image as ImageIcon } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
+import Avatar from '@/components/Avatar'
 
 interface Activity {
   id: string
   user_id: string
   username: string
+  avatar_url?: string | null
   species: string
   length: number
   weight?: number
@@ -84,7 +86,7 @@ export default function SocialPage() {
         (catches || []).map(async (catchItem) => {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('username')
+            .select('username, avatar_url')
             .eq('id', catchItem.user_id)
             .single()
 
@@ -114,6 +116,7 @@ export default function SocialPage() {
             id: catchItem.id,
             user_id: catchItem.user_id,
             username: profile?.username || 'angler',
+            avatar_url: profile?.avatar_url || null,
             species: catchItem.species,
             length: catchItem.length,
             weight: catchItem.weight,
@@ -275,18 +278,26 @@ export default function SocialPage() {
                 {/* Content */}
                 <div className="p-5">
                   {/* User */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <Link
-                      href={`/user/${activity.user_id}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-ocean-light hover:text-white transition-colors text-sm font-semibold"
-                    >
-                      @{activity.username}
-                    </Link>
-                    <span className="text-ocean-light/50 text-xs">?</span>
-                    <span className="text-ocean-light/70 text-xs">
-                      {format(new Date(activity.created_at), 'dd.MM.yyyy', { locale: de })}
-                    </span>
+                  <div className="flex items-center gap-2 mb-3 min-h-[28px]">
+                    <Avatar
+                      seed={activity.username || activity.user_id}
+                      src={activity.avatar_url}
+                      size={28}
+                      className="w-7 h-7 flex-shrink-0"
+                      alt={`@${activity.username}`}
+                    />
+                    <div className="flex items-center gap-2 h-7 min-w-0 leading-none sm:leading-snug">
+                      <Link
+                        href={`/user/${activity.user_id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-ocean-light hover:text-white transition-colors text-sm font-semibold leading-none sm:leading-snug flex items-center truncate"
+                      >
+                        @{activity.username}
+                      </Link>
+                      <span className="text-ocean-light/70 text-xs leading-none sm:leading-snug flex items-center whitespace-nowrap">
+                        {format(new Date(activity.created_at), 'dd.MM.yyyy', { locale: de })}
+                      </span>
+                    </div>
                   </div>
 
               {/* Species */}

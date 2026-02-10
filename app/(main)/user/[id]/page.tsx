@@ -13,11 +13,13 @@ import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
 import { getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { useToast } from '@/components/ToastProvider'
+import Avatar from '@/components/Avatar'
 
 interface UserProfile {
   id: string
   username: string
   bio?: string
+  avatar_url?: string | null
   created_at: string
   pinned_catch_ids?: string[]
 }
@@ -305,8 +307,14 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
       <div className="bg-gradient-to-br from-ocean/40 to-ocean-dark/40 backdrop-blur-sm rounded-xl p-8 border border-ocean-light/10 shadow-xl">
         <div className="flex items-start gap-6">
           {/* Avatar */}
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-ocean-light to-ocean flex items-center justify-center text-5xl flex-shrink-0 shadow-lg">
-            <Fish className="w-12 h-12 text-white" />
+          <div className="w-24 h-24 flex-shrink-0 shadow-lg rounded-full ring-2 ring-ocean-light/30">
+            <Avatar
+              seed={profile.username || profile.id}
+              src={profile.avatar_url}
+              size={96}
+              className="w-24 h-24"
+              alt={`@${profile.username}`}
+            />
           </div>
 
           {/* Info */}

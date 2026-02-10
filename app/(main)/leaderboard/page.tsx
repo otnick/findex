@@ -9,10 +9,12 @@ import { Trophy, Fish, TrendingUp, Award, Eye } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
+import Avatar from '@/components/Avatar'
 
 interface LeaderboardEntry {
   user_id: string
   username: string
+  avatar_url?: string | null
   total_catches: number
   total_weight: number
   biggest_catch: number
@@ -117,7 +119,7 @@ export default function LeaderboardPage() {
       
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, username')
+        .select('id, username, avatar_url')
         .in('id', userIds)
 
       const leaderboardData: LeaderboardEntry[] = userIds
@@ -128,6 +130,7 @@ export default function LeaderboardPage() {
           return {
             user_id: userId,
             username: profile?.username || 'angler',
+            avatar_url: profile?.avatar_url || null,
             total_catches: stats.catches,
             total_weight: stats.totalWeight,
             biggest_catch: stats.biggestCatch,
@@ -308,10 +311,19 @@ export default function LeaderboardPage() {
 
                 <div className="p-4">
                   <Link href={`/user/${entry.user_id}`}>
-                    <h3 className="text-lg font-bold text-white hover:text-ocean-light transition-colors mb-2 flex items-center gap-2">
-                      @{entry.username}
-                      {index < 3 && <Award className="w-4 h-4 text-ocean-light" />}
-                    </h3>
+                    <div className="flex items-center gap-3 mb-2">
+                      <Avatar
+                        seed={entry.username || entry.user_id}
+                        src={entry.avatar_url}
+                        size={36}
+                        className="w-9 h-9"
+                        alt={`@${entry.username}`}
+                      />
+                      <h3 className="text-lg font-bold text-white hover:text-ocean-light transition-colors flex items-center gap-2">
+                        @{entry.username}
+                        {index < 3 && <Award className="w-4 h-4 text-ocean-light" />}
+                      </h3>
+                    </div>
                   </Link>
 
                   <div className="mb-3 p-3 bg-gradient-to-br from-ocean-dark/50 to-ocean/30 rounded-lg">

@@ -6,11 +6,13 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { Users, UserPlus, UserCheck, UserX, Search, Fish, Award } from 'lucide-react'
 import { useToast } from '@/components/ToastProvider'
+import Avatar from '@/components/Avatar'
 
 interface Friend {
   id: string
   username: string
   bio?: string
+  avatar_url?: string | null
   stats?: {
     catches: number
     species: number
@@ -64,7 +66,7 @@ export default function FriendsPage() {
 
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, username, bio')
+        .select('id, username, bio, avatar_url')
         .in('id', friendIds)
 
       // Get stats for each friend
@@ -143,7 +145,7 @@ export default function FriendsPage() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, username, bio')
+        .select('id, username, bio, avatar_url')
         .ilike('username', `%${query}%`)
         .neq('id', user.id)
         .limit(10)
@@ -338,9 +340,18 @@ export default function FriendsPage() {
                   <div className="flex items-start justify-between mb-4">
                     <Link href={`/user/${friend.id}`}>
                       <div>
-                        <h3 className="text-lg font-bold text-white hover:text-ocean-light transition-colors">
-                          @{friend.username}
-                        </h3>
+                        <div className="flex items-center gap-3">
+                          <Avatar
+                            seed={friend.username || friend.id}
+                            src={friend.avatar_url}
+                            size={36}
+                            className="w-9 h-9"
+                            alt={`@${friend.username}`}
+                          />
+                          <h3 className="text-lg font-bold text-white hover:text-ocean-light transition-colors">
+                            @{friend.username}
+                          </h3>
+                        </div>
                         {friend.bio && (
                           <p className="text-ocean-light text-sm mt-1 line-clamp-2">
                             {friend.bio}
@@ -463,9 +474,18 @@ export default function FriendsPage() {
                 >
                   <Link href={`/user/${result.id}`}>
                     <div className="mb-4">
-                      <h3 className="text-lg font-bold text-white hover:text-ocean-light transition-colors">
-                        @{result.username}
-                      </h3>
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          seed={result.username || result.id}
+                          src={result.avatar_url}
+                          size={36}
+                          className="w-9 h-9"
+                          alt={`@${result.username}`}
+                        />
+                        <h3 className="text-lg font-bold text-white hover:text-ocean-light transition-colors">
+                          @{result.username}
+                        </h3>
+                      </div>
                       {result.bio && (
                         <p className="text-ocean-light text-sm mt-1 line-clamp-2">
                           {result.bio}

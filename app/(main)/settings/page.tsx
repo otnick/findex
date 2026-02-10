@@ -1,13 +1,15 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useCatchStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { User, Package, FileSpreadsheet, Settings } from 'lucide-react'
+import { Package, FileSpreadsheet, Settings } from 'lucide-react'
 import { useToast } from '@/components/ToastProvider'
+import Avatar from '@/components/Avatar'
+import { compressImage } from '@/lib/utils/photoUpload'
 import { 
   notificationService, 
   getNotificationPreference, 
@@ -17,6 +19,7 @@ import {
 interface Profile {
   username: string
   bio?: string
+  avatar_url?: string | null
   pinned_catch_ids?: string[]
 }
 
@@ -25,12 +28,16 @@ export default function ProfilePage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [editingProfile, setEditingProfile] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [profileForm, setProfileForm] = useState({
     username: '',
     bio: '',
+    avatar_url: '',
   })
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
+  const avatarInputRef = useRef<HTMLInputElement | null>(null)
+  const avatarPath = user?.id ? `${user.id}/avatar.jpg` : null
   useEffect(() => {
     setNotificationsEnabled(getNotificationPreference())
     fetchProfile()
@@ -51,6 +58,7 @@ export default function ProfilePage() {
       setProfileForm({
         username: data.username || '',
         bio: data.bio || '',
+        avatar_url: data.avatar_url || '',
       })
     }
   }
@@ -66,6 +74,7 @@ export default function ProfilePage() {
           id: user.id,
           username: profileForm.username,
           bio: profileForm.bio,
+          avatar_url: profileForm.avatar_url || null,
           updated_at: new Date().toISOString(),
         })
 
@@ -78,6 +87,81 @@ export default function ProfilePage() {
       toast('Fehler: ' + error.message, 'error')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !event.target.files?.[0]) return
+    if (!avatarPath) return
+
+    const file = event.target.files[0]
+    if (!file.type.startsWith('image/')) {
+      toast('Bitte ein Bild auswählen', 'error')
+      return
+    }
+
+    setUploadingAvatar(true)
+    try {
+      const compressed = await compressImage(file, 512, 512, 0.85)
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(avatarPath, compressed, {
+          cacheControl: '3600',
+          upsert: true,
+        })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(avatarPath)
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+
+      if (updateError) throw updateError
+
+      setProfileForm((prev) => ({ ...prev, avatar_url: publicUrl }))
+      setProfile((prev) => (prev ? { ...prev, avatar_url: publicUrl } : prev))
+      toast('Profilfoto aktualisiert!', 'success')
+    } catch (error: any) {
+      toast(`Upload fehlgeschlagen: ${error.message}`, 'error')
+    } finally {
+      setUploadingAvatar(false)
+      if (event.target) event.target.value = ''
+    }
+  }
+
+  const handleAvatarRemove = async () => {
+    if (!user || !avatarPath) return
+
+    setUploadingAvatar(true)
+    try {
+      await supabase.storage.from('avatars').remove([avatarPath])
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          avatar_url: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      setProfileForm((prev) => ({ ...prev, avatar_url: '' }))
+      setProfile((prev) => (prev ? { ...prev, avatar_url: null } : prev))
+      toast('Profilfoto entfernt', 'success')
+    } catch (error: any) {
+      toast(`Entfernen fehlgeschlagen: ${error.message}`, 'error')
+    } finally {
+      setUploadingAvatar(false)
     }
   }
 
@@ -160,6 +244,46 @@ export default function ProfilePage() {
 
         {editingProfile ? (
           <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Avatar
+                seed={profileForm.username || user?.id || 'user'}
+                src={profileForm.avatar_url}
+                size={56}
+                className="w-14 h-14"
+                alt="Profilbild"
+              />
+              <div className="flex-1">
+                <label className="block text-ocean-light text-sm mb-2">Profilfoto</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="px-3 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 hover:border-ocean-light disabled:opacity-60 transition-colors text-sm"
+                  >
+                    {uploadingAvatar ? 'Lade hoch...' : 'Foto hochladen'}
+                  </button>
+                  {profileForm.avatar_url && (
+                    <button
+                      type="button"
+                      onClick={handleAvatarRemove}
+                      disabled={uploadingAvatar}
+                      className="px-3 py-2 rounded-lg bg-red-900/30 text-red-300 border border-red-400/30 hover:border-red-300 disabled:opacity-60 transition-colors text-sm"
+                    >
+                      Entfernen
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-ocean-light mt-2">PNG/JPG, wird automatisch komprimiert.</p>
+              </div>
+            </div>
             <div>
               <label className="block text-ocean-light text-sm mb-2">Username</label>
               <input
@@ -193,6 +317,21 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Avatar
+                seed={profile?.username || user?.id || 'user'}
+                src={profile?.avatar_url}
+                size={56}
+                className="w-14 h-14"
+                alt="Profilbild"
+              />
+              <div>
+                <div className="text-ocean-light text-sm">Profilfoto</div>
+                <div className="text-white font-semibold">
+                  {profile?.avatar_url ? 'Eigenes Foto' : 'Standard-Avatar'}
+                </div>
+              </div>
+            </div>
             <div>
               <div className="text-ocean-light text-sm">E-Mail</div>
               <div className="text-white font-semibold">{user?.email}</div>
