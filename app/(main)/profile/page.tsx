@@ -16,6 +16,7 @@ import {
 interface Profile {
   username: string
   bio?: string
+  pinned_catch_ids?: string[]
 }
 
 export default function ProfilePage() {
@@ -130,14 +131,6 @@ export default function ProfilePage() {
     a.download = `fishbox-export-${format(new Date(), 'yyyy-MM-dd')}.csv`
     a.click()
     URL.revokeObjectURL(url)
-  }
-
-  const stats = {
-    totalCatches: catches.length,
-    uniqueSpecies: new Set(catches.map(c => c.species)).size,
-    withPhotos: catches.filter(c => c.photo).length,
-    withGPS: catches.filter(c => c.coordinates).length,
-    totalWeight: catches.reduce((sum, c) => sum + (c.weight || 0), 0),
   }
 
   return (
@@ -270,35 +263,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-
-      {/* Stats Overview */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">Deine Statistiken</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div>
-            <div className="text-ocean-light text-sm">Gesamt Fänge</div>
-            <div className="text-2xl font-bold text-white">{stats.totalCatches}</div>
-          </div>
-          <div>
-            <div className="text-ocean-light text-sm">Verschiedene Arten</div>
-            <div className="text-2xl font-bold text-white">{stats.uniqueSpecies}</div>
-          </div>
-          <div>
-            <div className="text-ocean-light text-sm">Mit Fotos</div>
-            <div className="text-2xl font-bold text-white">{stats.withPhotos}</div>
-          </div>
-          <div>
-            <div className="text-ocean-light text-sm">Mit GPS</div>
-            <div className="text-2xl font-bold text-white">{stats.withGPS}</div>
-          </div>
-          <div>
-            <div className="text-ocean-light text-sm">Gesamt Gewicht</div>
-            <div className="text-2xl font-bold text-white">
-              {(stats.totalWeight / 1000).toFixed(1)} kg
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Export */}
       <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">

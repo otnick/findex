@@ -1,13 +1,13 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCatchStore, type Catch } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Eye, Trash2, MapPin, Calendar, Ruler, Fish } from 'lucide-react'
+import { Eye, Trash2, MapPin, Calendar, Ruler, Fish, Star } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import VerificationBadge from '@/components/VerificationBadge'
 
@@ -18,10 +18,33 @@ interface CatchListProps {
 }
 
 export default function CatchList({ catches: propCatches }: CatchListProps = {}) {
+  const user = useCatchStore((state) => state.user)
   const storeCatches = useCatchStore((state) => state.catches)
   const catches = propCatches || storeCatches
   const deleteCatch = useCatchStore((state) => state.deleteCatch)
   const [expandedMapId, setExpandedMapId] = useState<string | null>(null)
+  const [pinnedCatchIds, setPinnedCatchIds] = useState<string[]>([])
+  const [pinSaving, setPinSaving] = useState(false)
+
+  useEffect(() => {
+    const loadPinned = async () => {
+      if (!user) {
+        setPinnedCatchIds([])
+        return
+      }
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('pinned_catch_ids')
+        .eq('id', user.id)
+        .single()
+
+      if (!error) {
+        setPinnedCatchIds((data?.pinned_catch_ids || []).slice(0, 6))
+      }
+    }
+
+    loadPinned()
+  }, [user?.id])
 
   if (catches.length === 0) {
     return (
@@ -62,6 +85,52 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
           : c
       ),
     }))
+
+    if (!newPublicState && pinnedCatchIds.includes(catchItem.id)) {
+      const nextPinned = pinnedCatchIds.filter((id) => id !== catchItem.id)
+      await persistPinned(nextPinned)
+    }
+  }
+
+  const persistPinned = async (nextPinned: string[]) => {
+    if (!user) return false
+    setPinSaving(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        pinned_catch_ids: nextPinned,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+
+    if (error) {
+      alert('Fehler beim Anpinnen: ' + error.message)
+      setPinSaving(false)
+      return false
+    }
+
+    setPinnedCatchIds(nextPinned)
+    setPinSaving(false)
+    return true
+  }
+
+  const handleTogglePin = async (catchItem: Catch) => {
+    const isPinned = pinnedCatchIds.includes(catchItem.id)
+    if (!catchItem.is_public && !isPinned) {
+      alert('Bitte mache den Fang zuerst öffentlich, damit er in der Vitrine angezeigt werden kann.')
+      return
+    }
+
+    if (!isPinned && pinnedCatchIds.length >= 6) {
+      alert('Du kannst maximal 6 Fänge anpinnen.')
+      return
+    }
+
+    const nextPinned = isPinned
+      ? pinnedCatchIds.filter((id) => id !== catchItem.id)
+      : [...pinnedCatchIds, catchItem.id]
+
+    await persistPinned(nextPinned)
   }
 
   return (
@@ -75,7 +144,9 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
         {catches.map((catchItem) => (
           <div
             key={catchItem.id}
-            className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300"
+            className={`bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 ${
+              catchItem.is_shiny ? 'shiny-ring' : ''
+            }`}
           >
             {/* Photo - Like Social Page */}
             <Link href={`/catch/${catchItem.id}`}>
@@ -96,6 +167,12 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                       aiVerified={catchItem.ai_verified}
                       className="absolute top-2 left-2"
                     />
+
+                    {catchItem.is_shiny && (
+                      <div className="absolute top-2 right-2 shiny-badge text-black rounded-full p-2 shadow-lg">
+                        <Star className="w-4 h-4" />
+                      </div>
+                    )}
                     
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
@@ -103,8 +180,13 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                     </div>
                   </>
                 ) : (
-                  <div className="h-full flex items-center justify-center">
+                  <div className="h-full flex items-center justify-center relative">
                     <Fish className="w-14 h-14 opacity-50 text-ocean-light" />
+                    {catchItem.is_shiny && (
+                      <div className="absolute top-2 right-2 shiny-badge text-black rounded-full p-2 shadow-lg">
+                        <Star className="w-4 h-4" />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -164,6 +246,29 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                     <span className="hidden sm:inline">Details</span>
                   </button>
                 </Link>
+
+                {/* Pin to Showcase */}
+                <button
+                  onClick={() => handleTogglePin(catchItem)}
+                  disabled={pinSaving}
+                  className={`px-3 py-2 rounded-lg transition-colors group relative ${
+                    pinnedCatchIds.includes(catchItem.id)
+                      ? 'bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30'
+                      : 'bg-ocean-dark hover:bg-ocean text-ocean-light'
+                  } ${pinSaving ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  aria-label={pinnedCatchIds.includes(catchItem.id) ? 'Aus Vitrine entfernen' : 'In Vitrine anpinnen'}
+                >
+                  <Star
+                    className={`w-4 h-4 ${
+                      pinnedCatchIds.includes(catchItem.id)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : ''
+                    }`}
+                  />
+                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    {pinnedCatchIds.includes(catchItem.id) ? 'Gepinnt' : 'Anpinnen'}
+                  </div>
+                </button>
 
                 {/* Public Toggle Button */}
                 <button

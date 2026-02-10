@@ -145,12 +145,49 @@ body {
   }
 }
 
+@keyframes shinyGlow {
+  0% { box-shadow: 0 0 0 rgba(250, 204, 21, 0.0), 0 0 18px rgba(250, 204, 21, 0.15); }
+  50% { box-shadow: 0 0 0 rgba(250, 204, 21, 0.0), 0 0 26px rgba(250, 204, 21, 0.35); }
+  100% { box-shadow: 0 0 0 rgba(250, 204, 21, 0.0), 0 0 18px rgba(250, 204, 21, 0.15); }
+}
+
+@keyframes shinyTwinkle {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0.4; transform: scale(0.9); }
+}
+
+@keyframes shinyBurst {
+  0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+  20% { opacity: 1; transform: scale(1.02) translateY(0); }
+  80% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.98) translateY(-6px); }
+}
+
 .animate-catchSubOverlayIn {
   animation: catchSubOverlayIn 0.18s ease-out;
 }
 
 .animate-catchSubModalIn {
   animation: catchSubModalIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.shiny-ring {
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  animation: shinyGlow 2.2s ease-in-out infinite;
+}
+
+.shiny-badge {
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.95), rgba(253, 224, 71, 0.7));
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.45);
+}
+
+.shiny-badge svg {
+  animation: shinyTwinkle 1.6s ease-in-out infinite;
+}
+
+.animate-shinyBurst {
+  animation: shinyBurst 1.8s ease-in-out forwards;
 }
 
 /* Mobile optimizations */

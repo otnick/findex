@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS public.catches (
     notes TEXT,
     photo_url TEXT, -- URL to photo in storage
     coordinates JSONB, -- {lat: number, lng: number}
+    is_shiny BOOLEAN DEFAULT false,
+    shiny_reason TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -22,6 +22,7 @@ import {
   Wind,
   Gauge,
   Droplets,
+  Star,
 } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 
@@ -43,6 +44,8 @@ interface CatchDetail {
   user_id: string
   username: string
   is_public: boolean
+  is_shiny?: boolean
+  shiny_reason?: string | null
   verification_status?: 'pending' | 'verified' | 'rejected' | 'manual'
   ai_verified?: boolean
   likes_count: number
@@ -64,6 +67,8 @@ function getWeatherSourceClass(source?: 'historical' | 'forecast' | 'current'): 
 
 export default function CatchDetailPage({ params }: { params: { id: string } }) {
   const [catchData, setCatchData] = useState<CatchDetail | null>(null)
+  const [pinnedCatchIds, setPinnedCatchIds] = useState<string[]>([])
+  const [pinSaving, setPinSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const user = useCatchStore((state) => state.user)
@@ -97,7 +102,7 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('username')
+        .select('username, pinned_catch_ids')
         .eq('id', catchRow.user_id)
         .single()
 
@@ -125,6 +130,10 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
         comments_count: commentsCount || 0,
         user_has_liked: !!userLike,
       })
+
+      if (catchRow.user_id === user.id) {
+        setPinnedCatchIds((profile?.pinned_catch_ids || []).slice(0, 6))
+      }
     } catch (error) {
       console.error('Error fetching catch:', error)
       setError(true)
@@ -172,21 +181,68 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
     if (!user || !catchData || catchData.user_id !== user.id) return
 
     try {
+      const nextPublic = !catchData.is_public
       const { error } = await supabase
         .from('catches')
-        .update({ is_public: !catchData.is_public })
+        .update({ is_public: nextPublic })
         .eq('id', params.id)
 
       if (error) throw error
 
       setCatchData({
         ...catchData,
-        is_public: !catchData.is_public,
+        is_public: nextPublic,
       })
+
+      if (!nextPublic && pinnedCatchIds.includes(catchData.id)) {
+        const nextPinned = pinnedCatchIds.filter((id) => id !== catchData.id)
+        await persistPinned(nextPinned)
+      }
     } catch (error) {
       console.error('Error toggling public:', error)
       alert('Fehler beim Aktualisieren der Sichtbarkeit')
     }
+  }
+
+  const persistPinned = async (nextPinned: string[]) => {
+    if (!user) return false
+    setPinSaving(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        pinned_catch_ids: nextPinned,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+
+    if (error) {
+      alert('Fehler beim Anpinnen: ' + error.message)
+      setPinSaving(false)
+      return false
+    }
+
+    setPinnedCatchIds(nextPinned)
+    setPinSaving(false)
+    return true
+  }
+
+  const handleTogglePin = async () => {
+    if (!catchData || !user || catchData.user_id !== user.id) return
+    const isPinned = pinnedCatchIds.includes(catchData.id)
+    if (!catchData.is_public && !isPinned) {
+      alert('Bitte mache den Fang zuerst öffentlich, damit er in der Vitrine angezeigt werden kann.')
+      return
+    }
+    if (!isPinned && pinnedCatchIds.length >= 6) {
+      alert('Du kannst maximal 6 Fänge anpinnen.')
+      return
+    }
+
+    const nextPinned = isPinned
+      ? pinnedCatchIds.filter((id) => id !== catchData.id)
+      : [...pinnedCatchIds, catchData.id]
+
+    await persistPinned(nextPinned)
   }
 
   if (loading) {
@@ -266,11 +322,19 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
         {/* Right Column - Info */}
         <div className="space-y-4">
           {/* Main Info Card */}
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+          <div className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-6 ${catchData.is_shiny ? 'shiny-ring' : ''}`}>
             <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
               <FishIcon className="w-8 h-8 text-ocean-light" />
               {catchData.species}
             </h1>
+            {catchData.is_shiny && (
+              <div className="inline-flex items-center gap-2 text-sm text-yellow-300 mb-3">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                Shiny-Fang
+                {catchData.shiny_reason === 'trophy' && <span className="text-yellow-200/80">(Trophy)</span>}
+                {catchData.shiny_reason === 'lucky' && <span className="text-yellow-200/80">(Lucky)</span>}
+              </div>
+            )}
             <div className="flex items-center gap-2 mb-3">
               <VerificationBadge
                 status={catchData.verification_status}
@@ -427,6 +491,28 @@ export default function CatchDetailPage({ params }: { params: { id: string } }) 
 
             {/* Actions */}
             <div className="flex items-center gap-4 pt-4 border-t border-ocean-light/20">
+              {catchData.user_id === user?.id && (
+                <button
+                  onClick={handleTogglePin}
+                  disabled={pinSaving}
+                  className={`flex items-center gap-2 transition-all ${
+                    pinnedCatchIds.includes(catchData.id)
+                      ? 'text-yellow-300'
+                      : 'text-ocean-light hover:text-yellow-300'
+                  } ${pinSaving ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                  <Star
+                    className={`w-6 h-6 ${
+                      pinnedCatchIds.includes(catchData.id)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : ''
+                    }`}
+                  />
+                  <span className="font-semibold">
+                    {pinnedCatchIds.includes(catchData.id) ? 'Gepinnt' : 'Anpinnen'}
+                  </span>
+                </button>
+              )}
               <button
                 onClick={toggleLike}
                 className={`flex items-center gap-2 transition-all ${

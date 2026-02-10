@@ -35,6 +35,8 @@ CREATE TABLE public.catches (
     is_public BOOLEAN DEFAULT false,
     likes_count INTEGER DEFAULT 0,
     comments_count INTEGER DEFAULT 0,
+    is_shiny BOOLEAN DEFAULT false,
+    shiny_reason TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -46,6 +48,7 @@ CREATE TABLE public.profiles (
     bio TEXT,
     avatar_url TEXT,
     is_public BOOLEAN DEFAULT true,
+    pinned_catch_ids UUID[] DEFAULT '{}'::uuid[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

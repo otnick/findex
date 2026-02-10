@@ -6,7 +6,9 @@ ALTER TABLE public.catches
 ADD COLUMN IF NOT EXISTS weather JSONB,
 ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT false,
 ADD COLUMN IF NOT EXISTS likes_count INTEGER DEFAULT 0,
-ADD COLUMN IF NOT EXISTS comments_count INTEGER DEFAULT 0;
+ADD COLUMN IF NOT EXISTS comments_count INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS is_shiny BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS shiny_reason TEXT;
 
 -- Create user profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -15,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     bio TEXT,
     avatar_url TEXT,
     is_public BOOLEAN DEFAULT true,
+    pinned_catch_ids UUID[] DEFAULT '{}'::uuid[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

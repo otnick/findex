@@ -23,6 +23,8 @@ export interface Database {
           notes: string | null
           photo_url: string | null
           coordinates: { lat: number; lng: number } | null
+          is_shiny?: boolean
+          shiny_reason?: string | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['catches']['Row'], 'id' | 'created_at'>

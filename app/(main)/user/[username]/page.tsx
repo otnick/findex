@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit, Star } from 'lucide-react'
+import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit, Star, GripVertical, X } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
@@ -18,6 +18,7 @@ interface UserProfile {
   username: string
   bio?: string
   created_at: string
+  pinned_catch_ids?: string[]
 }
 
 interface PublicCatch {
@@ -29,6 +30,8 @@ interface PublicCatch {
   date: string
   likes_count: number
   comments_count: number
+  is_shiny?: boolean
+  shiny_reason?: string | null
   verification_status?: 'pending' | 'verified' | 'rejected' | 'manual'
   ai_verified?: boolean
 }
@@ -36,6 +39,10 @@ interface PublicCatch {
 export default function UserProfilePage({ params }: { params: { username: string } }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [catches, setCatches] = useState<PublicCatch[]>([])
+  const [pinnedCatches, setPinnedCatches] = useState<PublicCatch[]>([])
+  const [pinnedCatchIds, setPinnedCatchIds] = useState<string[]>([])
+  const [pinSaving, setPinSaving] = useState(false)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
   const [fishdexEntries, setFishdexEntries] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState<'gallery' | 'fishdex'>('gallery')
   const [showPublicOnly, setShowPublicOnly] = useState(true)
@@ -69,6 +76,8 @@ export default function UserProfilePage({ params }: { params: { username: string
 
       const isOwnProfile = currentUser?.id === profileData.id
       const publicOnly = !isOwnProfile || showPublicOnly
+      const pinnedIds = (profileData.pinned_catch_ids || []).filter(Boolean)
+      setPinnedCatchIds(pinnedIds.slice(0, 6))
 
       // Get catches
       let catchesQuery = supabase
@@ -86,6 +95,14 @@ export default function UserProfilePage({ params }: { params: { username: string
       if (catchesError) throw catchesError
 
       setCatches(catchesData)
+      if (pinnedIds.length > 0) {
+        const orderedPinned = pinnedIds
+          .map((id: string) => catchesData.find((catchItem: PublicCatch) => catchItem.id === id))
+          .filter(Boolean) as PublicCatch[]
+        setPinnedCatches(orderedPinned)
+      } else {
+        setPinnedCatches([])
+      }
 
       // Calculate stats
       const uniqueSpecies = new Set(catchesData.map(c => c.species)).size
@@ -194,6 +211,69 @@ export default function UserProfilePage({ params }: { params: { username: string
 
   const isOwnProfile = currentUser?.id === profile.id
 
+  const savePinnedCatchIds = async (nextPinned: string[]) => {
+    if (!currentUser) return
+    setPinSaving(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          pinned_catch_ids: nextPinned,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', currentUser.id)
+
+      if (error) throw error
+      setPinnedCatchIds(nextPinned)
+      const orderedPinned = nextPinned
+        .map((id) => catches.find((catchItem) => catchItem.id === id))
+        .filter(Boolean) as PublicCatch[]
+      setPinnedCatches(orderedPinned)
+    } catch (error: any) {
+      alert('Fehler beim Speichern der Vitrine: ' + error.message)
+    } finally {
+      setPinSaving(false)
+    }
+  }
+
+  const handleUnpin = async (catchId: string) => {
+    const nextPinned = pinnedCatchIds.filter((id) => id !== catchId)
+    await savePinnedCatchIds(nextPinned)
+  }
+
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, catchId: string) => {
+    event.dataTransfer.setData('text/plain', catchId)
+    event.dataTransfer.effectAllowed = 'move'
+    setDraggingId(catchId)
+  }
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>, targetId: string) => {
+    event.preventDefault()
+    const sourceId = event.dataTransfer.getData('text/plain')
+    if (!sourceId || sourceId === targetId) return
+
+    const fromIndex = pinnedCatchIds.indexOf(sourceId)
+    const toIndex = pinnedCatchIds.indexOf(targetId)
+    if (fromIndex === -1 || toIndex === -1) return
+
+    const nextPinned = [...pinnedCatchIds]
+    const [moved] = nextPinned.splice(fromIndex, 1)
+    nextPinned.splice(toIndex, 0, moved)
+    setPinnedCatchIds(nextPinned)
+    await savePinnedCatchIds(nextPinned)
+  }
+
+  const handleDragEnd = () => {
+    setDraggingId(null)
+  }
+
+  const showcaseSlots = Array.from({ length: 6 }, (_, index) => pinnedCatches[index] || null)
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -267,6 +347,133 @@ export default function UserProfilePage({ params }: { params: { username: string
           </div>
         </div>
       </div>
+
+      {/* Showcase */}
+      {(isOwnProfile || pinnedCatches.length > 0) && (
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Star className="w-5 h-5 text-yellow-400" />
+              Vitrine
+            </h2>
+            <div className="text-ocean-light text-sm">{pinnedCatches.length}/6</div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(isOwnProfile ? showcaseSlots : pinnedCatches).map((catchData, index) =>
+              catchData ? (
+                <div
+                  key={catchData.id}
+                  draggable={isOwnProfile}
+                  onDragStart={(event) => isOwnProfile && handleDragStart(event, catchData.id)}
+                  onDragOver={(event) => isOwnProfile && handleDragOver(event)}
+                  onDrop={(event) => isOwnProfile && handleDrop(event, catchData.id)}
+                  onDragEnd={() => isOwnProfile && handleDragEnd()}
+                  className={`bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-300 ${
+                    isOwnProfile ? 'hover:bg-ocean/40 hover:shadow-xl hover:scale-[1.02]' : 'hover:bg-ocean/40'
+                  } ${draggingId === catchData.id ? 'ring-2 ring-ocean-light/60' : ''} ${
+                    catchData.is_shiny ? 'shiny-ring' : ''
+                  }`}
+                >
+                  <Link href={`/catch/${catchData.id}`}>
+                    {catchData.photo_url ? (
+                      <div className="relative h-40 bg-ocean-dark">
+                        <Image
+                          src={catchData.photo_url}
+                          alt={catchData.species}
+                          fill
+                          sizes="100vw"
+                          className="object-cover"
+                        />
+                        <VerificationBadge
+                          status={catchData.verification_status}
+                          aiVerified={catchData.ai_verified}
+                          className="absolute top-2 left-2"
+                        />
+                        {catchData.is_shiny && (
+                          <div className="absolute top-2 right-2 shiny-badge text-black rounded-full p-2 shadow-lg">
+                            <Star className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="h-40 bg-gradient-to-br from-ocean-light/20 to-ocean-dark/20 flex items-center justify-center relative">
+                        <Fish className="w-10 h-10 text-ocean-light/50" />
+                        {catchData.is_shiny && (
+                          <div className="absolute top-2 right-2 shiny-badge text-black rounded-full p-2 shadow-lg">
+                            <Star className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </Link>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-bold text-white">{catchData.species}</h3>
+                      {!catchData.photo_url && (
+                        <VerificationBadge
+                          status={catchData.verification_status}
+                          aiVerified={catchData.ai_verified}
+                          className="ml-1"
+                        />
+                      )}
+                    </div>
+                    <div className="text-ocean-light text-sm mb-3">
+                      {catchData.length} cm
+                      {catchData.weight && ` • ${catchData.weight > 1000 
+                        ? `${(catchData.weight / 1000).toFixed(2)} kg`
+                        : `${catchData.weight} g`
+                      }`}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-ocean-light">
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-4 h-4" />
+                        {catchData.likes_count || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="w-4 h-4" />
+                        {catchData.comments_count || 0}
+                      </span>
+                      <span className="ml-auto">
+                        {format(new Date(catchData.date), 'dd.MM.yyyy')}
+                      </span>
+                    </div>
+                    {isOwnProfile && (
+                      <div className="mt-3 flex items-center gap-2 text-ocean-light">
+                        <GripVertical className="w-4 h-4" />
+                        <button
+                          onClick={() => handleUnpin(catchData.id)}
+                          disabled={pinSaving}
+                          className="p-1 rounded-md hover:bg-red-900/30 text-red-300 transition-colors disabled:opacity-60"
+                          aria-label="Aus Vitrine entfernen"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  key={`slot-${index}`}
+                  className="border border-dashed border-ocean-light/30 rounded-xl p-4 flex items-center justify-center text-ocean-light text-sm bg-ocean/20"
+                >
+                  Leerer Platz
+                </div>
+              )
+            )}
+          </div>
+          {isOwnProfile && pinnedCatches.length === 0 && (
+            <div className="text-ocean-light text-sm mt-3">
+              Du hast noch keine Fänge gepinnt. Gehe zu deinen Fängen und pinne bis zu 6 öffentliche Highlights.
+            </div>
+          )}
+          {isOwnProfile && (
+            <div className="text-ocean-light text-xs mt-3">
+              Ziehe die Karten, um die Reihenfolge festzulegen. Nur öffentliche Fänge können angezeigt werden.
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-2">

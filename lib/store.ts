@@ -27,6 +27,8 @@ export interface Catch {
   is_public?: boolean
   likes_count?: number
   comments_count?: number
+  is_shiny?: boolean
+  shiny_reason?: string | null
 
   verification_status?: 'pending' | 'verified' | 'manual'
   ai_verified?: boolean

@@ -41,6 +41,9 @@ interface CatchFormProps {
 }
 
 const FISH_SPECIES = Array.from(new Set([...ALL_GERMAN_SPECIES, 'Andere']))
+const SHINY_LUCKY_CHANCE = 0.02
+const SHINY_PERCENTILE = 0.95
+const SHINY_MIN_HISTORY = 8
 
 function toDateTimeLocalValue(date: Date): string {
   const pad = (n: number) => n.toString().padStart(2, '0')
@@ -99,6 +102,7 @@ export default function CatchForm({
   const [aiDetectionLoading, setAIDetectionLoading] = useState(false)
   const [manualMode, setManualMode] = useState(false)
   const [aiVerified, setAIVerified] = useState(false)
+  const [showShinyMoment, setShowShinyMoment] = useState(false)
   const [showSpeciesPicker, setShowSpeciesPicker] = useState(false)
   const [dateManuallySet, setDateManuallySet] = useState(false)
   const isSubModalOpen = showAIVerification || showNoDetection || showSpeciesPicker
@@ -324,6 +328,11 @@ export default function CatchForm({
         console.log('Saving as pending catch')
       }
 
+      const shinyStatus = await determineShinyStatus(
+        formData.species,
+        parseInt(formData.length)
+      )
+
       const catchData = {
         species: formData.species,
         length: parseInt(formData.length),
@@ -336,10 +345,15 @@ export default function CatchForm({
         coordinates: coordinates || undefined,
         weather: weather || undefined,
         is_public: formData.isPublic, // Add public status
+        ...shinyStatus,
         ...verificationData
       }
 
       await addCatch(catchData)
+      if (shinyStatus.is_shiny) {
+        setShowShinyMoment(true)
+        setTimeout(() => setShowShinyMoment(false), 1800)
+      }
 
       // Check if this was a new discovery (only verified)
       if (verificationData.verification_status === 'verified') {
@@ -454,6 +468,39 @@ export default function CatchForm({
     }
   }
 
+  const determineShinyStatus = async (speciesName: string, length: number) => {
+    if (!user) return { is_shiny: false, shiny_reason: null }
+
+    let isTrophy = false
+    try {
+      const { data, error } = await supabase
+        .rpc('get_species_length_percentile', {
+          species_name: speciesName,
+          percentile_value: SHINY_PERCENTILE,
+        })
+
+      const row = Array.isArray(data) ? data[0] : null
+      if (!error && row?.sample_size >= SHINY_MIN_HISTORY && row?.threshold_length) {
+        if (length >= row.threshold_length) {
+          isTrophy = true
+        }
+      }
+    } catch (error) {
+      console.error('Error determining shiny status:', error)
+    }
+
+    if (isTrophy) {
+      return { is_shiny: true, shiny_reason: 'trophy' }
+    }
+
+    const isLucky = Math.random() < SHINY_LUCKY_CHANCE
+    if (isLucky) {
+      return { is_shiny: true, shiny_reason: 'lucky' }
+    }
+
+    return { is_shiny: false, shiny_reason: null }
+  }
+
   return (
     <>
       {/* AI Verification Modal */}
@@ -564,6 +611,17 @@ export default function CatchForm({
             onSuccess()
           }}
         />
+      )}
+
+      {showShinyMoment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="bg-black/70 text-yellow-200 px-6 py-4 rounded-xl shadow-xl shiny-badge animate-shinyBurst">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-yellow-300 animate-pulse" />
+              Shiny-Fang entdeckt!
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Species Picker Dialog */}
