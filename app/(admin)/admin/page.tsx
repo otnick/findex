@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Shield, Users, Trash2, Sliders, Fish, RefreshCw, ArrowLeft } from 'lucide-react'
@@ -46,6 +46,31 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+
+  const loadUsers = useCallback(async () => {
+    setUsersLoading(true)
+    setError(null)
+    try {
+      const resp = await fetch('/api/admin/users', {
+        headers: await getAuthHeaders(),
+      })
+      if (!resp.ok) {
+        throw new Error('Konnte User nicht laden')
+      }
+      const payload = await resp.json()
+      setUsers(payload.users || [])
+    } catch (err: any) {
+      setError(err.message || 'Unbekannter Fehler')
+    } finally {
+      setUsersLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     const init = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
@@ -82,32 +107,7 @@ export default function AdminPage() {
     }
 
     init()
-  }, [])
-
-  const getAuthHeaders = async (): Promise<Record<string, string>> => {
-    const { data } = await supabase.auth.getSession()
-    const token = data.session?.access_token
-    return token ? { Authorization: `Bearer ${token}` } : {}
-  }
-
-  const loadUsers = async () => {
-    setUsersLoading(true)
-    setError(null)
-    try {
-      const resp = await fetch('/api/admin/users', {
-        headers: await getAuthHeaders(),
-      })
-      if (!resp.ok) {
-        throw new Error('Konnte User nicht laden')
-      }
-      const payload = await resp.json()
-      setUsers(payload.users || [])
-    } catch (err: any) {
-      setError(err.message || 'Unbekannter Fehler')
-    } finally {
-      setUsersLoading(false)
-    }
-  }
+  }, [loadUsers])
 
   const loadCatchesForUser = async (userId: string) => {
     setCatchesLoading(true)

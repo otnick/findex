@@ -5,7 +5,11 @@ function isAdminFromJwt(payload: any): boolean {
   return payload?.app_metadata?.is_admin === true || payload?.app_metadata?.is_admin === 'true'
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
   const authHeader = request.headers.get('authorization') || ''
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
@@ -25,7 +29,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   }
 
   const adminClient = createClient(supabaseUrl, serviceKey)
-  const { error } = await adminClient.auth.admin.deleteUser(params.id)
+  const { error } = await adminClient.auth.admin.deleteUser(id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

@@ -190,7 +190,7 @@ export default function CatchForm({
     return () => {
       isMounted = false
     }
-  }, [user?.id])
+  }, [user])
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

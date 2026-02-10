@@ -188,7 +188,7 @@ export default function FishDexPage() {
     })
 
     return filtered
-  }, [entries, selectedCategory, searchQuery, sortBy])
+  }, [entries, selectedCategory, searchQuery, sortBy, onlyDiscovered])
 
   const stats = useMemo(() => {
     const total = entries.length

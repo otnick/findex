@@ -49,7 +49,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
     }
 
     loadPinned()
-  }, [user?.id])
+  }, [user])
 
   if (catches.length === 0) {
     return (
