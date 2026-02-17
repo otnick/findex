@@ -39,12 +39,29 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # 🔐 Decode Keystore
-      - name: Decode Keystore
+      # 🔐 Decode Keystore & configure signing
+      - name: Setup signing
         env:
           ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
         run: |
           echo "$ANDROID_KEYSTORE" | base64 -d > android/app/release-key.jks
+
+          # Inject signing config into build.gradle
+          sed -i '/android {/a \
+              signingConfigs {\
+                  release {\
+                      storeFile file("release-key.jks")\
+                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\
+                      keyAlias System.getenv("ANDROID_KEY_ALIAS")\
+                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")\
+                  }\
+              }' android/app/build.gradle
+
+          # Set release build type to use signing config
+          sed -i '/buildTypes {/,/release {/{s/release {/release {\n                signingConfig signingConfigs.release/}' android/app/build.gradle
+
+          echo "=== Signing config injected ==="
+          grep -A 10 "signingConfigs" android/app/build.gradle || true
 
       # 🏗 Build SIGNED AAB
       - name: Build Signed Android AAB
