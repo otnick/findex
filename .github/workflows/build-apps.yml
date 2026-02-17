@@ -39,6 +39,13 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      # 📱 Update targetSdk to 35 (required by Google Play)
+      - name: Update targetSdk
+        run: |
+          sed -i 's/targetSdk = .*/targetSdk = 35/' android/app/build.gradle
+          echo "=== targetSdk updated ==="
+          grep "targetSdk" android/app/build.gradle
+
       # 🔐 Decode Keystore & configure signing
       - name: Setup signing
         env:
