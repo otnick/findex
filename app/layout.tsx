@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'FishBox',
-  description: 'Tracke deine Angelfänge mit 3D-Visualisierung',
+  description: 'Tracke deine Angelfänge',
   manifest: '/manifest.json',
   appleWebApp: {
     statusBarStyle: 'black-translucent',

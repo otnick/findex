@@ -171,21 +171,17 @@ export default function CatchForm({
   }
 
   const runAiDetectionForPrimary = async (file: File) => {
-    console.log('Starting AI detection...')
     closeSubModals()
     setAIDetectionResults([])
     setShowAIVerification(true)
     setAIDetectionLoading(true)
     try {
       const results = await detectFishSpecies(file)
-      console.log('AI Results:', results)
 
       if (results.detections > 0 && results.results.length > 0) {
         setAIDetectionResults(results.results)
         setShowAIVerification(true)
-        console.log('Fish detected. Showing verification modal')
       } else {
-        console.log('No fish detected. Showing NoDetectionModal')
         setShowAIVerification(false)
         setShowNoDetection(true)
       }
@@ -197,14 +193,6 @@ export default function CatchForm({
       setAIDetectionLoading(false)
     }
   }
-
-  // Debug: Watch newDiscovery changes
-  useEffect(() => {
-    console.log('newDiscovery state changed:', newDiscovery)
-    if (newDiscovery) {
-      console.log('ScanAnimation should render NOW!')
-    }
-  }, [newDiscovery])
 
   useEffect(() => {
     if (manualMode && !aiVerified && !formData.species) {
@@ -421,21 +409,18 @@ export default function CatchForm({
           verified_at: new Date().toISOString(),
           verification_status: 'verified'
         }
-        console.log('Saving as AI verified catch')
       } else if (manualMode) {
         // Manual mode
         verificationData = {
           ai_verified: false,
           verification_status: 'manual'
         }
-        console.log('Saving as manual catch')
       } else {
         // Rejected or unverified
         verificationData = {
           ai_verified: false,
           verification_status: 'pending'
         }
-        console.log('Saving as pending catch')
       }
 
       const shinyStatus = await determineShinyStatus(
@@ -514,11 +499,8 @@ export default function CatchForm({
         .single()
 
       if (speciesError || !species) {
-        console.log('Species not found in catalog:', speciesName)
         return
       }
-
-      console.log('Found species in catalog:', species.name)
 
       // Wait for trigger to complete (increased wait time)
       await new Promise(resolve => setTimeout(resolve, 1500))
@@ -532,7 +514,6 @@ export default function CatchForm({
         .single()
 
       if (entryError) {
-        console.log('Error checking user_fishdex:', entryError)
         return
       }
 
@@ -541,15 +522,7 @@ export default function CatchForm({
       const now = Date.now()
       const isNew = (now - createdAt) < 10000
 
-      console.log('User entry:', {
-        created: userEntry.created_at,
-        isNew,
-        timeDiff: now - createdAt
-      })
-
       if (isNew) {
-        console.log('NEW DISCOVERY! Showing scan animation')
-
         // Load newly unlocked achievements
         const { data: achievements } = await supabase
           .from('user_achievements')
@@ -557,22 +530,13 @@ export default function CatchForm({
           .eq('user_id', user.id)
           .gte('unlocked_at', new Date(Date.now() - 10000).toISOString())
 
-        console.log('Found achievements:', achievements?.length || 0)
-
         // IMPORTANT: Set state AFTER all data is loaded
         const discoveryData = {
           species,
           achievements: achievements?.map(a => a.achievement).filter(Boolean) || []
         }
-        
-        console.log('Setting newDiscovery state:', discoveryData)
+
         setNewDiscovery(discoveryData)
-        
-        // Force a small delay to ensure state propagates
-        await new Promise(resolve => setTimeout(resolve, 100))
-        console.log('State should be set now!')
-      } else {
-        console.log('Already discovered, no animation')
       }
     } catch (error) {
       console.error('Error checking discovery:', error)
@@ -638,18 +602,15 @@ export default function CatchForm({
           detectionResults={aiDetectionResults}
           detectionLoading={aiDetectionLoading}
           onConfirm={(species) => {
-            console.log('User confirmed:', species)
             const mappedSpecies = mapSpeciesToDatabase(species)
             setFormData({ ...formData, species: mappedSpecies })
             setAIVerified(true)
             closeSubModals()
           }}
           onReject={() => {
-            console.log('User rejected catch. Discarding')
             clearPhotoSelection()
           }}
           onRetry={async () => {
-            console.log('Retrying AI detection...')
             if (primaryPhoto) {
               setAIDetectionLoading(true)
               try {
@@ -669,7 +630,6 @@ export default function CatchForm({
             }
           }}
           onManualOverride={() => {
-            console.log('User chose manual mode from verification')
             closeSubModals()
             setManualMode(true)
             setAIVerified(false)
@@ -683,7 +643,6 @@ export default function CatchForm({
           embedded={embeddedFlow}
           photoPreview={primaryPhotoPreview}
           onRetry={async () => {
-            console.log('Retrying AI detection from NoDetectionModal...')
             if (primaryPhoto) {
               closeSubModals()
               setAIDetectionLoading(true)
@@ -707,13 +666,11 @@ export default function CatchForm({
             }
           }}
           onManualOverride={() => {
-            console.log('User chose manual mode from NoDetectionModal')
             closeSubModals()
             setManualMode(true)
             setAIVerified(false)
           }}
           onReject={() => {
-            console.log('User rejected from NoDetectionModal. Discarding')
             clearPhotoSelection()
           }}
         />

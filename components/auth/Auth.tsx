@@ -49,9 +49,8 @@ export default function Auth({ onSuccess }: AuthProps) {
         if (data.user) {
           setMessage({
             type: 'success',
-            text: 'Account erstellt! Bitte bestätige deine E-Mail-Adresse.',
+            text: 'Account erstellt! Wir haben dir eine Bestätigungs-E-Mail geschickt. Bitte prüfe auch deinen Spam-Ordner.',
           })
-          setEmail('')
           setPassword('')
         }
       }

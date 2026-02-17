@@ -1,9 +1,11 @@
 {
-  "name": "FishBox - Angel Tracker",
+  "id": "/",
+  "name": "FishBox – Catch. Track. Share.",
   "short_name": "FishBox",
-  "description": "Deine Angel-Sammlung in 3D mit GPS, Wetter und Social Features",
+  "description": "Das intelligente Fangbuch für moderne Angler. Dokumentiere Fänge mit GPS, Wetterdaten und Statistiken – und teile deine besten Momente mit der Community.",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
   "background_color": "#0f2333",
   "theme_color": "#2c5f8d",
   "orientation": "portrait-primary",
@@ -12,21 +14,34 @@
       "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "categories": ["sports", "lifestyle", "social"],
   "screenshots": [
     {
-      "src": "/screenshot-1.png",
+      "src": "/screenshot-portrait.png",
       "sizes": "1080x1920",
-      "type": "image/png"
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
     }
   ]
 }

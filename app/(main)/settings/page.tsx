@@ -464,29 +464,9 @@ export default function ProfilePage() {
             </label>
           </div>
           
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-3 border-b border-ocean-light/20">
-            <div>
-              <div className="text-white font-semibold">Dark Mode</div>
-              <div className="text-ocean-light text-sm">Immer aktiv</div>
-            </div>
-            <div className="self-start sm:self-auto text-white">?</div>
-          </div>
         </div>
       </div>
 
-      {/* Danger Zone */}
-      <div className="bg-red-900/20 backdrop-blur-sm rounded-xl p-6 border border-red-500/30">
-        <h2 className="text-xl font-bold text-red-400 mb-4">Account löschen</h2>
-        <p className="text-red-300 text-sm mb-4">
-          Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Daten werden permanent gelöscht.
-        </p>
-        <button
-          onClick={() => toast('Account-Löschung: Bitte kontaktiere den Support', 'info')}
-          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
-        >
-          Account löschen
-        </button>
-      </div>
 
       {/* Logout */}
       <div className="text-center">

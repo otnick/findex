@@ -77,4 +77,7 @@ CREATE POLICY "Users can delete photos of their catches"
   );
 
 -- Done!
-RAISE NOTICE 'catch_photos table created successfully with RLS policies!';
+DO $$
+BEGIN
+  RAISE NOTICE 'catch_photos table created successfully with RLS policies!';
+END $$;

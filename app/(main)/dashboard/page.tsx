@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { format, subDays, isAfter } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Plus, MapPin, BarChart3, User, BookOpen, Trophy, LayoutDashboard, Lightbulb, Fish as FishIcon } from 'lucide-react'
-import FishAquarium from '@/components/FishAquarium'
+// import FishAquarium from '@/components/FishAquarium' // TODO: Re-enable for 3D aquarium feature
 import VerificationBadge from '@/components/VerificationBadge'
 
 export default function DashboardPage() {
@@ -59,6 +59,60 @@ export default function DashboardPage() {
 
   const recentCatchesList = catches.slice(0, 3)
 
+  if (catches.length === 0) {
+    return (
+      <div className="space-y-8">
+        {/* Welcome Header */}
+        <div className="text-center pt-4">
+          <div className="flex justify-center mb-4">
+            <FishIcon className="w-16 h-16 text-ocean-light" />
+          </div>
+          <h1 className="text-3xl font-bold text-white">Willkommen bei FishBox</h1>
+          <p className="text-ocean-light mt-2 max-w-md mx-auto">
+            Dein digitales Fangbuch. Tracke deine Fänge, entdecke Fischarten und behalte den Überblick.
+          </p>
+        </div>
+
+        {/* Primary CTA */}
+        <Link
+          href="/catches"
+          className="block bg-ocean hover:bg-ocean-light text-white rounded-xl p-8 text-center transition-colors group"
+        >
+          <Plus className="w-12 h-12 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+          <div className="text-xl font-bold">Ersten Fang eintragen</div>
+          <p className="text-white/70 text-sm mt-1">Starte jetzt mit deinem ersten Eintrag</p>
+        </Link>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-3 gap-4">
+          <Link
+            href="/map"
+            className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
+          >
+            <MapPin className="w-10 h-10 mx-auto mb-2 text-ocean-light group-hover:text-white transition-colors" />
+            <div className="text-white font-semibold text-sm">Karte</div>
+          </Link>
+
+          <Link
+            href="/fishdex"
+            className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
+          >
+            <BookOpen className="w-10 h-10 mx-auto mb-2 text-ocean-light group-hover:text-white transition-colors" />
+            <div className="text-white font-semibold text-sm">FishDex</div>
+          </Link>
+
+          <Link
+            href="/profile"
+            className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
+          >
+            <User className="w-10 h-10 mx-auto mb-2 text-ocean-light group-hover:text-white transition-colors" />
+            <div className="text-white font-semibold text-sm">Profil</div>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -97,13 +151,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 3D Aquarium */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden p-4">
-        <h2 className="text-xl font-bold text-white mb-4">Dein Aquarium</h2>
-        <div className="rounded-xl overflow-hidden">
-          <FishAquarium />
-        </div>
-      </div>
+      {/* 3D Aquarium - disabled for v1 release, see FishAquarium component to re-enable */}
 
       {/* FishDex Widget */}
       {fishDexStats && (
@@ -262,19 +310,19 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link
-          href="/catches"
-          className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
-        >
-          <Plus className="w-12 h-12 mx-auto mb-3 text-ocean-light group-hover:text-white transition-colors" />
-          <div className="text-white font-semibold text-sm sm:text-base">Fang hinzufügen</div>
-        </Link>
-
-        <Link
           href="/map"
           className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
         >
           <MapPin className="w-12 h-12 mx-auto mb-3 text-ocean-light group-hover:text-white transition-colors" />
           <div className="text-white font-semibold text-sm sm:text-base">Spots anzeigen</div>
+        </Link>
+
+        <Link
+          href="/fishdex"
+          className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
+        >
+          <BookOpen className="w-12 h-12 mx-auto mb-3 text-ocean-light group-hover:text-white transition-colors" />
+          <div className="text-white font-semibold text-sm sm:text-base">FishDex</div>
         </Link>
 
         <Link
