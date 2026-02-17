@@ -57,38 +57,30 @@ jobs:
           echo "=== Build config ==="
           grep -E "targetSdk|versionCode|versionName" android/app/build.gradle
 
-      # 🔐 Decode Keystore & configure signing
-      - name: Setup signing
+      # 🏗 Build unsigned AAB
+      - name: Build Android AAB
+        working-directory: android
+        run: ./gradlew bundleRelease
+
+      # 🔐 Sign AAB with jarsigner
+      - name: Sign AAB
         env:
           ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
-        run: |
-          echo "$ANDROID_KEYSTORE" | base64 -d > android/app/release-key.jks
-
-          # Inject signing config into build.gradle
-          sed -i '/android {/a \
-              signingConfigs {\
-                  release {\
-                      storeFile file("release-key.jks")\
-                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\
-                      keyAlias System.getenv("ANDROID_KEY_ALIAS")\
-                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")\
-                  }\
-              }' android/app/build.gradle
-
-          # Set release build type to use signing config
-          sed -i '/buildTypes {/,/release {/{s/release {/release {\n                signingConfig signingConfigs.release/}' android/app/build.gradle
-
-          echo "=== Signing config injected ==="
-          grep -A 10 "signingConfigs" android/app/build.gradle || true
-
-      # 🏗 Build SIGNED AAB
-      - name: Build Signed Android AAB
-        working-directory: android
-        env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew bundleRelease
+        run: |
+          echo "$ANDROID_KEYSTORE" | base64 -d > release-key.jks
+          AAB_FILE=$(find android/app/build/outputs/bundle/release -name "*.aab" | head -1)
+          echo "Signing: $AAB_FILE"
+          jarsigner -verbose \
+            -keystore release-key.jks \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$ANDROID_KEY_PASSWORD" \
+            "$AAB_FILE" \
+            "$ANDROID_KEY_ALIAS"
+          echo "=== Verifying signature ==="
+          jarsigner -verify "$AAB_FILE"
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
