@@ -106,10 +106,6 @@ jobs:
             cp resources/ios/*.png resources/ios/Contents.json ios/App/App/Assets.xcassets/AppIcon.appiconset/
           fi
 
-      - name: Install CocoaPods
-        working-directory: ios/App
-        run: pod install
-
       # Unsigned build (for testing / TestFlight via Xcode)
       - name: Build iOS (unsigned)
         if: env.IOS_P12_BASE64 == ''
