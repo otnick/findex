@@ -35,6 +35,12 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Copy app icons
+        run: |
+          if [ -d "resources/android/res" ]; then
+            cp -r resources/android/res/* android/app/src/main/res/
+          fi
+
       - name: Build Android APK
         working-directory: android
         run: ./gradlew assembleRelease
@@ -93,6 +99,12 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync ios
+
+      - name: Copy app icons
+        run: |
+          if [ -d "resources/ios" ]; then
+            cp resources/ios/*.png resources/ios/Contents.json ios/App/App/Assets.xcassets/AppIcon.appiconset/
+          fi
 
       - name: Install CocoaPods
         working-directory: ios/App
