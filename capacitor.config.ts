@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'is.nickot.fishbox',
-  appName: 'FishBox',
+  appName: 'FinDex',
   webDir: 'out',
   server: {
     url: 'https://fishbox.nickot.is',
@@ -11,7 +11,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
-    scheme: 'FishBox',
+    scheme: 'FinDex',
   },
   android: {
     backgroundColor: '#0f2333',

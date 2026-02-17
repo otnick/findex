@@ -124,7 +124,7 @@ class NotificationService {
     if (parts.length === 0) return
 
     await this.send({
-      title: '📊 Dein Tag auf FishBox',
+      title: '📊 Dein Tag auf FinDex',
       body: parts.join(' • '),
       tag: 'daily-summary',
       data: { url: '/dashboard' },
@@ -150,7 +150,7 @@ class NotificationService {
 
   async testNotification(): Promise<void> {
     await this.send({
-      title: '🎣 FishBox Benachrichtigungen',
+      title: '🎣 FinDex Benachrichtigungen',
       body: 'Du erhältst jetzt Updates zu Likes, Kommentaren und mehr!',
       tag: 'test',
     })

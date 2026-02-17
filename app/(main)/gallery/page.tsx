@@ -103,7 +103,7 @@ export default function GalleryPage() {
           const url = window.URL.createObjectURL(blob)
           const a = document.createElement('a')
           a.href = url
-          a.download = `fishbox-${photo.species}-${format(new Date(photo.date), 'yyyy-MM-dd')}.jpg`
+          a.download = `findex-${photo.species}-${format(new Date(photo.date), 'yyyy-MM-dd')}.jpg`
           a.click()
           window.URL.revokeObjectURL(url)
           await new Promise(resolve => setTimeout(resolve, 500))

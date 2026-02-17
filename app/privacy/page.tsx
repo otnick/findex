@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Datenschutzerklärung – FishBox',
+  title: 'Datenschutzerklärung – FinDex',
 }
 
 export default function PrivacyPage() {
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Verantwortlicher</h2>
             <p>
-              FishBox wird betrieben von Nick Schumacher.<br />
+              FinDex wird betrieben von Nick Schumacher.<br />
               Kontakt: <a href="mailto:schumacher@nickot.is" className="text-ocean-light hover:underline">schumacher@nickot.is</a>
             </p>
           </section>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">4. Keine Werbung oder Tracking</h2>
-            <p>FishBox verwendet keine Werbenetzwerke, Analyse-Tools oder Tracking-Dienste. Wir verkaufen oder teilen deine Daten nicht mit Dritten zu Werbezwecken.</p>
+            <p>FinDex verwendet keine Werbenetzwerke, Analyse-Tools oder Tracking-Dienste. Wir verkaufen oder teilen deine Daten nicht mit Dritten zu Werbezwecken.</p>
           </section>
 
           <section>
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-white/50 text-sm">
-          <a href="/" className="text-ocean-light hover:underline">Zurück zu FishBox</a>
+          <a href="/" className="text-ocean-light hover:underline">Zurück zu FinDex</a>
         </div>
       </div>
     </div>

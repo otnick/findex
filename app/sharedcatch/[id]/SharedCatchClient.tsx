@@ -71,7 +71,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
 
     const shareData = {
       title: `${catchData.species} - ${catchData.length} cm`,
-      text: `Schau dir diesen ${catchData.species}-Fang auf FishBox an!`,
+      text: `Schau dir diesen ${catchData.species}-Fang auf FinDex an!`,
       url: window.location.href,
     }
 
@@ -122,7 +122,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mb-4 flex justify-center"><Fish className="w-12 h-12 text-ocean-light" /></div>
-          <h1 className="text-3xl font-bold text-white mb-2">FishBox</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">FinDex</h1>
           <p className="text-ocean-light">Geteilter Fang von {catchData.user_email?.split('@')[0]}</p>
         </div>
 
@@ -236,7 +236,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
             {/* CTA */}
             <div className="text-center pt-6 border-t border-ocean-light/20">
               <p className="text-ocean-light mb-4">
-                Tracke auch du deine Fänge mit FishBox!
+                Tracke auch du deine Fänge mit FinDex!
               </p>
               <Link
                 href="/"

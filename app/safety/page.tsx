@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Kindersicherheitsstandards – FishBox',
+  title: 'Kindersicherheitsstandards – FinDex',
 }
 
 export default function SafetyPage() {
@@ -13,7 +13,7 @@ export default function SafetyPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Zielgruppe</h2>
             <p>
-              FishBox richtet sich an Angler ab 16 Jahren. Die App ist nicht für Kinder unter 13 Jahren bestimmt
+              FinDex richtet sich an Angler ab 16 Jahren. Die App ist nicht für Kinder unter 13 Jahren bestimmt
               und wir richten uns nicht gezielt an Minderjährige.
             </p>
           </section>
@@ -30,7 +30,7 @@ export default function SafetyPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">3. Soziale Funktionen</h2>
-            <p>FishBox bietet soziale Funktionen wie:</p>
+            <p>FinDex bietet soziale Funktionen wie:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Öffentliches Teilen von Fangfotos in der Community-Galerie</li>
               <li>Kommentare und Likes auf Fänge anderer Nutzer</li>
@@ -65,7 +65,7 @@ export default function SafetyPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">6. Werbung und Käufe</h2>
             <p>
-              Sollte FishBox zukünftig Werbung oder In-App-Käufe anbieten, werden diese
+              Sollte FinDex zukünftig Werbung oder In-App-Käufe anbieten, werden diese
               klar gekennzeichnet und nicht gezielt an Minderjährige gerichtet.
               Personalisierte Werbung wird nur mit ausdrücklicher Zustimmung der Nutzer geschaltet.
             </p>
@@ -82,7 +82,7 @@ export default function SafetyPage() {
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-white/50 text-sm">
           <a href="/privacy" className="text-ocean-light hover:underline mr-6">Datenschutzerklärung</a>
-          <a href="/" className="text-ocean-light hover:underline">Zurück zu FishBox</a>
+          <a href="/" className="text-ocean-light hover:underline">Zurück zu FinDex</a>
         </div>
       </div>
     </div>

@@ -58,7 +58,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `fishbox-${photo.species || 'catch'}-${Date.now()}.jpg`
+      a.download = `findex-${photo.species || 'catch'}-${Date.now()}.jpg`
       a.click()
       window.URL.revokeObjectURL(url)
     } catch (error) {

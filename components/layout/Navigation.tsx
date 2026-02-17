@@ -54,7 +54,7 @@ export default function Navigation() {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ocean-light to-ocean flex items-center justify-center shadow-lg">
                 <Fish className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-white">FishBox</span>
+              <span className="text-2xl font-bold text-white">FinDex</span>
             </div>
           </div>
 

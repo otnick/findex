@@ -597,7 +597,7 @@ export default function StatsPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `fishbox-stats-${format(new Date(), 'yyyy-MM-dd')}.csv`
+    a.download = `findex-stats-${format(new Date(), 'yyyy-MM-dd')}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -662,7 +662,7 @@ export default function StatsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => exportChartAsPng(tab === 'overview' ? overviewTrendRef : speciesTrendRef, `fishbox-chart-${tab}`)}
+              onClick={() => exportChartAsPng(tab === 'overview' ? overviewTrendRef : speciesTrendRef, `findex-chart-${tab}`)}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-ocean-dark text-ocean-light border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors text-sm"
             >
               <FileImage className="w-4 h-4" />

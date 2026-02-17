@@ -37,7 +37,7 @@ export default function Navigation({ userEmail }: NavigationProps) {
           <div className="flex h-16 shrink-0 items-center">
             <Link href="/dashboard" className="flex items-center gap-2">
               <Fish className="w-8 h-8 text-ocean-light" />
-              <span className="text-2xl font-bold text-white">FishBox</span>
+              <span className="text-2xl font-bold text-white">FinDex</span>
             </Link>
           </div>
 
@@ -94,7 +94,7 @@ export default function Navigation({ userEmail }: NavigationProps) {
         <div className="flex-1 text-sm font-semibold leading-6 text-white">
           <Link href="/dashboard" className="flex items-center gap-2">
             <Fish className="w-6 h-6" />
-            FishBox
+            FinDex
           </Link>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function Navigation({ userEmail }: NavigationProps) {
             <div className="flex items-center justify-between">
               <Link href="/dashboard" className="flex items-center gap-2">
                 <Fish className="w-7 h-7 text-ocean-light" />
-                <span className="text-xl font-bold text-white">FishBox</span>
+                <span className="text-xl font-bold text-white">FinDex</span>
               </Link>
               <button
                 type="button"

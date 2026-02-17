@@ -188,7 +188,7 @@ export default function ProfilePage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `fishbox-backup-${format(new Date(), 'yyyy-MM-dd')}.json`
+    a.download = `findex-backup-${format(new Date(), 'yyyy-MM-dd')}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -214,7 +214,7 @@ export default function ProfilePage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `fishbox-export-${format(new Date(), 'yyyy-MM-dd')}.csv`
+    a.download = `findex-export-${format(new Date(), 'yyyy-MM-dd')}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -374,7 +374,7 @@ export default function ProfilePage() {
                 Teile deinen FishDex und deine besten Fänge mit anderen Anglern
               </p>
               <div className="flex flex-wrap items-center gap-2 bg-ocean-dark/50 rounded-lg px-3 py-2 w-full sm:w-fit">
-                <span className="text-ocean-light text-sm">fishbox.app/user/</span>
+                <span className="text-ocean-light text-sm">findex.app/user/</span>
                 <div className="flex items-center gap-2">
                   <span className="text-white font-mono font-semibold break-all">{user?.id}</span>
                   <button

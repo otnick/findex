@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "FishBox – Catch. Track. Share.",
-  "short_name": "FishBox",
+  "name": "FinDex – Catch. Track. Share.",
+  "short_name": "FinDex",
   "description": "Das intelligente Fangbuch für moderne Angler. Dokumentiere Fänge mit GPS, Wetterdaten und Statistiken – und teile deine besten Momente mit der Community.",
   "start_url": "/",
   "display": "standalone",

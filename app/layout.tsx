@@ -8,12 +8,12 @@ import ConfirmDialogProvider from '@/components/ConfirmDialogProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'FishBox',
+  title: 'FinDex',
   description: 'Tracke deine Angelfänge',
   manifest: '/manifest.json',
   appleWebApp: {
     statusBarStyle: 'black-translucent',
-    title: 'FishBox',
+    title: 'FinDex',
   },
   icons: {
     icon: '/icon-192x192.png',

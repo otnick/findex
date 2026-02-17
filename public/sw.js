@@ -1,5 +1,5 @@
-// Service Worker for FishBox PWA
-const CACHE_NAME = 'fishbox-static-v3'
+// Service Worker for FinDex PWA
+const CACHE_NAME = 'findex-static-v3'
 const urlsToCache = [
   '/manifest.json',
   '/icon-192x192.png',
@@ -111,7 +111,7 @@ self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {}
   
   const options = {
-    body: data.body || 'Neue Aktivität in FishBox',
+    body: data.body || 'Neue Aktivität in FinDex',
     icon: '/icon-192x192.png',
     badge: '/icon-192x192.png',
     vibrate: [200, 100, 200],
@@ -119,7 +119,7 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'FishBox', options)
+    self.registration.showNotification(data.title || 'FinDex', options)
   )
 })
 

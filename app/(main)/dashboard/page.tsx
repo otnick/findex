@@ -67,7 +67,7 @@ export default function DashboardPage() {
           <div className="flex justify-center mb-4">
             <FishIcon className="w-16 h-16 text-ocean-light" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Willkommen bei FishBox</h1>
+          <h1 className="text-3xl font-bold text-white">Willkommen bei FinDex</h1>
           <p className="text-ocean-light mt-2 max-w-md mx-auto">
             Dein digitales Fangbuch. Tracke deine Fänge, entdecke Fischarten und behalte den Überblick.
           </p>
