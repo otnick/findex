@@ -12,7 +12,11 @@
       "Bash(\"C:\\\\Program Files \\(x86\\)\\\\Common Files\\\\Oracle\\\\Java\\\\java8path\\\\keytool\")",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm run build)",
+      "Bash(node --version:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(npx cap sync:*)"
     ]
   }
 }
