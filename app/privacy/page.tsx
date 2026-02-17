@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Verantwortlicher</h2>
             <p>
-              FishBox wird betrieben von Nicklas Ottosson.<br />
+              FishBox wird betrieben von Nick Schumacher.<br />
               Kontakt: <a href="mailto:schumacher@nickot.is" className="text-ocean-light hover:underline">schumacher@nickot.is</a>
             </p>
           </section>
