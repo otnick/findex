@@ -106,12 +106,23 @@ jobs:
             cp resources/ios/*.png resources/ios/Contents.json ios/App/App/Assets.xcassets/AppIcon.appiconset/
           fi
 
+      - name: Install CocoaPods
+        working-directory: ios/App
+        run: |
+          pod install || echo "No Podfile or pod install not needed"
+          ls -la *.xcworkspace *.xcodeproj 2>/dev/null || true
+
       # Unsigned build (for testing / TestFlight via Xcode)
       - name: Build iOS (unsigned)
         if: env.IOS_P12_BASE64 == ''
         working-directory: ios/App
         run: |
-          xcodebuild -workspace App.xcworkspace \
+          if [ -d "App.xcworkspace" ]; then
+            BUILD_ARG="-workspace App.xcworkspace"
+          else
+            BUILD_ARG="-project App.xcodeproj"
+          fi
+          xcodebuild $BUILD_ARG \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
@@ -152,7 +163,12 @@ jobs:
           IOS_P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
         working-directory: ios/App
         run: |
-          xcodebuild -workspace App.xcworkspace \
+          if [ -d "App.xcworkspace" ]; then
+            BUILD_ARG="-workspace App.xcworkspace"
+          else
+            BUILD_ARG="-project App.xcodeproj"
+          fi
+          xcodebuild $BUILD_ARG \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
