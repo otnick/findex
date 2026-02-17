@@ -33,6 +33,9 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Create assets directory
+        run: mkdir -p android/app/src/main/assets
+
       - name: Sync Capacitor
         run: npx cap sync android
 
