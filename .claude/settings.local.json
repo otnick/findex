@@ -5,7 +5,14 @@
       "Bash(ls:*)",
       "Bash(npx next build:*)",
       "Bash(npm install:*)",
-      "Bash(npx cap add:*)"
+      "Bash(npx cap add:*)",
+      "Bash(keytool:*)",
+      "Bash(where java:*)",
+      "Bash(java -version:*)",
+      "Bash(\"C:\\\\Program Files \\(x86\\)\\\\Common Files\\\\Oracle\\\\Java\\\\java8path\\\\keytool\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
