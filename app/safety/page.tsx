@@ -63,10 +63,11 @@ export default function SafetyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">6. Keine Werbung</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">6. Werbung und Käufe</h2>
             <p>
-              FishBox enthält keine Werbung und keine In-App-Käufe.
-              Es werden keine Daten an Werbenetzwerke weitergegeben.
+              Sollte FishBox zukünftig Werbung oder In-App-Käufe anbieten, werden diese
+              klar gekennzeichnet und nicht gezielt an Minderjährige gerichtet.
+              Personalisierte Werbung wird nur mit ausdrücklicher Zustimmung der Nutzer geschaltet.
             </p>
           </section>
 
