@@ -124,8 +124,15 @@ jobs:
 
       - name: Patch Info.plist
         run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          VERSION_NAME="${TAG:-1.0.0}"
+          VERSION_CODE=$(git rev-list --count HEAD)
+          echo "versionName: $VERSION_NAME | versionCode (build): $VERSION_CODE"
+
           plutil -replace CFBundleDisplayName -string "FinDex" ios/App/App/Info.plist
           plutil -replace ITSAppUsesNonExemptEncryption -bool NO ios/App/App/Info.plist
+          plutil -replace CFBundleShortVersionString -string "$VERSION_NAME" ios/App/App/Info.plist
+          plutil -replace CFBundleVersion -string "$VERSION_CODE" ios/App/App/Info.plist
 
       - name: Install CocoaPods
         working-directory: ios/App
