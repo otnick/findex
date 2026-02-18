@@ -122,6 +122,12 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
+      - name: Copy custom app icons
+        run: |
+          APPICONSET="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          cp resources/ios/*.png "$APPICONSET/"
+          cp resources/ios/Contents.json "$APPICONSET/"
+
       - name: Patch Info.plist
         run: |
           TAG="${GITHUB_REF#refs/tags/v}"
