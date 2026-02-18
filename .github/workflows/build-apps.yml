@@ -124,7 +124,19 @@ jobs:
 
       - name: Install CocoaPods
         working-directory: ios/App
-        run: pod install || echo "No Podfile needed"
+        run: |
+          # Disable code signing for pod targets (they don't support provisioning profiles).
+          # Append a post_install hook using echo to avoid YAML heredoc indentation issues.
+          echo '' >> Podfile
+          echo 'post_install do |installer|' >> Podfile
+          echo '  installer.pods_project.targets.each do |target|' >> Podfile
+          echo '    target.build_configurations.each do |config|' >> Podfile
+          echo '      config.build_settings["CODE_SIGNING_ALLOWED"] = "NO"' >> Podfile
+          echo '      config.build_settings["CODE_SIGNING_REQUIRED"] = "NO"' >> Podfile
+          echo '    end' >> Podfile
+          echo '  end' >> Podfile
+          echo 'end' >> Podfile
+          pod install
 
       # 🔐 Import certificate & provisioning profile
       - name: Setup signing
@@ -170,8 +182,8 @@ jobs:
             -sdk iphoneos \
             -destination generic/platform=iOS \
             -archivePath $RUNNER_TEMP/App.xcarchive \
-            CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=BK3MDP3L75 \
+            CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             PROVISIONING_PROFILE_SPECIFIER="FinDex App Store" \
             archive
