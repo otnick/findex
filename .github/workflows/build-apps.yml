@@ -41,6 +41,9 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Copy custom app icons
+        run: cp -r resources/android/res/. android/app/src/main/res/
+
       # 📱 Update targetSdk, versionCode and versionName from git tag
       - name: Update build config
         run: |
