@@ -125,17 +125,19 @@ jobs:
       - name: Install CocoaPods
         working-directory: ios/App
         run: |
-          # Disable code signing for pod targets (they don't support provisioning profiles).
-          # Append a post_install hook using echo to avoid YAML heredoc indentation issues.
-          echo '' >> Podfile
-          echo 'post_install do |installer|' >> Podfile
-          echo '  installer.pods_project.targets.each do |target|' >> Podfile
-          echo '    target.build_configurations.each do |config|' >> Podfile
-          echo '      config.build_settings["CODE_SIGNING_ALLOWED"] = "NO"' >> Podfile
-          echo '      config.build_settings["CODE_SIGNING_REQUIRED"] = "NO"' >> Podfile
-          echo '    end' >> Podfile
-          echo '  end' >> Podfile
-          echo 'end' >> Podfile
+          # CocoaPods forbids multiple post_install blocks, so patch the existing one
+          # by inserting code-signing-disable lines after assertDeploymentTarget.
+          awk '/assertDeploymentTarget\(installer\)/{
+            print
+            print "  installer.pods_project.targets.each do |target|"
+            print "    target.build_configurations.each do |config|"
+            print "      config.build_settings[\"CODE_SIGNING_ALLOWED\"] = \"NO\""
+            print "      config.build_settings[\"CODE_SIGNING_REQUIRED\"] = \"NO\""
+            print "    end"
+            print "  end"
+            next
+          }
+          {print}' Podfile > Podfile.tmp && mv Podfile.tmp Podfile
           pod install
 
       # 🔐 Import certificate & provisioning profile
