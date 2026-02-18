@@ -1,11 +1,9 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
-import {
-  Fish,
-  Sparkles,
-} from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
 interface AuthProps {
   onSuccess: () => void
@@ -102,7 +100,7 @@ export default function Auth({ onSuccess }: AuthProps) {
       <div className="bg-ocean/30 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full shadow-2xl">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-            <Fish className="w-12 h-12 mx-auto mb-2 text-ocean-light" />
+            <Image src="/icon-512x512.png" alt="FinDex" width={48} height={48} className="mx-auto mb-2 rounded-xl" />
           <h2 className="text-3xl font-bold text-white mb-2">FinDex</h2>
           <p className="text-ocean-light">
             {isLogin ? 'Willkommen zurück!' : 'Erstelle deinen Account'}
