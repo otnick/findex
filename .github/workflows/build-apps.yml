@@ -122,6 +122,11 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
+      - name: Patch Info.plist
+        run: |
+          plutil -replace CFBundleDisplayName -string "FinDex" ios/App/App/Info.plist
+          plutil -replace ITSAppUsesNonExemptEncryption -bool NO ios/App/App/Info.plist
+
       - name: Install CocoaPods
         working-directory: ios/App
         run: |
