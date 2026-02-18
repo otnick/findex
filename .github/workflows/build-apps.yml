@@ -110,6 +110,9 @@ jobs:
 
   # ─── iOS Build (signed) ───────────────────────────────────────────────
   ios:
+    # TODO: Switch to macos-15 (or newer) with Xcode 26 before April 28, 2026.
+    # Apple requires iOS 26 SDK (Xcode 26) from that date onwards.
+    # Check GitHub runner availability: https://github.com/actions/runner-images
     runs-on: macos-latest
 
     steps:
