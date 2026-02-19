@@ -48,7 +48,10 @@ jobs:
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           # Insert required permissions after the INTERNET permission line
-          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />|' "$MANIFEST"
+          # Storage permissions (READ_MEDIA_IMAGES, READ_EXTERNAL_STORAGE) are NOT needed –
+          # the Android file picker (Intent.ACTION_GET_CONTENT) has its own access.
+          # Declaring them triggers Google Play's photo/video permissions policy review.
+          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.CAMERA" />|' "$MANIFEST"
           echo "=== Permissions after patch ==="
           grep "uses-permission" "$MANIFEST"
 
