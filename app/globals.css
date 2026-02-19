@@ -251,15 +251,15 @@ html {
 html, body {
   background-color: #0f2333;
   overscroll-behavior: none;
+  overflow-x: hidden;
 }
 
-/* Prevent iOS/Android from styling inputs differently */
+/* Prevent iOS/Android from styling text inputs differently.
+   date/datetime-local intentionally excluded so iOS native date picker still works. */
 input[type="text"],
 input[type="number"],
 input[type="email"],
 input[type="password"],
-input[type="datetime-local"],
-input[type="date"],
 select,
 textarea {
   -webkit-appearance: none;
