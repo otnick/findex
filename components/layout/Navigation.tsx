@@ -89,7 +89,7 @@ export default function Navigation() {
       </nav>
 
       {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 bg-ocean-deeper/95 backdrop-blur-xl border-t border-ocean-light/10 z-50">
+      <div className="lg:hidden fixed bottom-0 inset-x-0 bg-ocean-deeper/95 backdrop-blur-xl border-t border-ocean-light/10 z-[60]">
         <div className="relative grid grid-cols-5 items-center h-20 px-2">
           {[
             { name: 'Dashboard', href: '/dashboard', icon: Home, colClass: 'col-start-1' },

@@ -162,6 +162,7 @@ jobs:
           cat > ios/App/App/MainViewController.swift << 'SWIFT_EOF'
           import UIKit
           import Capacitor
+          import WebKit
 
           class MainViewController: CAPBridgeViewController {
               override func viewDidLoad() {
@@ -170,6 +171,19 @@ jobs:
                   // Note: do NOT set isOpaque = false – causes a black re-render flash
                   webView?.scrollView.bounces = false
                   webView?.scrollView.alwaysBounceVertical = false
+              }
+
+              // iOS 15+: grant geolocation permission for the WKWebView.
+              // Without this, navigator.geolocation silently fails in remote-URL Capacitor apps.
+              // iOS will still show its own native location permission dialog if needed.
+              @available(iOS 15.0, *)
+              override func webView(
+                  _ webView: WKWebView,
+                  requestGeolocationPermissionFor origin: WKSecurityOrigin,
+                  initiatedByFrame frame: WKFrameInfo,
+                  decisionHandler: @escaping (WKPermissionDecision) -> Void
+              ) {
+                  decisionHandler(.grant)
               }
           }
           SWIFT_EOF
