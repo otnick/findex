@@ -166,6 +166,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
               <div className="flex gap-3">
                 <Link
                   href={`/fishdex/${species.id}`}
+                  onClick={onClose}
                   className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
                 >
                   Zur FinDex <ArrowRight className="w-4 h-4" />
@@ -207,6 +208,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
               <div className="flex gap-3">
                 <Link
                   href="/fishdex/achievements"
+                  onClick={onClose}
                   className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-4 rounded-lg transition-colors text-sm"
                 >
                   Alle Erfolge

@@ -990,7 +990,7 @@ export default function CatchForm({
         <label className="block text-ocean-light text-sm mb-2">
           Datum & Uhrzeit
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 overflow-hidden">
           <input
             type="date"
             value={formData.date.slice(0, 10)}
