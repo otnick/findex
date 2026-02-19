@@ -143,9 +143,11 @@ jobs:
           cp resources/ios/*.png "$APPICONSET/"
           cp resources/ios/Contents.json "$APPICONSET/"
 
-      - name: Patch native iOS – disable overscroll bounce
+      - name: Patch native iOS – dark background during WKWebView load
         run: |
-          # Create MainViewController that disables WKWebView scroll bounce
+          # Capacitor already generates MainViewController.swift – we just overwrite it.
+          # The storyboard already references MainViewController, no patching needed.
+          # IMPORTANT: do NOT set webView?.isOpaque = false – it causes a black re-render flash.
           cat > ios/App/App/MainViewController.swift << 'SWIFT_EOF'
           import UIKit
           import Capacitor
@@ -153,19 +155,11 @@ jobs:
           class MainViewController: CAPBridgeViewController {
               override func viewDidLoad() {
                   super.viewDidLoad()
-                  // Dark background so the native view matches app theme during WKWebView load
+                  // Match app background so the native view isn't black while WKWebView loads
                   view.backgroundColor = UIColor(red: 15/255.0, green: 35/255.0, blue: 51/255.0, alpha: 1.0)
-                  webView?.backgroundColor = UIColor(red: 15/255.0, green: 35/255.0, blue: 51/255.0, alpha: 1.0)
-                  webView?.isOpaque = false
-                  webView?.scrollView.bounces = false
-                  webView?.scrollView.alwaysBounceVertical = false
               }
           }
           SWIFT_EOF
-          # Patch storyboard to use MainViewController instead of CAPBridgeViewController
-          # Use perl instead of sed to avoid BSD vs GNU sed -i incompatibilities
-          perl -i -pe 's/customClass="CAPBridgeViewController" customModule="Capacitor"/customClass="MainViewController" customModule="App"/g' \
-            ios/App/App/Base.lproj/Main.storyboard
 
       - name: Patch Info.plist
         run: |
