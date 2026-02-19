@@ -1,5 +1,5 @@
-import FishDexDetailClient from './FishDexDetailClient'
+﻿import FinDexDetailClient from './FinDexDetailClient'
 
-export default function FishDexDetailPage({ params }: { params: { id: string } }) {
-  return <FishDexDetailClient id={params.id} />
+export default function FinDexDetailPage({ params }: { params: { id: string } }) {
+  return <FinDexDetailClient id={params.id} />
 }

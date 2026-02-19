@@ -26,7 +26,7 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Fänge', href: '/catches', icon: Fish },
-  { name: 'FishDex', href: '/fishdex', icon: BookOpen },
+  { name: 'FinDex', href: '/fishdex', icon: BookOpen },
   { name: 'Galerie', href: '/gallery', icon: ImageIcon },
   { name: 'Karte', href: '/map', icon: Map },
   { name: 'Statistiken', href: '/stats', icon: BarChart3 },
@@ -94,7 +94,7 @@ export default function Navigation() {
           {[
             { name: 'Dashboard', href: '/dashboard', icon: Home, colClass: 'col-start-1' },
             { name: 'Fänge', href: '/catches', icon: Fish, colClass: 'col-start-2' },
-            { name: 'FishDex', href: '/fishdex', icon: BookOpen, colClass: 'col-start-4' },
+            { name: 'FinDex', href: '/fishdex', icon: BookOpen, colClass: 'col-start-4' },
             { name: 'Menü', href: '#', icon: Menu, colClass: 'col-start-5', action: 'menu' as const },
           ].map((item) => {
             const isActive = item.action === 'menu' ? mobileMenuOpen : pathname === item.href

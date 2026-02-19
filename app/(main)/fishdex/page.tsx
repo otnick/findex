@@ -5,28 +5,28 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
-import type { FishDexEntry, FishDexRegion, FishDexCategory, FishDexSortBy } from '@/lib/types/fishdex'
+import type { FinDexEntry, FinDexRegion, FinDexCategory, FinDexSortBy } from '@/lib/types/FinDex'
 import { getSpeciesInfo, getSpeciesRarity, getSpeciesSearchTokens, normalizeSpeciesName } from '@/lib/utils/speciesInfo'
 import { Search, Filter, Trophy, Star, Lock, Fish, BookOpen } from 'lucide-react'
 
-export default function FishDexPage() {
+export default function FinDexPage() {
   const user = useCatchStore(state => state.user)
-  const [entries, setEntries] = useState<FishDexEntry[]>([])
+  const [entries, setEntries] = useState<FinDexEntry[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedRegion, setSelectedRegion] = useState<FishDexRegion>('deutschland')
-  const [selectedCategory, setSelectedCategory] = useState<FishDexCategory>('all')
-  const [sortBy, setSortBy] = useState<FishDexSortBy>('number')
+  const [selectedRegion, setSelectedRegion] = useState<FinDexRegion>('deutschland')
+  const [selectedCategory, setSelectedCategory] = useState<FinDexCategory>('all')
+  const [sortBy, setSortBy] = useState<FinDexSortBy>('number')
   const [searchQuery, setSearchQuery] = useState('')
   const [onlyDiscovered, setOnlyDiscovered] = useState(false)
 
   useEffect(() => {
     if (user) {
-      loadFishDex()
+      loadFinDex()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedRegion])
 
-  const loadFishDex = async () => {
+  const loadFinDex = async () => {
     if (!user) return
 
     try {
@@ -41,7 +41,7 @@ export default function FishDexPage() {
 
       // Load user's discovered species
       const { data: userProgress, error: progressError } = await supabase
-        .from('user_fishdex')
+        .from('user_FinDex')
         .select('*')
         .eq('user_id', user.id)
 
@@ -99,7 +99,7 @@ export default function FishDexPage() {
         progressWithPhotos.map(p => [p.species_id, p])
       )
 
-      const fishDexEntries: FishDexEntry[] = (species || []).map(s => ({
+      const FinDexEntries: FinDexEntry[] = (species || []).map(s => ({
         ...s,
         discovered: progressMap.has(s.id),
         userProgress: progressMap.get(s.id),
@@ -108,9 +108,9 @@ export default function FishDexPage() {
         verified: progressMap.get(s.id)?.verified ? true : false,
       }))
 
-      setEntries(fishDexEntries)
+      setEntries(FinDexEntries)
     } catch (error) {
-      console.error('Error loading FishDex:', error)
+      console.error('Error loading FinDex:', error)
     } finally {
       setLoading(false)
     }
@@ -213,7 +213,7 @@ export default function FishDexPage() {
     }
   }
 
-  const quickCategories: Array<{ value: FishDexCategory; label: string }> = [
+  const quickCategories: Array<{ value: FinDexCategory; label: string }> = [
     { value: 'all', label: 'Alle' },
     { value: 'freshwater', label: 'Süßwasser' },
     { value: 'saltwater', label: 'Salzwasser' },
@@ -289,7 +289,7 @@ export default function FishDexPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-ocean-light">Lade FishDex...</div>
+        <div className="text-ocean-light">Lade FinDex...</div>
       </div>
     )
   }
@@ -302,14 +302,14 @@ export default function FishDexPage() {
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <BookOpen className="w-10 h-10 text-ocean-light" />
-              FishDex
+              FinDex
             </h1>
             <p className="text-ocean-light mt-1">
               Entdecke und sammle alle Fischarten!
             </p>
           </div>
           <Link
-            href="/fishdex/achievements"
+            href="/FinDex/achievements"
             className="px-4 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors flex items-center gap-2"
           >
             <Trophy className="w-4 h-4" />
@@ -342,7 +342,7 @@ export default function FishDexPage() {
           {/* Region */}
           <select
             value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value as FishDexRegion)}
+            onChange={(e) => setSelectedRegion(e.target.value as FinDexRegion)}
             className="px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
           >
             <option value="deutschland">Deutschland</option>
@@ -353,7 +353,7 @@ export default function FishDexPage() {
           {/* Sort */}
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as FishDexSortBy)}
+            onChange={(e) => setSortBy(e.target.value as FinDexSortBy)}
             className="px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
           >
             <option value="number">Nach Nummer</option>
@@ -429,7 +429,7 @@ export default function FishDexPage() {
         {filteredEntries.map((entry) => (
           <Link
             key={entry.id}
-            href={`/fishdex/${entry.id}`}
+            href={`/FinDex/${entry.id}`}
             className={`
               relative aspect-square rounded-xl overflow-hidden
               transition-all duration-300 hover:scale-105 hover:shadow-xl

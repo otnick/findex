@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
@@ -46,8 +46,8 @@ export default function UserProfileClient({ id }: { id: string }) {
   const [pinnedCatchIds, setPinnedCatchIds] = useState<string[]>([])
   const [pinSaving, setPinSaving] = useState(false)
   const [draggingId, setDraggingId] = useState<string | null>(null)
-  const [fishdexEntries, setFishdexEntries] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<'gallery' | 'fishdex'>('gallery')
+  const [FinDexEntries, setFinDexEntries] = useState<any[]>([])
+  const [activeTab, setActiveTab] = useState<'gallery' | 'FinDex'>('gallery')
   const [showPublicOnly, setShowPublicOnly] = useState(true)
   const [stats, setStats] = useState({
     totalCatches: 0,
@@ -123,9 +123,9 @@ export default function UserProfileClient({ id }: { id: string }) {
         shinyCount,
       })
 
-      // Get user's FishDex (discovered species)
-      const { data: fishdexData } = await supabase
-        .from('user_fishdex')
+      // Get user's FinDex (discovered species)
+      const { data: FinDexData } = await supabase
+        .from('user_FinDex')
         .select(`
           *,
           species:fish_species(*)
@@ -133,7 +133,7 @@ export default function UserProfileClient({ id }: { id: string }) {
         .eq('user_id', profileData.id)
         .order('discovered_at', { ascending: false })
 
-      if (fishdexData) {
+      if (FinDexData) {
         let catchesQuery = supabase
           .from('catches')
           .select('species, verification_status, ai_verified, photo_url, length, is_public')
@@ -172,7 +172,7 @@ export default function UserProfileClient({ id }: { id: string }) {
           statsMap.set(name, stats)
         })
 
-        const progressWithPhotos = fishdexData.map((entry: any) => {
+        const progressWithPhotos = FinDexData.map((entry: any) => {
           const speciesName = entry.species?.name || ''
           const stats = statsMap.get(speciesName.toLowerCase())
 
@@ -183,7 +183,7 @@ export default function UserProfileClient({ id }: { id: string }) {
           }
         })
 
-        setFishdexEntries(progressWithPhotos)
+        setFinDexEntries(progressWithPhotos)
       }
     } catch (err) {
       console.error('Error fetching profile:', err)
@@ -554,16 +554,16 @@ export default function UserProfileClient({ id }: { id: string }) {
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('fishdex')}
+              onClick={() => setActiveTab('FinDex')}
               className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
-                activeTab === 'fishdex'
+                activeTab === 'FinDex'
                   ? 'bg-ocean text-white'
                   : 'text-ocean-light hover:text-white'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
                 <Award className="w-5 h-5" />
-                FishDex ({fishdexEntries.length})
+                FinDex ({FinDexEntries.length})
               </div>
             </button>
           </div>
@@ -662,21 +662,21 @@ export default function UserProfileClient({ id }: { id: string }) {
         </div>
       )}
 
-      {/* FishDex Tab */}
-      {activeTab === 'fishdex' && (
+      {/* FinDex Tab */}
+      {activeTab === 'FinDex' && (
         <div>
-          {fishdexEntries.length === 0 ? (
+          {FinDexEntries.length === 0 ? (
             <EmptyState
               icon={Award}
               title="Noch keine Arten entdeckt"
-              description="Fange verifizierte Fische, um sie im FishDex freizuschalten."
+              description="Fange verifizierte Fische, um sie im FinDex freizuschalten."
             />
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {fishdexEntries.map((entry) => (
+              {FinDexEntries.map((entry) => (
                 <Link
                   key={entry.id}
-                  href={entry.species?.id ? `/fishdex/${entry.species.id}` : '#'}
+                  href={entry.species?.id ? `/FinDex/${entry.species.id}` : '#'}
                   className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-3 hover:bg-ocean/40 transition-all duration-300 hover:scale-105 ${
                     entry.species?.id ? '' : 'pointer-events-none'
                   }`}

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
-import type { Achievement, UserAchievement } from '@/lib/types/fishdex'
+import type { Achievement, UserAchievement } from '@/lib/types/FinDex'
 import { ArrowLeft, Trophy, Star, Lock, Target, BookOpen, Users } from 'lucide-react'
 
 interface AchievementWithProgress extends Achievement {
@@ -116,11 +116,11 @@ export default function AchievementsPage() {
     <div className="space-y-6 pb-20 md:pb-6">
       {/* Back Button */}
       <Link
-        href="/fishdex"
+        href="/FinDex"
         className="inline-flex items-center gap-2 text-ocean-light hover:text-white transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
-        Zurück zur FishDex
+        Zurück zur FinDex
       </Link>
 
       {/* Header */}

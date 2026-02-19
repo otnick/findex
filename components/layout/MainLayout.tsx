@@ -22,6 +22,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
     }
   }, [isCatchModalOpen])
 
+  // Android back button: navigate back in history instead of exiting the app
+  useEffect(() => {
+    const handleBackButton = (e: Event) => {
+      e.preventDefault()
+      if (window.history.length > 1) {
+        window.history.back()
+      }
+    }
+    document.addEventListener('backbutton', handleBackButton, false)
+    return () => document.removeEventListener('backbutton', handleBackButton, false)
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark">
       <Navigation />

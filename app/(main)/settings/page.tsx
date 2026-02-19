@@ -96,7 +96,7 @@ export default function ProfilePage() {
 
     const file = event.target.files[0]
     if (!file.type.startsWith('image/')) {
-      toast('Bitte ein Bild auswählen', 'error')
+      toast('Bitte ein Bild ausw�hlen', 'error')
       return
     }
 
@@ -173,7 +173,7 @@ export default function ProfilePage() {
         setNotificationsEnabled(true)
         await notificationService.send({
           title: 'Benachrichtigungen aktiviert!',
-          body: 'Du erhältst jetzt Updates zu Likes, Kommentaren und mehr.',
+          body: 'Du erh�ltst jetzt Updates zu Likes, Kommentaren und mehr.',
         })
       }
     } else {
@@ -194,7 +194,7 @@ export default function ProfilePage() {
   }
 
   const handleExportCSV = () => {
-    const headers = ['Datum', 'Art', 'Länge (cm)', 'Gewicht (g)', 'Ort', 'Köder', 'Notizen']
+    const headers = ['Datum', 'Art', 'L�nge (cm)', 'Gewicht (g)', 'Ort', 'K�der', 'Notizen']
     const rows = catches.map(c => [
       format(new Date(c.date), 'dd.MM.yyyy'),
       c.species,
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                 className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
                 placeholder="dein_username"
               />
-              <p className="text-xs text-ocean-light mt-1">Wird überall als @{profileForm.username} angezeigt</p>
+              <p className="text-xs text-ocean-light mt-1">Wird �berall als @{profileForm.username} angezeigt</p>
             </div>
 
             <div>
@@ -303,7 +303,7 @@ export default function ProfilePage() {
                 onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
                 className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
                 rows={3}
-                placeholder="Erzähl etwas über dich..."
+                placeholder="Erz�hl etwas �ber dich..."
               />
             </div>
 
@@ -368,10 +368,10 @@ export default function ProfilePage() {
                 <svg className="w-6 h-6 text-ocean-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                Dein öffentliches Profil
+                Dein �ffentliches Profil
               </h2>
               <p className="text-ocean-light text-sm mb-3">
-                Teile deinen FishDex und deine besten Fänge mit anderen Anglern
+                Teile deinen FinDex und deine besten F�nge mit anderen Anglern
               </p>
               <div className="flex flex-wrap items-center gap-2 bg-ocean-dark/50 rounded-lg px-3 py-2 w-full sm:w-fit">
                 <span className="text-ocean-light text-sm">findex.app/user/</span>
@@ -409,7 +409,7 @@ export default function ProfilePage() {
       <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
         <h2 className="text-xl font-bold text-white mb-4">Daten exportieren</h2>
         <p className="text-ocean-light text-sm mb-4">
-          Exportiere deine Fänge als Backup oder zur Weiterverarbeitung
+          Exportiere deine F�nge als Backup oder zur Weiterverarbeitung
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <button

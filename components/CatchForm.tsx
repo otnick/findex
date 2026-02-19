@@ -338,6 +338,8 @@ export default function CatchForm({
         const targetDate = formData.date ? new Date(formData.date) : new Date()
         const weatherData = await getWeatherData(position, targetDate)
         setWeather(weatherData)
+      } else {
+        toast('Standortzugriff verweigert – bitte in den Einstellungen erlauben', 'error')
       }
     } catch (error) {
       console.error('Location error:', error)
@@ -767,7 +769,7 @@ export default function CatchForm({
                 <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/90 text-white text-xs px-3 py-1.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                   <span className="inline-flex items-center gap-1">
                     <CheckCircle2 className="w-4 h-4" />
-                    KI-verifiziert → FishDex
+                    KI-verifiziert → FinDex
                   </span>
                 </div>
               </div>
@@ -782,7 +784,7 @@ export default function CatchForm({
                 <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/90 text-white text-xs px-3 py-1.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                   <span className="inline-flex items-center gap-1">
                     <PencilLine className="w-4 h-4" />
-                    Manuell → Kein FishDex
+                    Manuell → Kein FinDex
                   </span>
                 </div>
               </div>
@@ -868,14 +870,14 @@ export default function CatchForm({
             )}
             {!aiDetectionLoading && aiVerified && formData.species && (
               <p className="text-green-400">
-                ✓ Verifiziert als <strong>{formData.species}</strong> - wird im FishDex freigeschaltet
+                ✓ Verifiziert als <strong>{formData.species}</strong> - wird im FinDex freigeschaltet
               </p>
             )}
             {!aiDetectionLoading && manualMode && (
               <p className="text-yellow-400">
                 <span className="inline-flex items-center gap-1">
                   <AlertTriangle className="w-4 h-4" />
-                  Manuelle Eingabe - Fang wird gespeichert, aber NICHT im FishDex gewertet
+                  Manuelle Eingabe - Fang wird gespeichert, aber NICHT im FinDex gewertet
                 </span>
               </p>
             )}

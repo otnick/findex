@@ -14,34 +14,37 @@ import VerificationBadge from '@/components/VerificationBadge'
 export default function DashboardPage() {
   const catches = useCatchStore((state) => state.catches)
   const user = useCatchStore((state) => state.user)
-  const [fishDexStats, setFishDexStats] = useState<{discovered: number, total: number} | null>(null)
+  const [fishDexStats, setFinDexStats] = useState<{discovered: number, total: number} | null>(null)
 
   useEffect(() => {
     if (user) {
-      loadFishDexStats()
+      loadFinDexStats()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
-  const loadFishDexStats = async () => {
+  const loadFinDexStats = async () => {
     if (!user) return
-    
+
     try {
-      // Get total Deutschland species
-      const { count: total } = await supabase
+      // Get Deutschland species IDs and total count
+      const { data: deutschlandSpecies, count: total } = await supabase
         .from('fish_species')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact' })
         .contains('region', ['deutschland'])
 
-      // Get user's discovered species
+      const deutschlandIds = deutschlandSpecies?.map(s => s.id) ?? []
+
+      // Get user's discovered Deutschland species only
       const { count: discovered } = await supabase
         .from('user_fishdex')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .in('species_id', deutschlandIds)
 
-      setFishDexStats({ discovered: discovered || 0, total: total || 0 })
+      setFinDexStats({ discovered: discovered || 0, total: total || 0 })
     } catch (error) {
-      console.error('Error loading FishDex stats:', error)
+      console.error('Error loading FinDex stats:', error)
     }
   }
 
@@ -98,7 +101,7 @@ export default function DashboardPage() {
             className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
           >
             <BookOpen className="w-10 h-10 mx-auto mb-2 text-ocean-light group-hover:text-white transition-colors" />
-            <div className="text-white font-semibold text-sm">FishDex</div>
+            <div className="text-white font-semibold text-sm">FinDex</div>
           </Link>
 
           <Link
@@ -153,19 +156,19 @@ export default function DashboardPage() {
 
       {/* 3D Aquarium - disabled for v1 release, see FishAquarium component to re-enable */}
 
-      {/* FishDex Widget */}
+      {/* FinDex Widget */}
       {fishDexStats && (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <BookOpen className="w-6 h-6 text-ocean-light" />
-              <h2 className="text-xl font-bold text-white">FishDex</h2>
+              <h2 className="text-xl font-bold text-white">FinDex</h2>
             </div>
             <Link
               href="/fishdex"
               className="text-ocean-light hover:text-white text-sm transition-colors"
             >
-              Zur FishDex →
+              Zur FinDex →
             </Link>
           </div>
 
@@ -219,7 +222,7 @@ export default function DashboardPage() {
 
           {fishDexStats.discovered === 0 && (
             <div className="mt-4 text-center p-4 bg-ocean-dark/30 rounded-lg">
-              <p className="text-ocean-light text-sm"><span className="inline-flex items-center gap-1"><Lightbulb className="w-4 h-4" />Fange deinen ersten Fisch um die FishDex zu starten!</span></p>
+              <p className="text-ocean-light text-sm"><span className="inline-flex items-center gap-1"><Lightbulb className="w-4 h-4" />Fange deinen ersten Fisch um die FinDex zu starten!</span></p>
             </div>
           )}
         </div>
@@ -322,7 +325,7 @@ export default function DashboardPage() {
           className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6 hover:bg-ocean/50 transition-colors text-center group"
         >
           <BookOpen className="w-12 h-12 mx-auto mb-3 text-ocean-light group-hover:text-white transition-colors" />
-          <div className="text-white font-semibold text-sm sm:text-base">FishDex</div>
+          <div className="text-white font-semibold text-sm sm:text-base">FinDex</div>
         </Link>
 
         <Link

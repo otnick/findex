@@ -246,3 +246,22 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Prevent black overscroll bars on mobile (iOS rubber-band, Android) */
+html, body {
+  background-color: #0f2333;
+  overscroll-behavior: none;
+}
+
+/* Prevent iOS/Android from styling inputs differently */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="datetime-local"],
+input[type="date"],
+select,
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}

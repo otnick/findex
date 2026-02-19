@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
-import type { FishDexEntry } from '@/lib/types/fishdex'
+import type { FinDexEntry } from '@/lib/types/FinDex'
 import { getSpeciesInfo, getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { ArrowLeft, MapPin, Calendar, Ruler, Scale, Trophy, Info, Lightbulb, Lock, Fish, Droplet, Waves, HelpCircle, RotateCcw, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -13,9 +13,9 @@ import { de } from 'date-fns/locale'
 import { useToast } from '@/components/ToastProvider'
 import { useConfirm } from '@/components/ConfirmDialogProvider'
 
-export default function FishDexDetailClient({ id }: { id: string }) {
+export default function FinDexDetailClient({ id }: { id: string }) {
   const user = useCatchStore(state => state.user)
-  const [entry, setEntry] = useState<FishDexEntry | null>(null)
+  const [entry, setEntry] = useState<FinDexEntry | null>(null)
   const [catches, setCatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
@@ -44,7 +44,7 @@ export default function FishDexDetailClient({ id }: { id: string }) {
 
       // Load user progress
       const { data: progress, error: progressError } = await supabase
-        .from('user_fishdex')
+        .from('user_FinDex')
         .select('*')
         .eq('user_id', user.id)
         .eq('species_id', id)
@@ -77,11 +77,11 @@ export default function FishDexDetailClient({ id }: { id: string }) {
     }
   }
 
-  const resetFishDexEntry = async () => {
+  const resetFinDexEntry = async () => {
     if (!user || !entry) return
 
     const confirmed = await confirm({
-      title: 'FishDex-Eintrag zurücksetzen?',
+      title: 'FinDex-Eintrag zurücksetzen?',
       message: `Möchtest du wirklich den Eintrag für ${entry.name} zurücksetzen? Deine Fänge bleiben erhalten.`,
       confirmLabel: 'Zurücksetzen',
       cancelLabel: 'Abbrechen',
@@ -92,18 +92,18 @@ export default function FishDexDetailClient({ id }: { id: string }) {
 
     setResetting(true)
     try {
-      const { error } = await supabase.rpc('reset_fishdex_entry', {
+      const { error } = await supabase.rpc('reset_FinDex_entry', {
         p_user_id: user.id,
         p_species_name: entry.name
       })
 
       if (error) throw error
 
-      toast(`${entry.name} wurde aus deiner FishDex entfernt!`, 'success')
-      // Redirect to FishDex
-      window.location.href = '/fishdex'
+      toast(`${entry.name} wurde aus deiner FinDex entfernt!`, 'success')
+      // Redirect to FinDex
+      window.location.href = '/FinDex'
     } catch (error: any) {
-      console.error('Error resetting FishDex entry:', error)
+      console.error('Error resetting FinDex entry:', error)
       toast('Fehler beim Zurücksetzen: ' + (error.message || 'Unbekannter Fehler'), 'error')
     } finally {
       setResetting(false)
@@ -140,10 +140,10 @@ export default function FishDexDetailClient({ id }: { id: string }) {
           <HelpCircle className="w-16 h-16 text-ocean-light mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-4">Art nicht gefunden</h1>
           <Link
-            href="/fishdex"
+            href="/FinDex"
             className="inline-block bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors"
           >
-            Zurück zur FishDex
+            Zurück zur FinDex
           </Link>
         </div>
       </div>
@@ -171,11 +171,11 @@ export default function FishDexDetailClient({ id }: { id: string }) {
     <div className="space-y-6 pb-20 md:pb-6">
       {/* Back Button */}
       <Link
-        href="/fishdex"
+        href="/FinDex"
         className="inline-flex items-center gap-2 text-ocean-light hover:text-white transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
-        Zurück zur FishDex
+        Zurück zur FinDex
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -567,13 +567,13 @@ export default function FishDexDetailClient({ id }: { id: string }) {
             <div className="bg-red-900/20 backdrop-blur-sm rounded-xl p-6 border border-red-600/30">
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                 <RotateCcw className="w-5 h-5 text-red-400" />
-                FishDex zurücksetzen
+                FinDex zurücksetzen
               </h3>
               <p className="text-ocean-light text-sm mb-4">
-                Entferne diese Art aus deiner FishDex. Deine Fänge bleiben erhalten und die Art wird beim nächsten Fang wieder entdeckt.
+                Entferne diese Art aus deiner FinDex. Deine Fänge bleiben erhalten und die Art wird beim nächsten Fang wieder entdeckt.
               </p>
               <button
-                onClick={resetFishDexEntry}
+                onClick={resetFinDexEntry}
                 disabled={resetting}
                 className="w-full px-4 py-2 bg-red-900/50 hover:bg-red-900/70 text-red-400 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >

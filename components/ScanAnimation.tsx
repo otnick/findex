@@ -1,9 +1,9 @@
-Ôªø'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { FishSpecies, Achievement } from '@/lib/types/fishdex'
+import type { FishSpecies, Achievement } from '@/lib/types/FinDex'
 import { getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { Trophy, Star, ArrowRight, Radio, PartyPopper, Fish as FishIcon, X } from 'lucide-react'
 
@@ -161,17 +161,17 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
           <div className="bg-ocean-dark/50 rounded-lg p-4 mb-6">
             <div className="text-green-400 font-bold mb-2">+100 XP</div>
           <div className="text-ocean-light text-sm">
-              +1 zur FishDex ({getRegionLabel(species.region || [])})
+              +1 zur FinDex ({getRegionLabel(species.region || [])})
           </div>
           </div>
 
           {/* Buttons */}
           <div className="flex gap-3">
             <Link
-              href={`/fishdex/${species.id}`}
+              href={`/FinDex/${species.id}`}
               className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
-              Zur FishDex
+              Zur FinDex
               <ArrowRight className="w-4 h-4" />
             </Link>
             {newAchievements.length === 0 && (
@@ -179,7 +179,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
                 onClick={onClose}
                 className="px-6 py-3 bg-ocean-dark hover:bg-ocean text-white rounded-lg transition-colors"
               >
-                Schlie√üen
+                Schlieﬂen
               </button>
             )}
           </div>
@@ -218,7 +218,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
 
           <div className="flex gap-3">
             <Link
-              href="/fishdex/achievements"
+              href="/FinDex/achievements"
               className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               Alle Erfolge
@@ -227,7 +227,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
               onClick={onClose}
               className="px-6 py-3 bg-ocean-dark hover:bg-ocean text-white rounded-lg transition-colors"
             >
-              Schlie√üen
+              Schlieﬂen
             </button>
           </div>
         </div>

@@ -156,6 +156,13 @@ jobs:
           plutil -replace ITSAppUsesNonExemptEncryption -bool NO ios/App/App/Info.plist
           plutil -replace CFBundleShortVersionString -string "$VERSION_SHORT" ios/App/App/Info.plist
           plutil -replace CFBundleVersion -string "$VERSION_CODE" ios/App/App/Info.plist
+          # Required permission strings – without these iOS crashes on camera/location access
+          plutil -insert NSCameraUsageDescription -string "FinDex benötigt Zugriff auf die Kamera, um Fotos von deinen Fängen zu machen." ios/App/App/Info.plist 2>/dev/null || \
+            plutil -replace NSCameraUsageDescription -string "FinDex benötigt Zugriff auf die Kamera, um Fotos von deinen Fängen zu machen." ios/App/App/Info.plist
+          plutil -insert NSPhotoLibraryUsageDescription -string "FinDex benötigt Zugriff auf deine Fotos, um Bilder hochzuladen." ios/App/App/Info.plist 2>/dev/null || \
+            plutil -replace NSPhotoLibraryUsageDescription -string "FinDex benötigt Zugriff auf deine Fotos, um Bilder hochzuladen." ios/App/App/Info.plist
+          plutil -insert NSLocationWhenInUseUsageDescription -string "FinDex benötigt deinen Standort, um Fangorte zu speichern." ios/App/App/Info.plist 2>/dev/null || \
+            plutil -replace NSLocationWhenInUseUsageDescription -string "FinDex benötigt deinen Standort, um Fangorte zu speichern." ios/App/App/Info.plist
 
       - name: Install CocoaPods
         working-directory: ios/App
