@@ -159,7 +159,8 @@ jobs:
           }
           SWIFT_EOF
           # Patch storyboard to use MainViewController instead of CAPBridgeViewController
-          sed -i 's/customClass="CAPBridgeViewController" customModule="Capacitor"/customClass="MainViewController" customModule="App"/' \
+          # BSD sed (macOS) requires -i '' for in-place editing without a backup suffix
+          sed -i '' 's/customClass="CAPBridgeViewController" customModule="Capacitor"/customClass="MainViewController" customModule="App"/' \
             ios/App/App/Base.lproj/Main.storyboard
 
       - name: Patch Info.plist

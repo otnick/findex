@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
-import type { Achievement, UserAchievement } from '@/lib/types/FinDex'
+import type { Achievement, UserAchievement } from '@/lib/types/fishdex'
 import { ArrowLeft, Trophy, Star, Lock, Target, BookOpen, Users } from 'lucide-react'
 
 interface AchievementWithProgress extends Achievement {
