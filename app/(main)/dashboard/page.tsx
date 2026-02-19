@@ -32,8 +32,15 @@ export default function DashboardPage() {
         .from('fish_species')
         .select('id', { count: 'exact' })
         .contains('region', ['deutschland'])
+        .limit(500)
 
       const deutschlandIds = deutschlandSpecies?.map(s => s.id) ?? []
+
+      // Guard: empty array would cause .in() to ignore the filter and return all rows
+      if (deutschlandIds.length === 0) {
+        setFinDexStats({ discovered: 0, total: total || 0 })
+        return
+      }
 
       // Get user's discovered Deutschland species only
       const { count: discovered } = await supabase

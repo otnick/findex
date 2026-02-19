@@ -143,6 +143,25 @@ jobs:
           cp resources/ios/*.png "$APPICONSET/"
           cp resources/ios/Contents.json "$APPICONSET/"
 
+      - name: Patch native iOS – disable overscroll bounce
+        run: |
+          # Create MainViewController that disables WKWebView scroll bounce
+          cat > ios/App/App/MainViewController.swift << 'SWIFT_EOF'
+          import UIKit
+          import Capacitor
+
+          class MainViewController: CAPBridgeViewController {
+              override func viewDidLoad() {
+                  super.viewDidLoad()
+                  webView?.scrollView.bounces = false
+                  webView?.scrollView.alwaysBounceVertical = false
+              }
+          }
+          SWIFT_EOF
+          # Patch storyboard to use MainViewController instead of CAPBridgeViewController
+          sed -i 's/customClass="CAPBridgeViewController" customModule="Capacitor"/customClass="MainViewController" customModule="App"/' \
+            ios/App/App/Base.lproj/Main.storyboard
+
       - name: Patch Info.plist
         run: |
           TAG="${GITHUB_REF#refs/tags/v}"

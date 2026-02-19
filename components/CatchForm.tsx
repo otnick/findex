@@ -152,10 +152,11 @@ export default function CatchForm({
       setFormData((prev) => ({ ...prev, date: toDateTimeLocalValue(metadata.capturedAt as Date) }))
     }
 
+    const targetDate = metadata.capturedAt || (formData.date ? new Date(formData.date) : new Date())
+
     if (metadata.coordinates) {
       setCoordinates(metadata.coordinates)
 
-      const targetDate = metadata.capturedAt || (formData.date ? new Date(formData.date) : new Date())
       const [locationName, weatherData] = await Promise.all([
         getLocationName(metadata.coordinates),
         getWeatherData(metadata.coordinates, targetDate),
@@ -166,6 +167,22 @@ export default function CatchForm({
       }
       if (weatherData) {
         setWeather(weatherData)
+      }
+    } else {
+      // No EXIF GPS (e.g. camera photo on iOS strips EXIF) – silently fall back to device GPS
+      const position = await getCurrentPosition()
+      if (position) {
+        setCoordinates(position)
+        const [locationName, weatherData] = await Promise.all([
+          getLocationName(position),
+          getWeatherData(position, targetDate),
+        ])
+        if (locationName) {
+          setFormData((prev) => ({ ...prev, location: locationName }))
+        }
+        if (weatherData) {
+          setWeather(weatherData)
+        }
       }
     }
   }

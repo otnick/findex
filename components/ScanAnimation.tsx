@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { FishSpecies, Achievement } from '@/lib/types/FinDex'
+import type { FishSpecies, Achievement } from '@/lib/types/fishdex'
 import { getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { Trophy, Star, ArrowRight, Radio, PartyPopper, Fish as FishIcon, X } from 'lucide-react'
 
@@ -110,12 +110,30 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
 
       {/* Reveal Stage */}
       {stage === 'reveal' && (
-        <div className="text-center max-w-md w-full animate-scale-in">
+        <div className="text-center max-w-md w-full animate-scale-in relative">
+          {/* Confetti particles */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+            {[...Array(18)].map((_, i) => (
+              <span
+                key={i}
+                className="absolute animate-confetti"
+                style={{
+                  left: `${(i * 37 + 11) % 100}%`,
+                  animationDelay: `${(i * 0.13) % 1.2}s`,
+                  animationDuration: `${1.2 + (i % 4) * 0.25}s`,
+                  fontSize: i % 3 === 0 ? '1.4rem' : i % 3 === 1 ? '1rem' : '0.8rem',
+                }}
+              >
+                {['⭐', '✨', '🎉', '🐟', '💫'][i % 5]}
+              </span>
+            ))}
+          </div>
+
           <div className="mb-6">
             <div className="mb-4 flex justify-center">
               <PartyPopper className="w-14 h-14 text-yellow-400 animate-bounce" />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-2">
+            <h2 className="text-3xl font-bold text-white mb-2 animate-discovery-title">
               NEUE ENTDECKUNG!
             </h2>
             <div className="inline-flex items-center gap-2 bg-green-900/30 text-green-400 px-4 py-2 rounded-full mb-4">
@@ -125,15 +143,15 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
           </div>
 
           {/* Species Card */}
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 mb-6">
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-ocean-dark mb-4">
+          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 mb-6 ring-2 ring-yellow-400/40 shadow-[0_0_32px_rgba(250,204,21,0.25)]">
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-ocean-dark mb-4 ring-1 ring-yellow-400/30 shadow-[0_0_20px_rgba(250,204,21,0.2)]">
               {species.image_url ? (
                 <Image
                   src={species.image_url}
                   alt={species.name}
                   fill
                   sizes="100vw"
-            className="object-contain animate-fade-in"
+                  className="object-contain animate-fade-in"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -150,7 +168,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
                 {species.scientific_name}
               </p>
             )}
-            
+
             <div className="flex items-center justify-center gap-2">
               <span className="text-ocean-light text-sm">Seltenheit:</span>
               <span className="text-yellow-400">{renderRarityStars(rarity)}</span>
@@ -160,15 +178,15 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
           {/* Rewards */}
           <div className="bg-ocean-dark/50 rounded-lg p-4 mb-6">
             <div className="text-green-400 font-bold mb-2">+100 XP</div>
-          <div className="text-ocean-light text-sm">
+            <div className="text-ocean-light text-sm">
               +1 zur FinDex ({getRegionLabel(species.region || [])})
-          </div>
+            </div>
           </div>
 
           {/* Buttons */}
           <div className="flex gap-3">
             <Link
-              href={`/FinDex/${species.id}`}
+              href={`/fishdex/${species.id}`}
               className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               Zur FinDex
@@ -179,7 +197,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
                 onClick={onClose}
                 className="px-6 py-3 bg-ocean-dark hover:bg-ocean text-white rounded-lg transition-colors"
               >
-                Schlie�en
+                Schließen
               </button>
             )}
           </div>
@@ -218,7 +236,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
 
           <div className="flex gap-3">
             <Link
-              href="/FinDex/achievements"
+              href="/fishdex/achievements"
               className="flex-1 bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               Alle Erfolge
@@ -227,7 +245,7 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
               onClick={onClose}
               className="px-6 py-3 bg-ocean-dark hover:bg-ocean text-white rounded-lg transition-colors"
             >
-              Schlie�en
+              Schlie�en
             </button>
           </div>
         </div>

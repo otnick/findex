@@ -212,6 +212,28 @@ body {
   animation: shinyBurst 1.8s ease-in-out forwards;
 }
 
+@keyframes confettiFall {
+  0% { transform: translateY(-40px) rotate(0deg); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.animate-confetti {
+  animation: confettiFall linear forwards;
+  top: -20px;
+  position: absolute;
+}
+
+@keyframes discoveryTitle {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-discovery-title {
+  animation: discoveryTitle 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
   /* Prevent zoom on input focus (iOS) */
