@@ -44,26 +44,32 @@ export default function MainLayout({ children }: MainLayoutProps) {
         </main>
 
         {isCatchModalOpen && (
-          <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center p-2 pt-3 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] sm:p-4">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:pb-4">
             <div
               className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-catchOverlayIn"
               onClick={closeCatchModal}
             />
             <div
               data-catch-modal-sheet="true"
-              className="relative w-full max-w-none sm:max-w-2xl max-h-[80vh] sm:max-h-[75vh] overflow-x-hidden overflow-y-auto bg-ocean-deeper sm:bg-ocean/30 backdrop-blur-sm rounded-t-3xl sm:rounded-2xl p-6 sm:p-6 shadow-2xl animate-catchModalIn"
+              className="relative w-full max-w-none sm:max-w-2xl max-h-[85dvh] sm:max-h-[80dvh] flex flex-col bg-ocean-deeper sm:bg-ocean/30 sm:backdrop-blur-sm rounded-t-3xl sm:rounded-2xl shadow-2xl animate-catchModalIn"
             >
-              <div className="flex items-center justify-between mb-4">
+              {/* Drag handle (mobile) */}
+              <div className="flex justify-center pt-3 pb-1 shrink-0 sm:hidden">
+                <div className="w-10 h-1 rounded-full bg-ocean-light/30" />
+              </div>
+              <div className="flex items-center justify-between px-5 pt-3 pb-4 sm:px-6 sm:pt-5 shrink-0">
                 <h2 className="text-xl font-bold text-white">Neuen Fang hinzufügen</h2>
                 <button
                   onClick={closeCatchModal}
-                  className="text-ocean-light hover:text-white transition-colors text-xl leading-none"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-ocean-dark/50 text-ocean-light hover:text-white transition-colors shrink-0"
                   aria-label="Schließen"
                 >
                   ×
                 </button>
               </div>
-              <CatchForm onSuccess={closeCatchModal} embeddedFlow />
+              <div className="overflow-x-hidden overflow-y-auto px-5 pb-5 sm:px-6 sm:pb-6">
+                <CatchForm onSuccess={closeCatchModal} embeddedFlow />
+              </div>
             </div>
           </div>
         )}

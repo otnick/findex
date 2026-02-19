@@ -67,27 +67,22 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-2 pt-3 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] sm:p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Sheet */}
-      <div className="relative w-full max-w-none sm:max-w-lg max-h-[80vh] overflow-x-hidden overflow-y-auto bg-ocean-deeper sm:bg-ocean/30 sm:backdrop-blur-sm rounded-t-3xl sm:rounded-2xl shadow-2xl animate-catchModalIn">
+      {/* Card */}
+      <div className="relative w-full max-w-sm max-h-[80dvh] overflow-x-hidden overflow-y-auto bg-ocean-deeper rounded-2xl shadow-2xl animate-catchModalIn">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-ocean-light hover:text-white transition-colors z-10 w-8 h-8 flex items-center justify-center rounded-full bg-ocean-dark/50"
+          className="absolute top-3 right-3 text-ocean-light hover:text-white transition-colors z-10 w-8 h-8 flex items-center justify-center rounded-full bg-ocean-dark/50"
           aria-label="Schließen"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Drag handle (mobile) */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-ocean-light/30" />
-        </div>
-
-        <div className="p-5 sm:p-6">
+        <div className="p-5">
           {/* Scanning Stage */}
           {stage === 'scanning' && (
             <div className="text-center py-4">
