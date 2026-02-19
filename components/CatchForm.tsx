@@ -981,28 +981,15 @@ export default function CatchForm({
         <label className="block text-ocean-light text-sm mb-2">
           Datum & Uhrzeit
         </label>
-        <div className="space-y-2">
-          <input
-            type="date"
-            value={formData.date.slice(0, 10)}
-            onChange={(e) => {
-              setDateManuallySet(true)
-              const time = formData.date.length >= 16 ? formData.date.slice(11, 16) : '12:00'
-              setFormData({ ...formData, date: `${e.target.value}T${time}` })
-            }}
-            className="w-full px-3 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-sm"
-          />
-          <input
-            type="time"
-            value={formData.date.length >= 16 ? formData.date.slice(11, 16) : '12:00'}
-            onChange={(e) => {
-              setDateManuallySet(true)
-              const date = formData.date.slice(0, 10) || new Date().toISOString().slice(0, 10)
-              setFormData({ ...formData, date: `${date}T${e.target.value}` })
-            }}
-            className="w-full px-3 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-sm"
-          />
-        </div>
+        <input
+          type="datetime-local"
+          value={formData.date.slice(0, 16)}
+          onChange={(e) => {
+            setDateManuallySet(true)
+            setFormData({ ...formData, date: e.target.value })
+          }}
+          className="w-full px-3 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-sm"
+        />
       </div>
 
       {/* Location */}
