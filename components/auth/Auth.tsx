@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Eye, EyeOff } from 'lucide-react'
 
 interface AuthProps {
   onSuccess: () => void
@@ -15,6 +15,7 @@ export default function Auth({ onSuccess }: AuthProps) {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,14 +137,24 @@ export default function Auth({ onSuccess }: AuthProps) {
 
           <div>
             <label className="block text-ocean-light mb-2">Passwort</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 pr-12 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ocean-light hover:text-white transition-colors"
+                aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
             {!isLogin && (
               <p className="text-sm text-ocean-light mt-1">
                 Mindestens 6 Zeichen

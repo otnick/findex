@@ -23,9 +23,18 @@ interface Profile {
   pinned_catch_ids?: string[]
 }
 
+function getCapacitorPlatform(): 'ios' | 'android' | 'web' {
+  if (typeof window === 'undefined') return 'web'
+  const cap = (window as any).Capacitor
+  if (!cap?.isNativePlatform?.()) return 'web'
+  return cap.getPlatform?.() ?? 'web'
+}
+
 export default function ProfilePage() {
   const { user, catches, signOut } = useCatchStore()
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const platform = typeof window !== 'undefined' ? getCapacitorPlatform() : 'web'
+  const notificationsSupported = platform !== 'ios'
   const [profile, setProfile] = useState<Profile | null>(null)
   const [editingProfile, setEditingProfile] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -437,31 +446,37 @@ export default function ProfilePage() {
             <div>
               <div className="text-white font-semibold">Benachrichtigungen</div>
               <div className="text-ocean-light text-sm">
-                Erhalte Updates zu Likes, Kommentaren und Freunden
+                {notificationsSupported
+                  ? 'Erhalte Updates zu Likes, Kommentaren und Freunden'
+                  : 'Push-Benachrichtigungen für iOS folgen in einem zukünftigen Update'}
               </div>
             </div>
-            <label className="self-start inline-flex cursor-pointer items-center gap-3">
-              <span className="sr-only">Benachrichtigungen umschalten</span>
-              <input
-                type="checkbox"
-                className="sr-only"
-                checked={notificationsEnabled}
-                onChange={toggleNotifications}
-              />
-              <span
-                className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
-                  notificationsEnabled
-                    ? 'bg-green-500/90 border-green-400/60'
-                    : 'bg-gray-700 border-gray-500/60'
-                }`}
-              >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                    notificationsEnabled ? 'translate-x-5' : 'translate-x-1'
-                  }`}
+            {notificationsSupported ? (
+              <label className="self-start inline-flex cursor-pointer items-center gap-3">
+                <span className="sr-only">Benachrichtigungen umschalten</span>
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={notificationsEnabled}
+                  onChange={toggleNotifications}
                 />
-              </span>
-            </label>
+                <span
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
+                    notificationsEnabled
+                      ? 'bg-green-500/90 border-green-400/60'
+                      : 'bg-gray-700 border-gray-500/60'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                      notificationsEnabled ? 'translate-x-5' : 'translate-x-1'
+                    }`}
+                  />
+                </span>
+              </label>
+            ) : (
+              <span className="self-start text-xs text-ocean-light/60 italic">Kommt bald</span>
+            )}
           </div>
           
         </div>
