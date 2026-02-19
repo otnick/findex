@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
-import type { FinDexEntry } from '@/lib/types/FinDex'
+import type { FishDexEntry as FinDexEntry } from '@/lib/types/fishdex'
 import { getSpeciesInfo, getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { ArrowLeft, MapPin, Calendar, Ruler, Scale, Trophy, Info, Lightbulb, Lock, Fish, Droplet, Waves, HelpCircle, RotateCcw, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -44,7 +44,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
       // Load user progress
       const { data: progress, error: progressError } = await supabase
-        .from('user_FinDex')
+        .from('user_fishdex')
         .select('*')
         .eq('user_id', user.id)
         .eq('species_id', id)
@@ -101,7 +101,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
       toast(`${entry.name} wurde aus deiner FinDex entfernt!`, 'success')
       // Redirect to FinDex
-      window.location.href = '/FinDex'
+      window.location.href = '/fishdex'
     } catch (error: any) {
       console.error('Error resetting FinDex entry:', error)
       toast('Fehler beim Zurücksetzen: ' + (error.message || 'Unbekannter Fehler'), 'error')
@@ -140,7 +140,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
           <HelpCircle className="w-16 h-16 text-ocean-light mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-4">Art nicht gefunden</h1>
           <Link
-            href="/FinDex"
+            href="/fishdex"
             className="inline-block bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors"
           >
             Zurück zur FinDex
@@ -171,7 +171,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
     <div className="space-y-6 pb-20 md:pb-6">
       {/* Back Button */}
       <Link
-        href="/FinDex"
+        href="/fishdex"
         className="inline-flex items-center gap-2 text-ocean-light hover:text-white transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
@@ -183,27 +183,43 @@ export default function FinDexDetailClient({ id }: { id: string }) {
         <div className="lg:col-span-2 space-y-4">
           {/* Image Card */}
           <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-ocean-dark mb-4">
-              {entry.discovered ? (
-                entry.image_url ? (
-                  <Image
-                    src={entry.image_url}
-                    alt={entry.name}
-                    fill
-                    sizes="100vw"
-            className="object-contain"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Fish className="w-32 h-32 text-ocean-light" />
+            {(() => {
+              const biggestCatch = catches
+                .filter(c => c.photo_url)
+                .sort((a, b) => (b.length || 0) - (a.length || 0))[0]
+              const displayPhoto = biggestCatch?.photo_url || entry.image_url
+              return (
+                <>
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-ocean-dark mb-2">
+                    {entry.discovered ? (
+                      displayPhoto ? (
+                        <Image
+                          src={displayPhoto}
+                          alt={entry.name}
+                          fill
+                          sizes="100vw"
+                          className="object-contain"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Fish className="w-32 h-32 text-ocean-light" />
+                        </div>
+                      )
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Lock className="w-32 h-32 text-gray-600" />
+                      </div>
+                    )}
                   </div>
-                )
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Lock className="w-32 h-32 text-gray-600" />
-                </div>
-              )}
-            </div>
+                  {biggestCatch && (
+                    <p className="text-ocean-light text-xs text-center mb-4">
+                      Größter Fang · {biggestCatch.length} cm
+                      {biggestCatch.weight ? ` · ${biggestCatch.weight > 1000 ? `${(biggestCatch.weight / 1000).toFixed(1)} kg` : `${biggestCatch.weight} g`}` : ''}
+                    </p>
+                  )}
+                </>
+              )
+            })()}
 
             {/* Status Badge */}
             <div className="flex items-center justify-center">
@@ -214,7 +230,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 </div>
               ) : (
                 <div className="inline-flex items-center gap-2 bg-gray-900/30 text-gray-400 px-4 py-2 rounded-full">
-                  ðŸ”’ <span className="font-bold">NICHT ENTDECKT</span>
+                  <Lock className="w-5 h-5" /><span className="font-bold">NICHT ENTDECKT</span>
                 </div>
               )}
             </div>
