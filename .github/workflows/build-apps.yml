@@ -143,10 +143,10 @@ jobs:
           cp resources/ios/*.png "$APPICONSET/"
           cp resources/ios/Contents.json "$APPICONSET/"
 
-      - name: Patch native iOS – dark background during WKWebView load
+      - name: Patch native iOS – disable overscroll bounce
         run: |
           # Capacitor already generates MainViewController.swift – we just overwrite it.
-          # The storyboard already references MainViewController, no patching needed.
+          # backgroundColor is handled by capacitor.config.ts (ios.backgroundColor).
           # IMPORTANT: do NOT set webView?.isOpaque = false – it causes a black re-render flash.
           cat > ios/App/App/MainViewController.swift << 'SWIFT_EOF'
           import UIKit
@@ -155,8 +155,6 @@ jobs:
           class MainViewController: CAPBridgeViewController {
               override func viewDidLoad() {
                   super.viewDidLoad()
-                  // Match app background so the native view isn't black while WKWebView loads
-                  view.backgroundColor = UIColor(red: 15/255.0, green: 35/255.0, blue: 51/255.0, alpha: 1.0)
                   // Disable rubber-band overscroll that shows black bars on bounce
                   // Note: do NOT set isOpaque = false – causes a black re-render flash
                   webView?.scrollView.bounces = false

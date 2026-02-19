@@ -12,6 +12,7 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
     scheme: 'FinDex',
+    backgroundColor: '#0f2333',
   },
   android: {
     backgroundColor: '#0f2333',
