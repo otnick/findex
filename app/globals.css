@@ -273,6 +273,10 @@ html {
 html, body {
   background-color: #0f2333;
   overscroll-behavior: none;
+}
+
+/* overflow-x: hidden on html breaks iOS touch events – only apply to body */
+body {
   overflow-x: hidden;
 }
 
