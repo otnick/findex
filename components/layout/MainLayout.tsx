@@ -51,7 +51,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             />
             <div
               data-catch-modal-sheet="true"
-              className="relative w-full max-w-none sm:max-w-2xl max-h-[85dvh] sm:max-h-[80dvh] flex flex-col bg-ocean-deeper sm:bg-ocean/30 sm:backdrop-blur-sm rounded-3xl shadow-2xl animate-catchModalIn"
+              className="relative w-full max-w-none sm:max-w-2xl max-h-[72dvh] sm:max-h-[80dvh] flex flex-col bg-ocean-deeper sm:bg-ocean/30 sm:backdrop-blur-sm rounded-3xl shadow-2xl animate-catchModalIn"
             >
               {/* Drag handle (mobile) */}
               <div className="flex justify-center pt-3 pb-1 shrink-0 sm:hidden">
