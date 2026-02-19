@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
-import type { FinDexEntry, FinDexRegion, FinDexCategory, FinDexSortBy } from '@/lib/types/FinDex'
+import type { FishDexEntry as FinDexEntry, FishDexRegion as FinDexRegion, FishDexCategory as FinDexCategory, FishDexSortBy as FinDexSortBy } from '@/lib/types/fishdex'
 import { getSpeciesInfo, getSpeciesRarity, getSpeciesSearchTokens, normalizeSpeciesName } from '@/lib/utils/speciesInfo'
 import { Search, Filter, Trophy, Star, Lock, Fish, BookOpen } from 'lucide-react'
 
@@ -41,7 +41,7 @@ export default function FinDexPage() {
 
       // Load user's discovered species
       const { data: userProgress, error: progressError } = await supabase
-        .from('user_FinDex')
+        .from('user_fishdex')
         .select('*')
         .eq('user_id', user.id)
 
@@ -309,7 +309,7 @@ export default function FinDexPage() {
             </p>
           </div>
           <Link
-            href="/FinDex/achievements"
+            href="/fishdex/achievements"
             className="px-4 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors flex items-center gap-2"
           >
             <Trophy className="w-4 h-4" />
@@ -429,7 +429,7 @@ export default function FinDexPage() {
         {filteredEntries.map((entry) => (
           <Link
             key={entry.id}
-            href={`/FinDex/${entry.id}`}
+            href={`/fishdex/${entry.id}`}
             className={`
               relative aspect-square rounded-xl overflow-hidden
               transition-all duration-300 hover:scale-105 hover:shadow-xl
