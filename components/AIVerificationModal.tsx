@@ -77,7 +77,7 @@ export default function AIVerificationModal({
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-white">AI Fischerkennung</h2>
             <p className="text-ocean-light text-sm">
-              Best�tige die erkannte Fischart f�r FinDex-Wertung
+              Bestätige die erkannte Fischart für FinDex-Wertung
             </p>
           </div>
         </div>
@@ -163,11 +163,11 @@ export default function AIVerificationModal({
               <ul className="text-ocean-light text-sm space-y-1">
                 <li className="inline-flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-green-400" />
-                  <span><strong>Best�tigen:</strong> KI-Erkennung wird �bernommen ? FinDex Unlock</span>
+                  <span><strong>Bestätigen:</strong> KI-Erkennung wird übernommen → FinDex Unlock</span>
                 </li>
                 <li className="inline-flex items-center gap-2">
                   <PencilLine className="w-4 h-4 text-yellow-400" />
-                  <span><strong>Manuell:</strong> Du w�hlst die Art selbst ? Kein FinDex</span>
+                  <span><strong>Manuell:</strong> Du wählst die Art selbst → Kein FinDex</span>
                 </li>
                 <li className="inline-flex items-center gap-2">
                   <XCircle className="w-4 h-4 text-red-400" />
@@ -175,7 +175,7 @@ export default function AIVerificationModal({
                 </li>
               </ul>
               <p className="text-ocean-light text-xs mt-3 italic">
-                Hinweis: Bei &quot;Best�tigen&quot; wird die Art gesperrt.
+                Hinweis: Bei &quot;Bestätigen&quot; wird die Art gesperrt.
               </p>
             </div>
 
@@ -187,7 +187,7 @@ export default function AIVerificationModal({
                   className="flex-1 bg-green-900/30 hover:bg-green-900/50 text-green-400 font-semibold py-4 px-5 rounded-lg transition-colors disabled:opacity-50 flex flex-col items-center justify-center gap-2 group"
                 >
                   <CheckCircle2 className="w-8 h-8 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm">Best�tigen</span>
+                  <span className="text-sm">Bestätigen</span>
                   <span className="text-xs text-green-300/70">FinDex Unlock</span>
                 </button>
                 <button
