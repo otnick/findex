@@ -44,6 +44,14 @@ jobs:
       - name: Copy custom app icons
         run: cp -r resources/android/res/. android/app/src/main/res/
 
+      - name: Patch Android permissions
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          # Insert required permissions after the INTERNET permission line
+          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />|' "$MANIFEST"
+          echo "=== Permissions after patch ==="
+          grep "uses-permission" "$MANIFEST"
+
       # 📱 Update targetSdk, versionCode and versionName from git tag
       - name: Update build config
         run: |
