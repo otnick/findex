@@ -35,7 +35,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark">
+    <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark pt-[env(safe-area-inset-top)]">
       <Navigation />
 
         {/* Main Content */}
