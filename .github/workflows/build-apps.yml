@@ -153,6 +153,10 @@ jobs:
           class MainViewController: CAPBridgeViewController {
               override func viewDidLoad() {
                   super.viewDidLoad()
+                  // Dark background so the native view matches app theme during WKWebView load
+                  view.backgroundColor = UIColor(red: 15/255.0, green: 35/255.0, blue: 51/255.0, alpha: 1.0)
+                  webView?.backgroundColor = UIColor(red: 15/255.0, green: 35/255.0, blue: 51/255.0, alpha: 1.0)
+                  webView?.isOpaque = false
                   webView?.scrollView.bounces = false
                   webView?.scrollView.alwaysBounceVertical = false
               }
