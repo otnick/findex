@@ -7,7 +7,6 @@ import {
   Camera,
   CheckCircle2,
   Cloud,
-  ImagePlus,
   Lock,
   MapPin,
   PencilLine,
@@ -823,30 +822,22 @@ export default function CatchForm({
             </button>
           </div>
         ) : (
-          <div className="flex gap-3 w-full h-48">
-            <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-ocean-light/30 rounded-lg cursor-pointer hover:border-ocean-light transition-colors">
-              <Camera className="w-9 h-9 text-ocean-light mb-2" />
-              <span className="text-ocean-light text-sm">Kamera</span>
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handlePhotoChange}
-                className="hidden"
-              />
-            </label>
-            <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-ocean-light/30 rounded-lg cursor-pointer hover:border-ocean-light transition-colors">
-              <ImagePlus className="w-9 h-9 text-ocean-light mb-2" />
-              <span className="text-ocean-light text-sm">Galerie</span>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handlePhotoChange}
-                className="hidden"
-              />
-            </label>
-          </div>
+          <label className="flex items-center justify-center w-full h-48 border-2 border-dashed border-ocean-light/30 rounded-lg cursor-pointer hover:border-ocean-light transition-colors">
+            <div className="text-center">
+              <div className="mb-2 flex justify-center">
+                <Camera className="w-9 h-9 text-ocean-light" />
+              </div>
+              <div className="text-ocean-light">Foto hinzufügen</div>
+              <div className="text-ocean-light/50 text-xs mt-1">Kamera oder Galerie</div>
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+          </label>
         )}
 
         {photoPreviews.length > 0 && (

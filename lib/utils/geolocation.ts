@@ -8,31 +8,36 @@ export interface Coordinates {
  * @returns Promise with coordinates or null if failed
  */
 export async function getCurrentPosition(): Promise<Coordinates | null> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      console.error('Geolocation is not supported by this browser.')
-      resolve(null)
-      return
-    }
+  if (!navigator.geolocation) {
+    console.error('Geolocation is not supported by this browser.')
+    return null
+  }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        })
-      },
-      (error) => {
-        console.error('Error getting position:', error)
-        resolve(null)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    )
-  })
+  const tryGet = (highAccuracy: boolean): Promise<Coordinates | null> =>
+    new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          })
+        },
+        (error) => {
+          console.error(`Geolocation error (highAccuracy=${highAccuracy}):`, error)
+          resolve(null)
+        },
+        {
+          enableHighAccuracy: highAccuracy,
+          timeout: highAccuracy ? 10000 : 5000,
+          maximumAge: highAccuracy ? 0 : 60000,
+        }
+      )
+    })
+
+  // Try high accuracy first (GPS), fall back to low accuracy (network/WiFi)
+  const result = await tryGet(true)
+  if (result) return result
+  return tryGet(false)
 }
 
 /**
