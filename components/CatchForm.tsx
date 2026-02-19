@@ -471,8 +471,11 @@ export default function CatchForm({
       }
 
       // Check if this was a new discovery (only verified)
+      // Use a return value instead of reading state (setState is async –
+      // newDiscovery would still be null in this closure even after setNewDiscovery)
+      let foundDiscovery = false
       if (verificationData.verification_status === 'verified') {
-        await checkForNewDiscovery(catchData.species)
+        foundDiscovery = await checkForNewDiscovery(catchData.species)
       }
 
       setFormData({
@@ -483,7 +486,7 @@ export default function CatchForm({
         bait: '',
         notes: '',
         date: new Date().toISOString().slice(0, 16),
-        isPublic: false, // Reset to private
+        isPublic: false,
       })
       setDateManuallySet(false)
       setPhotos([])
@@ -494,8 +497,8 @@ export default function CatchForm({
       setAIVerified(false)
       setAIDetectionResults([])
 
-      // Only call onSuccess if no new discovery (to prevent navigation)
-      if (!newDiscovery) {
+      // Only close modal if no new discovery was found
+      if (!foundDiscovery) {
         onSuccess()
       }
     } catch (error) {
@@ -506,8 +509,8 @@ export default function CatchForm({
     }
   }
 
-  const checkForNewDiscovery = async (speciesName: string) => {
-    if (!user) return
+  const checkForNewDiscovery = async (speciesName: string): Promise<boolean> => {
+    if (!user) return false
 
     try {
       // Check if species exists in catalog
@@ -518,7 +521,7 @@ export default function CatchForm({
         .single()
 
       if (speciesError || !species) {
-        return
+        return false
       }
 
       // Wait for trigger to complete (increased wait time)
@@ -533,7 +536,7 @@ export default function CatchForm({
         .single()
 
       if (entryError) {
-        return
+        return false
       }
 
       // Check if this was just created (within last 10 seconds)
@@ -549,16 +552,19 @@ export default function CatchForm({
           .eq('user_id', user.id)
           .gte('unlocked_at', new Date(Date.now() - 10000).toISOString())
 
-        // IMPORTANT: Set state AFTER all data is loaded
         const discoveryData = {
           species,
           achievements: achievements?.map(a => a.achievement).filter(Boolean) || []
         }
 
         setNewDiscovery(discoveryData)
+        return true
       }
+
+      return false
     } catch (error) {
       console.error('Error checking discovery:', error)
+      return false
     }
   }
 
