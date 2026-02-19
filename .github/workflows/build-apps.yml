@@ -157,6 +157,10 @@ jobs:
                   super.viewDidLoad()
                   // Match app background so the native view isn't black while WKWebView loads
                   view.backgroundColor = UIColor(red: 15/255.0, green: 35/255.0, blue: 51/255.0, alpha: 1.0)
+                  // Disable rubber-band overscroll that shows black bars on bounce
+                  // Note: do NOT set isOpaque = false – causes a black re-render flash
+                  webView?.scrollView.bounces = false
+                  webView?.scrollView.alwaysBounceVertical = false
               }
           }
           SWIFT_EOF
