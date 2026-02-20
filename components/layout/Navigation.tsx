@@ -33,11 +33,15 @@ export default function Navigation() {
   const isAiAnalyzing = useCatchStore((state) => state.isAiAnalyzing)
   const toggleCatchModal = useCatchStore((state) => state.toggleCatchModal)
   const sheetRef = useRef<HTMLDivElement>(null)
+  const dragStartY = useRef(0)
+  const [dragY, setDragY] = useState(0)
+  const isDragging = useRef(false)
 
   // Non-passive touchmove listener: prevent page scroll when menu is open,
   // but allow scroll inside the sheet itself.
   useEffect(() => {
     if (!mobileMenuOpen) return
+    setDragY(0)
     const prevent = (e: TouchEvent) => {
       if (sheetRef.current?.contains(e.target as Node)) return
       e.preventDefault()
@@ -45,6 +49,28 @@ export default function Navigation() {
     document.addEventListener('touchmove', prevent, { passive: false })
     return () => document.removeEventListener('touchmove', prevent)
   }, [mobileMenuOpen])
+
+  const handleSheetTouchStart = (e: React.TouchEvent) => {
+    // Only allow drag-to-close when sheet is scrolled to top
+    if (sheetRef.current && sheetRef.current.scrollTop > 4) return
+    dragStartY.current = e.touches[0].clientY
+    isDragging.current = true
+  }
+
+  const handleSheetTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current) return
+    const dy = e.touches[0].clientY - dragStartY.current
+    if (dy > 0) setDragY(dy)
+  }
+
+  const handleSheetTouchEnd = () => {
+    isDragging.current = false
+    if (dragY > 80) {
+      setMobileMenuOpen(false)
+    } else {
+      setDragY(0)
+    }
+  }
 
   return (
     <>
@@ -176,7 +202,22 @@ export default function Navigation() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div ref={sheetRef} className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 space-y-2 max-h-[80vh] overflow-y-scroll overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div
+            ref={sheetRef}
+            className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 space-y-2 max-h-[80vh] overflow-y-scroll overscroll-contain"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              transform: `translateY(${dragY}px)`,
+              transition: isDragging.current ? 'none' : 'transform 0.3s cubic-bezier(0.2,0.8,0.2,1)',
+            }}
+            onTouchStart={handleSheetTouchStart}
+            onTouchMove={handleSheetTouchMove}
+            onTouchEnd={handleSheetTouchEnd}
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center -mt-2 mb-4">
+              <div className="w-10 h-1 rounded-full bg-ocean-light/30" />
+            </div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Navigation</h2>
               <button
