@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCatchStore } from '@/lib/store'
 import {
   Home,
@@ -41,6 +41,15 @@ export default function Navigation() {
   const isCatchModalOpen = useCatchStore((state) => state.isCatchModalOpen)
   const isAiAnalyzing = useCatchStore((state) => state.isAiAnalyzing)
   const toggleCatchModal = useCatchStore((state) => state.toggleCatchModal)
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''
+    document.documentElement.style.overflow = mobileMenuOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
 
   return (
     <>
