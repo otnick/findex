@@ -363,7 +363,7 @@ export default function SocialPage() {
             activeTab === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
-          Freunde{friendIds.length > 0 ? ` (${friendIds.length})` : ''}
+          Feed
         </button>
         <button
           onClick={() => setActiveTab('explore')}
@@ -389,7 +389,7 @@ export default function SocialPage() {
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          Freunde
+          Kontakte
           {requests.length > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white leading-none">
               {requests.length}
