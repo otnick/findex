@@ -21,3 +21,19 @@ export const hapticWarning = () => safe(() => Haptics.notification({ type: Notif
 
 /** Selection changed — small UI selections */
 export const hapticSelection = () => safe(() => Haptics.selectionChanged())
+
+/** Wild burst — new species discovery, shiny/legendary catch */
+export const hapticWild = async () => {
+  // Success notification first (the distinctive double-tap on iOS)
+  await safe(() => Haptics.notification({ type: NotificationType.Success }))
+  await new Promise(r => setTimeout(r, 120))
+  await safe(() => Haptics.impact({ style: ImpactStyle.Heavy }))
+  await new Promise(r => setTimeout(r, 80))
+  await safe(() => Haptics.impact({ style: ImpactStyle.Heavy }))
+  await new Promise(r => setTimeout(r, 80))
+  await safe(() => Haptics.impact({ style: ImpactStyle.Heavy }))
+  await new Promise(r => setTimeout(r, 60))
+  await safe(() => Haptics.impact({ style: ImpactStyle.Medium }))
+  await new Promise(r => setTimeout(r, 60))
+  await safe(() => Haptics.impact({ style: ImpactStyle.Light }))
+}

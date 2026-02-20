@@ -33,7 +33,7 @@ import SpeciesPickerDialog from '@/components/SpeciesPickerDialog'
 import { useToast } from '@/components/ToastProvider'
 import type { Coordinates } from '@/lib/utils/geolocation'
 import type { FishSpecies, Achievement } from '@/lib/types/fishdex'
-import { hapticSuccess, hapticWarning } from '@/lib/utils/haptics'
+import { hapticSuccess, hapticWarning, hapticWild } from '@/lib/utils/haptics'
 
 interface CatchFormProps {
   onSuccess: () => void
@@ -467,6 +467,7 @@ export default function CatchForm({
 
       await addCatch(catchData)
       if (shinyStatus.is_shiny) {
+        hapticWild()
         setShinyMomentReason(shinyStatus.shiny_reason || 'trophy')
         setTimeout(() => setShinyMomentReason(null), 1800)
       }
@@ -477,6 +478,7 @@ export default function CatchForm({
       let foundDiscovery = false
       if (verificationData.verification_status === 'verified') {
         foundDiscovery = await checkForNewDiscovery(catchData.species)
+        if (foundDiscovery) hapticWild()
       }
 
       setFormData({
