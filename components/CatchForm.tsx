@@ -33,6 +33,7 @@ import SpeciesPickerDialog from '@/components/SpeciesPickerDialog'
 import { useToast } from '@/components/ToastProvider'
 import type { Coordinates } from '@/lib/utils/geolocation'
 import type { FishSpecies, Achievement } from '@/lib/types/fishdex'
+import { hapticSuccess, hapticWarning } from '@/lib/utils/haptics'
 
 interface CatchFormProps {
   onSuccess: () => void
@@ -499,10 +500,12 @@ export default function CatchForm({
 
       // Only close modal if no new discovery was found
       if (!foundDiscovery) {
+        hapticSuccess()
         onSuccess()
       }
     } catch (error) {
       console.error('Submit error:', error)
+      hapticWarning()
       toast('Fehler beim Speichern', 'error')
     } finally {
       setUploading(false)

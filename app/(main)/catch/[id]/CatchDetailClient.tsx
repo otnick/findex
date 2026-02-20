@@ -27,6 +27,8 @@ import {
 } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import { useToast } from '@/components/ToastProvider'
+import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/utils/haptics'
+import Skeleton from '@/components/Skeleton'
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
 const Comments = dynamic(() => import('@/components/Comments'), { ssr: false })
@@ -177,6 +179,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
   const toggleLike = async () => {
     if (!user || !catchData) return
+    hapticLight()
 
     try {
       if (catchData.user_has_liked) {
@@ -276,6 +279,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
       : [...pinnedCatchIds, catchData.id]
 
     await persistPinned(nextPinned)
+    hapticMedium()
     toast(isPinned ? 'Fang aus Vitrine entfernt' : 'Fang in Vitrine gepinnt', 'success')
   }
 
@@ -305,8 +309,29 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-ocean-light">Laden...</div>
+      <div className="space-y-6 animate-pulse pb-20 md:pb-6">
+        <Skeleton className="h-5 w-20" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+              <Skeleton className="w-full aspect-video rounded-lg" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 space-y-4">
+              <Skeleton className="h-8 w-40" />
+              <Skeleton className="h-4 w-24" />
+              <div className="space-y-3 mt-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex justify-between py-2 border-b border-ocean-light/10">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }

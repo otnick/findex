@@ -9,6 +9,7 @@ import { format, subDays, isAfter } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { MapPin, BookOpen, Trophy, Lightbulb, Fish as FishIcon } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
+import { DashboardStatsSkeleton, CatchRowSkeleton } from '@/components/Skeleton'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -19,6 +20,7 @@ function getGreeting() {
 
 export default function DashboardPage() {
   const catches = useCatchStore((state) => state.catches)
+  const storeLoading = useCatchStore((state) => state.loading)
   const user = useCatchStore((state) => state.user)
   const [fishDexStats, setFinDexStats] = useState<{discovered: number, total: number} | null>(null)
   const [username, setUsername] = useState<string>('')
@@ -75,6 +77,22 @@ export default function DashboardPage() {
   const recentCatchesList = catches.slice(0, 3)
 
   const greeting = `${getGreeting()}${username ? `, ${username}` : ''}!`
+
+  if (storeLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="pt-4 space-y-2">
+          <div className="h-9 w-48 bg-ocean-light/10 rounded animate-pulse" />
+          <div className="h-4 w-32 bg-ocean-light/10 rounded animate-pulse" />
+        </div>
+        <DashboardStatsSkeleton />
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 space-y-4">
+          <div className="h-5 w-28 bg-ocean-light/10 rounded animate-pulse" />
+          {[...Array(3)].map((_, i) => <CatchRowSkeleton key={i} />)}
+        </div>
+      </div>
+    )
+  }
 
   if (catches.length === 0) {
     return (

@@ -12,6 +12,8 @@ import { useToast } from '@/components/ToastProvider'
 import { useConfirm } from '@/components/ConfirmDialogProvider'
 import VerificationBadge from '@/components/VerificationBadge'
 import Avatar from '@/components/Avatar'
+import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/utils/haptics'
+import { SocialCardSkeleton } from '@/components/Skeleton'
 
 interface Activity {
   id: string
@@ -90,6 +92,7 @@ export default function SocialPage() {
   const tabOrder = ['friends', 'explore', 'search', 'requests', 'leaderboard'] as const
 
   const switchTab = (newTab: typeof tabOrder[number], direction: 'left' | 'right') => {
+    hapticLight()
     setSlideDirection(direction)
     setActiveTab(newTab)
   }
@@ -120,6 +123,7 @@ export default function SocialPage() {
   const handleSwipeEnd = (e: React.TouchEvent) => {
     if (pullProgress >= 1 && (activeTab === 'friends' || activeTab === 'explore')) {
       setPullProgress(0)
+      hapticMedium()
       setIsRefreshing(true)
       fetchActivities(true)
       return
@@ -284,6 +288,7 @@ export default function SocialPage() {
       await supabase.from('friendships').insert({ user_id: user!.id, friend_id: friendId, status: 'accepted' })
       fetchFriends()
       fetchRequests()
+      hapticSuccess()
       toast('Freundschaftsanfrage angenommen!', 'success')
     } catch (e) { console.error(e) }
   }
@@ -443,17 +448,7 @@ export default function SocialPage() {
     }
   }
 
-  if (loading && activeTab !== 'search' && activeTab !== 'requests' && activeTab !== 'leaderboard') {
-    return (
-      <div className="space-y-6">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <div className="text-ocean-light">Laden...</div>
-        </div>
-      </div>
-    )
-  }
-
-  const showEmptyState = activities.length === 0
+  const showEmptyState = activities.length === 0 && !loading
 
   const contentAnimClass = slideDirection === 'left'
     ? 'animate-slideInFromRight'
@@ -706,6 +701,10 @@ export default function SocialPage() {
             </div>
           )}
         </div>
+      ) : loading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => <SocialCardSkeleton key={i} />)}
+        </div>
       ) : showEmptyState ? (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
           <div className="text-6xl mb-4">?</div>
@@ -828,6 +827,7 @@ export default function SocialPage() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        hapticLight()
                         toggleLike(activity.id)
                       }}
                       className={`flex items-center gap-2 transition-all ${
