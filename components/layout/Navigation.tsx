@@ -58,7 +58,7 @@ export default function Navigation() {
           </div>
 
           {/* Nav Items */}
-          <div className="flex-1 flex flex-col overflow-y-auto px-3 space-y-1">
+          <div className="flex-1 flex flex-col overflow-y-scroll overscroll-contain px-3 space-y-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             {navigation.map((item) => {
               const isActive = pathname === item.href
               const Icon = item.icon
@@ -155,7 +155,7 @@ export default function Navigation() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 space-y-2 max-h-[80vh] overflow-y-auto">
+          <div className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 space-y-2 max-h-[80vh] overflow-y-scroll overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Navigation</h2>
               <button
