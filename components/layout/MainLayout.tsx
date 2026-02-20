@@ -29,6 +29,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
     if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+
+    // Left-edge back gesture (within 30px of screen edge)
+    if (dx > 0 && touchStartX.current < 30) {
+      router.back()
+      return
+    }
+
+    // Tab swipe between main pages
     const idx = SWIPE_PAGES.indexOf(pathname)
     if (idx === -1) return
     if (dx < 0 && idx < SWIPE_PAGES.length - 1) router.push(SWIPE_PAGES[idx + 1])

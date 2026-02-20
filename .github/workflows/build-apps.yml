@@ -171,6 +171,8 @@ jobs:
                   // Note: do NOT set isOpaque = false – causes a black re-render flash
                   webView?.scrollView.bounces = false
                   webView?.scrollView.alwaysBounceVertical = false
+                  // Enable native iOS swipe-from-left-edge back gesture
+                  webView?.allowsBackForwardNavigationGestures = true
               }
 
               // iOS 15+: grant geolocation permission for the WKWebView.
