@@ -210,7 +210,7 @@ export default function Navigation() {
           />
           <div
             ref={sheetRef}
-            className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 space-y-2 max-h-[80vh] overflow-y-scroll overscroll-contain"
+            className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 pb-28 space-y-2 max-h-[80vh] overflow-y-scroll overscroll-contain"
             style={{
               WebkitOverflowScrolling: 'touch',
               transform: `translateY(${dragY}px)`,
@@ -254,6 +254,22 @@ export default function Navigation() {
                 </Link>
               )
             })}
+            <div className="pt-2 border-t border-ocean-light/10">
+              <Link
+                href="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`
+                  flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all
+                  ${pathname === '/settings'
+                    ? 'bg-gradient-to-r from-ocean-light/20 to-ocean/20 text-white'
+                    : 'text-ocean-light hover:bg-ocean/30'
+                  }
+                `}
+              >
+                <Settings className="w-5 h-5" />
+                <span>Einstellungen</span>
+              </Link>
+            </div>
           </div>
         </div>
       )}
