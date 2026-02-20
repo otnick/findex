@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -78,9 +78,39 @@ export default function SocialPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
   const [leaderboardTimeframe, setLeaderboardTimeframe] = useState<'week' | 'month' | 'all'>('month')
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
+  const swipeTouchStartX = useRef(0)
   const user = useCatchStore((state) => state.user)
   const { toast } = useToast()
   const { confirm } = useConfirm()
+
+  const tabOrder = ['friends', 'explore', 'search', 'requests', 'leaderboard'] as const
+
+  const switchTab = (newTab: typeof tabOrder[number], direction: 'left' | 'right') => {
+    setSlideDirection(direction)
+    setActiveTab(newTab)
+  }
+
+  useEffect(() => {
+    if (!slideDirection) return
+    const t = setTimeout(() => setSlideDirection(null), 280)
+    return () => clearTimeout(t)
+  }, [slideDirection])
+
+  const handleSwipeStart = (e: React.TouchEvent) => {
+    swipeTouchStartX.current = e.touches[0].clientX
+  }
+
+  const handleSwipeEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - swipeTouchStartX.current
+    if (Math.abs(dx) < 60) return
+    const currentIndex = tabOrder.indexOf(activeTab)
+    if (dx < 0 && currentIndex < tabOrder.length - 1) {
+      switchTab(tabOrder[currentIndex + 1], 'left')
+    } else if (dx > 0 && currentIndex > 0) {
+      switchTab(tabOrder[currentIndex - 1], 'right')
+    }
+  }
 
   useEffect(() => {
     if (user && activeTab !== 'search' && activeTab !== 'requests' && activeTab !== 'leaderboard') {
@@ -401,8 +431,14 @@ export default function SocialPage() {
 
   const showEmptyState = activities.length === 0
 
+  const contentAnimClass = slideDirection === 'left'
+    ? 'animate-slideInFromRight'
+    : slideDirection === 'right'
+      ? 'animate-slideInFromLeft'
+      : ''
+
   return (
-    <div className="space-y-6 pb-20 md:pb-6">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
@@ -414,11 +450,11 @@ export default function SocialPage() {
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1">
+      {/* Tabs — scrollable so they never overflow */}
+      <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveTab('friends')}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
             activeTab === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
@@ -426,7 +462,7 @@ export default function SocialPage() {
         </button>
         <button
           onClick={() => setActiveTab('explore')}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
             activeTab === 'explore' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
@@ -434,7 +470,7 @@ export default function SocialPage() {
         </button>
         <button
           onClick={() => setActiveTab('search')}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center justify-center gap-1 ${
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
             activeTab === 'search' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
@@ -443,7 +479,7 @@ export default function SocialPage() {
         </button>
         <button
           onClick={() => setActiveTab('requests')}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center justify-center gap-1 ${
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center gap-1 ${
             activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
@@ -457,7 +493,7 @@ export default function SocialPage() {
         </button>
         <button
           onClick={() => setActiveTab('leaderboard')}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center justify-center gap-1 ${
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
             activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
@@ -465,6 +501,14 @@ export default function SocialPage() {
           Ranking
         </button>
       </div>
+
+      {/* Tab content — swipeable */}
+      <div
+        key={activeTab}
+        className={contentAnimClass}
+        onTouchStart={handleSwipeStart}
+        onTouchEnd={handleSwipeEnd}
+      >
 
       {activeTab === 'search' ? (
         <div className="space-y-4">
@@ -769,6 +813,8 @@ export default function SocialPage() {
           </div>
         </>
       )}
+
+      </div>{/* end swipeable tab content */}
     </div>
   )
 }

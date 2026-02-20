@@ -81,6 +81,27 @@ body {
   text-shadow: 0 1px 2px rgba(6, 17, 26, 0.55);
 }
 
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tab slide animations */
+@keyframes slideInFromRight {
+  from { transform: translateX(32px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slideInFromLeft {
+  from { transform: translateX(-32px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+.animate-slideInFromRight { animation: slideInFromRight 0.22s ease-out; }
+.animate-slideInFromLeft  { animation: slideInFromLeft  0.22s ease-out; }
+
 /* Animations */
 @keyframes fadeIn {
   from {
