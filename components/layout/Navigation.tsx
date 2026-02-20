@@ -8,14 +8,10 @@ import { useCatchStore } from '@/lib/store'
 import {
   Home,
   Fish,
-  Map,
-  BarChart3,
   Users,
-  Trophy,
   UserCircle,
   Settings,
   X,
-  Image as ImageIcon,
   BookOpen,
   Plus,
   Menu,
@@ -26,13 +22,8 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Fänge', href: '/catches', icon: Fish },
   { name: 'FinDex', href: '/fishdex', icon: BookOpen },
-  { name: 'Galerie', href: '/gallery', icon: ImageIcon },
-  { name: 'Karte', href: '/map', icon: Map },
-  { name: 'Statistiken', href: '/stats', icon: BarChart3 },
   { name: 'Social', href: '/social', icon: Users },
-  { name: 'Bestenliste', href: '/leaderboard', icon: Trophy },
   { name: 'Profil', href: '/profile', icon: UserCircle },
-  { name: 'Einstellungen', href: '/settings', icon: Settings },
 ]
 
 export default function Navigation() {
@@ -95,6 +86,23 @@ export default function Navigation() {
                 </Link>
               )
             })}
+          </div>
+
+          {/* Settings pinned at bottom */}
+          <div className="px-3 pt-2 pb-2 border-t border-ocean-light/10">
+            <Link
+              href="/settings"
+              className={`
+                group flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200
+                ${pathname === '/settings'
+                  ? 'bg-gradient-to-r from-ocean-light/20 to-ocean/20 text-white shadow-lg ring-1 ring-ocean-light/20'
+                  : 'text-ocean-light hover:text-white hover:bg-ocean/30'
+                }
+              `}
+            >
+              <Settings className="w-5 h-5" />
+              <span>Einstellungen</span>
+            </Link>
           </div>
         </div>
       </nav>
@@ -199,6 +207,22 @@ export default function Navigation() {
                 </Link>
               )
             })}
+            <div className="border-t border-ocean-light/10 pt-2 mt-2">
+              <Link
+                href="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`
+                  flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all
+                  ${pathname === '/settings'
+                    ? 'bg-gradient-to-r from-ocean-light/20 to-ocean/20 text-white'
+                    : 'text-ocean-light hover:bg-ocean/30'
+                  }
+                `}
+              >
+                <Settings className="w-5 h-5" />
+                <span>Einstellungen</span>
+              </Link>
+            </div>
           </div>
         </div>
       )}

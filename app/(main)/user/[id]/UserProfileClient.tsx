@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit, Star, GripVertical, X, UserPlus, UserCheck } from 'lucide-react'
+import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Settings, Star, GripVertical, X, UserPlus, UserCheck, BarChart3 } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
@@ -352,7 +352,7 @@ export default function UserProfileClient({ id }: { id: string }) {
             href="/settings"
             className="flex items-center gap-2 text-ocean-light hover:text-white text-sm transition-colors"
           >
-            <Edit className="w-4 h-4" />
+            <Settings className="w-4 h-4" />
             Einstellungen
           </Link>
         ) : currentUser && (
@@ -451,6 +451,18 @@ export default function UserProfileClient({ id }: { id: string }) {
             <div className="text-2xl font-bold text-white">{stats.shinyCount}</div>
           </div>
         </div>
+
+        {isOwnProfile && (
+          <div className="mt-4 pt-4 border-t border-ocean-light/10">
+            <Link
+              href="/stats"
+              className="inline-flex items-center gap-2 text-sm text-ocean-light hover:text-white transition-colors"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Detaillierte Statistiken ansehen →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Showcase */}

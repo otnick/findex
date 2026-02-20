@@ -2,19 +2,21 @@
 
 import { useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
 import CatchForm from '@/components/CatchForm'
 import CatchList from '@/components/CatchList'
 import { useCatchStore } from '@/lib/store'
-import { Fish } from 'lucide-react'
+import { Fish, List, LayoutGrid } from 'lucide-react'
 import type { Coordinates } from '@/lib/utils/geolocation'
 
 export default function CatchesPage() {
   const searchParams = useSearchParams()
-  const [showForm, setShowForm] = useState(false)
   const [dismissPrefillOpen, setDismissPrefillOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterSpecies, setFilterSpecies] = useState('all')
   const [sortBy, setSortBy] = useState<'date' | 'length' | 'weight'>('date')
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const catches = useCatchStore((state) => state.catches)
 
   const prefill = useMemo(() => {
@@ -31,17 +33,16 @@ export default function CatchesPage() {
     return { autoOpen, coordinates, location }
   }, [searchParams])
 
-  // Get unique species for filter
+  const effectiveShowForm = prefill.autoOpen && !dismissPrefillOpen
+
   const species = useMemo(() => {
     const uniqueSpecies = [...new Set(catches.map(c => c.species))].sort()
     return uniqueSpecies
   }, [catches])
 
-  // Filter and sort catches
   const filteredCatches = useMemo(() => {
     let filtered = [...catches]
 
-    // Search
     if (searchTerm) {
       filtered = filtered.filter(c =>
         c.species.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -50,32 +51,24 @@ export default function CatchesPage() {
       )
     }
 
-    // Filter by species
     if (filterSpecies !== 'all') {
       filtered = filtered.filter(c => c.species === filterSpecies)
     }
 
-    // Sort
     filtered.sort((a, b) => {
-      if (sortBy === 'date') {
-        return new Date(b.date).getTime() - new Date(a.date).getTime()
-      } else if (sortBy === 'length') {
-        return b.length - a.length
-      } else if (sortBy === 'weight') {
-        return (b.weight || 0) - (a.weight || 0)
-      }
+      if (sortBy === 'date') return new Date(b.date).getTime() - new Date(a.date).getTime()
+      if (sortBy === 'length') return b.length - a.length
+      if (sortBy === 'weight') return (b.weight || 0) - (a.weight || 0)
       return 0
     })
 
     return filtered
   }, [catches, searchTerm, filterSpecies, sortBy])
 
-  const effectiveShowForm = showForm || (prefill.autoOpen && !dismissPrefillOpen)
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <Fish className="w-8 h-8 text-ocean-light" />
@@ -83,26 +76,29 @@ export default function CatchesPage() {
           </h1>
           <p className="text-ocean-light mt-1">{catches.length} Fänge insgesamt</p>
         </div>
-        <button
-          onClick={() => {
-            if (effectiveShowForm) {
-              setShowForm(false)
-              setDismissPrefillOpen(true)
-              return
-            }
-            setShowForm(true)
-          }}
-          className="w-full sm:w-auto bg-ocean hover:bg-ocean-light text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg"
-        >
-          {showForm ? 'Abbrechen' : '+ Neuer Fang'}
-        </button>
+        <div className="flex bg-ocean/30 rounded-lg p-1 gap-1">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+            aria-label="Listenansicht"
+          >
+            <List className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+            aria-label="Galerieansicht"
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* Add Catch Form */}
+      {/* Auto-open form from map/prefill */}
       {effectiveShowForm && (
         <div className="animate-fadeIn">
           <CatchForm
-            onSuccess={() => setShowForm(false)}
+            onSuccess={() => setDismissPrefillOpen(true)}
             initialCoordinates={prefill.coordinates}
             initialLocation={prefill.location}
           />
@@ -113,7 +109,6 @@ export default function CatchesPage() {
       {!effectiveShowForm && catches.length > 0 && (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
             <div>
               <label className="block text-ocean-light text-sm mb-2">Suche</label>
               <input
@@ -124,8 +119,6 @@ export default function CatchesPage() {
                 className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
               />
             </div>
-
-            {/* Filter by Species */}
             <div>
               <label className="block text-ocean-light text-sm mb-2">Fischart</label>
               <select
@@ -139,8 +132,6 @@ export default function CatchesPage() {
                 ))}
               </select>
             </div>
-
-            {/* Sort */}
             <div>
               <label className="block text-ocean-light text-sm mb-2">Sortierung</label>
               <select
@@ -154,32 +145,61 @@ export default function CatchesPage() {
               </select>
             </div>
           </div>
-
-          {/* Results count */}
           {filteredCatches.length !== catches.length && (
             <div className="mt-4 text-ocean-light text-sm">
               {filteredCatches.length} von {catches.length} Fängen
-              {searchTerm || filterSpecies !== 'all' ? (
+              {(searchTerm || filterSpecies !== 'all') && (
                 <button
-                  onClick={() => {
-                    setSearchTerm('')
-                    setFilterSpecies('all')
-                  }}
+                  onClick={() => { setSearchTerm(''); setFilterSpecies('all') }}
                   className="ml-2 text-white hover:underline"
                 >
                   Filter zurücksetzen
                 </button>
-              ) : null}
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* Catch List */}
+      {/* Content */}
       {!effectiveShowForm && (
-        <div>
+        viewMode === 'grid' ? (
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1">
+            {filteredCatches.map((c) => (
+              <Link
+                key={c.id}
+                href={`/catch/${c.id}`}
+                className="relative aspect-square bg-ocean-dark/50 overflow-hidden group"
+              >
+                {c.photo ? (
+                  <Image
+                    src={c.photo}
+                    alt={c.species}
+                    fill
+                    sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-200"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-ocean/40 to-ocean-dark/60">
+                    <Fish className="w-8 h-8 text-ocean-light/40" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute bottom-0 left-0 right-0 p-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                  <p className="text-white text-xs font-semibold truncate leading-tight">{c.species}</p>
+                  <p className="text-white/70 text-xs">{c.length} cm</p>
+                </div>
+              </Link>
+            ))}
+            {filteredCatches.length === 0 && (
+              <div className="col-span-3 sm:col-span-4 lg:col-span-5 text-center py-16 text-ocean-light">
+                Keine Fänge gefunden
+              </div>
+            )}
+          </div>
+        ) : (
           <CatchList catches={filteredCatches} />
-        </div>
+        )
       )}
     </div>
   )

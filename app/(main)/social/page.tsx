@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Heart, MessageCircle, MapPin, Ruler, Image as ImageIcon, Search, UserPlus, UserCheck, Users, UserX, Fish, Award } from 'lucide-react'
+import { Heart, MessageCircle, MapPin, Ruler, Image as ImageIcon, Search, UserPlus, UserCheck, Users, UserX, Fish, Award, Trophy, TrendingUp } from 'lucide-react'
 import { useToast } from '@/components/ToastProvider'
 import { useConfirm } from '@/components/ConfirmDialogProvider'
 import VerificationBadge from '@/components/VerificationBadge'
@@ -54,10 +54,20 @@ interface FriendRequest {
   created_at: string
 }
 
+interface LeaderboardEntry {
+  user_id: string
+  username: string
+  avatar_url?: string | null
+  total_catches: number
+  biggest_catch: number
+  biggest_catch_species: string
+  unique_species: number
+}
+
 export default function SocialPage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'friends' | 'explore' | 'search' | 'requests'>('friends')
+  const [activeTab, setActiveTab] = useState<'friends' | 'explore' | 'search' | 'requests' | 'leaderboard'>('friends')
   const [friendIds, setFriendIds] = useState<string[]>([])
   const [friends, setFriends] = useState<FriendProfile[]>([])
   const [requests, setRequests] = useState<FriendRequest[]>([])
@@ -65,12 +75,15 @@ export default function SocialPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [sentRequests, setSentRequests] = useState<Set<string>>(new Set())
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+  const [leaderboardTimeframe, setLeaderboardTimeframe] = useState<'week' | 'month' | 'all'>('month')
   const user = useCatchStore((state) => state.user)
   const { toast } = useToast()
   const { confirm } = useConfirm()
 
   useEffect(() => {
-    if (user && activeTab !== 'search' && activeTab !== 'requests') {
+    if (user && activeTab !== 'search' && activeTab !== 'requests' && activeTab !== 'leaderboard') {
       fetchActivities()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,6 +96,52 @@ export default function SocialPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  useEffect(() => {
+    if (activeTab === 'leaderboard') fetchLeaderboard()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, leaderboardTimeframe])
+
+  const fetchLeaderboard = async () => {
+    setLeaderboardLoading(true)
+    try {
+      let startDate = new Date(0)
+      if (leaderboardTimeframe === 'week') startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      else if (leaderboardTimeframe === 'month') startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+
+      const { data: catches } = await supabase
+        .from('catches')
+        .select('user_id, species, length')
+        .eq('is_public', true)
+        .gte('date', startDate.toISOString())
+
+      if (!catches) return
+
+      const statsMap = new Map<string, { catches: number; biggest: number; biggestSpecies: string; species: Set<string> }>()
+      catches.forEach((c: any) => {
+        if (!statsMap.has(c.user_id)) statsMap.set(c.user_id, { catches: 0, biggest: 0, biggestSpecies: '', species: new Set() })
+        const s = statsMap.get(c.user_id)!
+        s.catches++
+        s.species.add(c.species)
+        if (c.length > s.biggest) { s.biggest = c.length; s.biggestSpecies = c.species }
+      })
+
+      const userIds = Array.from(statsMap.keys())
+      const { data: profiles } = await supabase.from('profiles').select('id, username, avatar_url').in('id', userIds)
+
+      const entries: LeaderboardEntry[] = userIds
+        .map(uid => {
+          const s = statsMap.get(uid)!
+          const p = profiles?.find(p => p.id === uid)
+          return { user_id: uid, username: p?.username || 'angler', avatar_url: p?.avatar_url || null, total_catches: s.catches, biggest_catch: s.biggest, biggest_catch_species: s.biggestSpecies, unique_species: s.species.size }
+        })
+        .sort((a, b) => b.total_catches - a.total_catches)
+        .slice(0, 20)
+
+      setLeaderboard(entries)
+    } catch (e) { console.error(e) }
+    finally { setLeaderboardLoading(false) }
+  }
 
   const searchUsers = async (query: string) => {
     setSearchQuery(query)
@@ -330,7 +389,7 @@ export default function SocialPage() {
     }
   }
 
-  if (loading && activeTab !== 'search' && activeTab !== 'requests') {
+  if (loading && activeTab !== 'search' && activeTab !== 'requests' && activeTab !== 'leaderboard') {
     return (
       <div className="space-y-6">
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
@@ -395,6 +454,15 @@ export default function SocialPage() {
               {requests.length}
             </span>
           )}
+        </button>
+        <button
+          onClick={() => setActiveTab('leaderboard')}
+          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center justify-center gap-1 ${
+            activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+          }`}
+        >
+          <Trophy className="w-3.5 h-3.5" />
+          Ranking
         </button>
       </div>
 
@@ -505,6 +573,56 @@ export default function SocialPage() {
               </div>
             )}
           </div>
+        </div>
+      ) : activeTab === 'leaderboard' ? (
+        <div className="space-y-4">
+          {/* Timeframe selector */}
+          <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 w-fit">
+            {(['week', 'month', 'all'] as const).map((tf) => (
+              <button
+                key={tf}
+                onClick={() => setLeaderboardTimeframe(tf)}
+                className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${leaderboardTimeframe === tf ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+              >
+                {tf === 'week' ? 'Woche' : tf === 'month' ? 'Monat' : 'Gesamt'}
+              </button>
+            ))}
+          </div>
+
+          {leaderboardLoading ? (
+            <div className="text-center py-12 text-ocean-light">Laden...</div>
+          ) : leaderboard.length === 0 ? (
+            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+              <Trophy className="w-12 h-12 text-ocean-light/40 mx-auto mb-3" />
+              <p className="text-ocean-light text-sm">Noch keine Einträge für diesen Zeitraum.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {leaderboard.map((entry, index) => (
+                <Link
+                  key={entry.user_id}
+                  href={`/user/${entry.user_id}`}
+                  className="flex items-center gap-4 bg-ocean/30 backdrop-blur-sm rounded-xl px-4 py-3 hover:bg-ocean/40 transition-colors"
+                >
+                  <div className={`w-8 text-center font-bold text-lg flex-shrink-0 ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-amber-600' : 'text-ocean-light'}`}>
+                    {index < 3 ? ['🥇', '🥈', '🥉'][index] : `#${index + 1}`}
+                  </div>
+                  <Avatar seed={entry.username || entry.user_id} src={entry.avatar_url} size={36} className="w-9 h-9 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-semibold text-sm truncate">@{entry.username}</div>
+                    <div className="flex gap-3 mt-0.5">
+                      <span className="text-ocean-light/70 text-xs flex items-center gap-1"><Fish className="w-3 h-3" />{entry.unique_species} Arten</span>
+                      <span className="text-ocean-light/70 text-xs flex items-center gap-1"><TrendingUp className="w-3 h-3" />{entry.biggest_catch} cm</span>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-white font-bold">{entry.total_catches}</div>
+                    <div className="text-ocean-light/60 text-xs">Fänge</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       ) : showEmptyState ? (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
