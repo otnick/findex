@@ -1,12 +1,10 @@
 ﻿'use client'
 
 import { ReactNode, useEffect, useRef } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import CatchForm from '@/components/CatchForm'
 import { useCatchStore } from '@/lib/store'
 import Navigation from './Navigation'
-
-const SWIPE_PAGES = ['/dashboard', '/catches', '/fishdex']
 
 interface MainLayoutProps {
   children: ReactNode
@@ -16,7 +14,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isCatchModalOpen = useCatchStore((state) => state.isCatchModalOpen)
   const closeCatchModal = useCatchStore((state) => state.closeCatchModal)
   const router = useRouter()
-  const pathname = usePathname()
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
 
@@ -29,18 +26,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
     if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
-
     // Left-edge back gesture (within 30px of screen edge)
-    if (dx > 0 && touchStartX.current < 30) {
-      router.back()
-      return
-    }
-
-    // Tab swipe between main pages
-    const idx = SWIPE_PAGES.indexOf(pathname)
-    if (idx === -1) return
-    if (dx < 0 && idx < SWIPE_PAGES.length - 1) router.push(SWIPE_PAGES[idx + 1])
-    else if (dx > 0 && idx > 0) router.push(SWIPE_PAGES[idx - 1])
+    if (dx > 0 && touchStartX.current < 30) router.back()
   }
 
   useEffect(() => {

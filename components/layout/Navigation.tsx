@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCatchStore } from '@/lib/store'
 import {
   Home,
@@ -41,7 +41,19 @@ export default function Navigation() {
   const isCatchModalOpen = useCatchStore((state) => state.isCatchModalOpen)
   const isAiAnalyzing = useCatchStore((state) => state.isAiAnalyzing)
   const toggleCatchModal = useCatchStore((state) => state.toggleCatchModal)
+  const sheetRef = useRef<HTMLDivElement>(null)
 
+  // Non-passive touchmove listener: prevent page scroll when menu is open,
+  // but allow scroll inside the sheet itself.
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const prevent = (e: TouchEvent) => {
+      if (sheetRef.current?.contains(e.target as Node)) return
+      e.preventDefault()
+    }
+    document.addEventListener('touchmove', prevent, { passive: false })
+    return () => document.removeEventListener('touchmove', prevent)
+  }, [mobileMenuOpen])
 
   return (
     <>
@@ -151,12 +163,12 @@ export default function Navigation() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 touch-none">
+        <div className="lg:hidden fixed inset-0 z-50">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 space-y-2 max-h-[80vh] overflow-y-scroll overscroll-contain touch-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div ref={sheetRef} className="absolute bottom-0 inset-x-0 bg-ocean-deeper rounded-t-3xl shadow-2xl p-6 space-y-2 max-h-[80vh] overflow-y-scroll overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Navigation</h2>
               <button
