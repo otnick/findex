@@ -7,8 +7,9 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Heart, MessageCircle, MapPin, Ruler, Image as ImageIcon, Search, UserPlus, UserCheck } from 'lucide-react'
+import { Heart, MessageCircle, MapPin, Ruler, Image as ImageIcon, Search, UserPlus, UserCheck, Users, UserX, Fish, Award } from 'lucide-react'
 import { useToast } from '@/components/ToastProvider'
+import { useConfirm } from '@/components/ConfirmDialogProvider'
 import VerificationBadge from '@/components/VerificationBadge'
 import Avatar from '@/components/Avatar'
 
@@ -38,23 +39,50 @@ interface SearchResult {
   avatar_url?: string | null
 }
 
+interface FriendProfile {
+  id: string
+  username: string
+  bio?: string
+  avatar_url?: string | null
+  stats?: { catches: number; species: number }
+}
+
+interface FriendRequest {
+  id: string
+  friend_id: string
+  username: string
+  created_at: string
+}
+
 export default function SocialPage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'friends' | 'explore' | 'search'>('friends')
+  const [activeTab, setActiveTab] = useState<'friends' | 'explore' | 'search' | 'requests'>('friends')
   const [friendIds, setFriendIds] = useState<string[]>([])
+  const [friends, setFriends] = useState<FriendProfile[]>([])
+  const [requests, setRequests] = useState<FriendRequest[]>([])
+  const [friendsLoading, setFriendsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [sentRequests, setSentRequests] = useState<Set<string>>(new Set())
   const user = useCatchStore((state) => state.user)
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   useEffect(() => {
-    if (user && activeTab !== 'search') {
+    if (user && activeTab !== 'search' && activeTab !== 'requests') {
       fetchActivities()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeTab])
+
+  useEffect(() => {
+    if (user) {
+      fetchFriends()
+      fetchRequests()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   const searchUsers = async (query: string) => {
     setSearchQuery(query)
@@ -85,6 +113,86 @@ export default function SocialPage() {
         toast('Fehler beim Senden der Anfrage', 'error')
       }
     }
+  }
+
+  const fetchFriends = async () => {
+    if (!user) return
+    setFriendsLoading(true)
+    try {
+      const { data } = await supabase
+        .from('friendships')
+        .select('friend_id')
+        .eq('user_id', user.id)
+        .eq('status', 'accepted')
+
+      const ids = (data || []).map(f => f.friend_id)
+      if (ids.length === 0) { setFriends([]); return }
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, bio, avatar_url')
+        .in('id', ids)
+
+      const friendsWithStats = await Promise.all(
+        (profiles || []).map(async (profile) => {
+          const { data: catches } = await supabase
+            .from('catches').select('species').eq('user_id', profile.id).eq('is_public', true)
+          return { ...profile, stats: { catches: catches?.length || 0, species: new Set(catches?.map(c => c.species)).size || 0 } }
+        })
+      )
+      setFriends(friendsWithStats)
+    } catch (e) { console.error(e) }
+    finally { setFriendsLoading(false) }
+  }
+
+  const fetchRequests = async () => {
+    if (!user) return
+    try {
+      const { data } = await supabase
+        .from('friendships')
+        .select('id, user_id, created_at')
+        .eq('friend_id', user.id)
+        .eq('status', 'pending')
+
+      if (!data || data.length === 0) { setRequests([]); return }
+
+      const { data: profiles } = await supabase
+        .from('profiles').select('id, username').in('id', data.map(r => r.user_id))
+
+      setRequests(data.map(req => {
+        const profile = profiles?.find(p => p.id === req.user_id)
+        return { id: req.id, friend_id: req.user_id, username: profile?.username || 'Unbekannt', created_at: req.created_at }
+      }))
+    } catch (e) { console.error(e) }
+  }
+
+  const acceptRequest = async (requestId: string, friendId: string) => {
+    try {
+      await supabase.from('friendships').update({ status: 'accepted' }).eq('id', requestId)
+      await supabase.from('friendships').insert({ user_id: user!.id, friend_id: friendId, status: 'accepted' })
+      fetchFriends()
+      fetchRequests()
+      toast('Freundschaftsanfrage angenommen!', 'success')
+    } catch (e) { console.error(e) }
+  }
+
+  const rejectRequest = async (requestId: string) => {
+    try {
+      await supabase.from('friendships').delete().eq('id', requestId)
+      fetchRequests()
+      toast('Anfrage abgelehnt', 'info')
+    } catch (e) { console.error(e) }
+  }
+
+  const removeFriend = async (friendId: string) => {
+    const confirmed = await confirm({ title: 'Freund entfernen?', message: 'Freund wirklich entfernen?', confirmLabel: 'Entfernen', cancelLabel: 'Abbrechen', variant: 'danger' })
+    if (!confirmed) return
+    try {
+      await supabase.from('friendships').delete()
+        .or(`and(user_id.eq.${user!.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user!.id})`)
+      fetchFriends()
+      toast('Freund entfernt', 'success')
+    } catch (e) { console.error(e) }
   }
 
   const fetchActivities = async () => {
@@ -222,7 +330,7 @@ export default function SocialPage() {
     }
   }
 
-  if (loading && activeTab !== 'search') {
+  if (loading && activeTab !== 'search' && activeTab !== 'requests') {
     return (
       <div className="space-y-6">
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
@@ -274,6 +382,20 @@ export default function SocialPage() {
           <Search className="w-3.5 h-3.5" />
           Suchen
         </button>
+        <button
+          onClick={() => setActiveTab('requests')}
+          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center justify-center gap-1 ${
+            activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          Freunde
+          {requests.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white leading-none">
+              {requests.length}
+            </span>
+          )}
+        </button>
       </div>
 
       {activeTab === 'search' ? (
@@ -317,6 +439,71 @@ export default function SocialPage() {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      ) : activeTab === 'requests' ? (
+        <div className="space-y-6">
+          {/* Pending requests */}
+          {requests.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-ocean-light uppercase tracking-wider">Anfragen ({requests.length})</h3>
+              {requests.map((request) => (
+                <div key={request.id} className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 flex items-center justify-between">
+                  <Link href={`/user/${request.friend_id}`} className="flex items-center gap-3 min-w-0">
+                    <Avatar seed={request.username} src={null} size={36} className="w-9 h-9 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-white font-semibold text-sm">@{request.username}</div>
+                      <div className="text-ocean-light/60 text-xs">Möchte dein Freund sein</div>
+                    </div>
+                  </Link>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button onClick={() => acceptRequest(request.id, request.friend_id)} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs flex items-center gap-1 transition-colors">
+                      <UserCheck className="w-3.5 h-3.5" />
+                      Annehmen
+                    </button>
+                    <button onClick={() => rejectRequest(request.id)} className="px-3 py-1.5 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-lg text-xs transition-colors">
+                      <UserX className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Friend list */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-ocean-light uppercase tracking-wider">
+              Meine Freunde ({friends.length})
+            </h3>
+            {friendsLoading ? (
+              <div className="text-ocean-light/60 text-sm text-center py-6">Laden...</div>
+            ) : friends.length === 0 ? (
+              <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-8 text-center">
+                <Users className="w-12 h-12 text-ocean-light/40 mx-auto mb-3" />
+                <p className="text-ocean-light text-sm">Noch keine Freunde. Nutze Suchen um Angler zu finden!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {friends.map((friend) => (
+                  <div key={friend.id} className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 flex items-center gap-3">
+                    <Link href={`/user/${friend.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                      <Avatar seed={friend.username || friend.id} src={friend.avatar_url} size={40} className="w-10 h-10 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-white font-semibold text-sm truncate">@{friend.username}</div>
+                        {friend.bio && <div className="text-ocean-light/70 text-xs truncate">{friend.bio}</div>}
+                        <div className="flex gap-3 mt-1">
+                          <span className="text-ocean-light/60 text-xs flex items-center gap-1"><Fish className="w-3 h-3" />{friend.stats?.catches || 0}</span>
+                          <span className="text-ocean-light/60 text-xs flex items-center gap-1"><Award className="w-3 h-3" />{friend.stats?.species || 0} Arten</span>
+                        </div>
+                      </div>
+                    </Link>
+                    <button onClick={() => removeFriend(friend.id)} className="p-1.5 text-red-400/60 hover:text-red-400 transition-colors flex-shrink-0">
+                      <UserX className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ) : showEmptyState ? (

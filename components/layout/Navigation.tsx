@@ -13,7 +13,6 @@ import {
   Users,
   Trophy,
   UserCircle,
-  UserPlus,
   Settings,
   X,
   Image as ImageIcon,
@@ -32,7 +31,6 @@ const navigation = [
   { name: 'Statistiken', href: '/stats', icon: BarChart3 },
   { name: 'Social', href: '/social', icon: Users },
   { name: 'Bestenliste', href: '/leaderboard', icon: Trophy },
-  { name: 'Freunde', href: '/friends', icon: UserPlus },
   { name: 'Profil', href: '/profile', icon: UserCircle },
   { name: 'Einstellungen', href: '/settings', icon: Settings },
 ]

@@ -116,10 +116,29 @@ export default function UserProfileClient({ id }: { id: string }) {
 
       if (catchesError) throw catchesError
 
-      setCatches(catchesData)
+      // Batch-fetch likes and comments counts
+      let enrichedCatches: PublicCatch[] = catchesData
+      if (catchesData.length > 0) {
+        const catchIds = catchesData.map((c: any) => c.id)
+        const [{ data: likesData }, { data: commentsData }] = await Promise.all([
+          supabase.from('catch_likes').select('catch_id').in('catch_id', catchIds),
+          supabase.from('catch_comments').select('catch_id').in('catch_id', catchIds),
+        ])
+        const likesMap = new Map<string, number>()
+        const commentsMap = new Map<string, number>()
+        ;(likesData || []).forEach((l: any) => likesMap.set(l.catch_id, (likesMap.get(l.catch_id) || 0) + 1))
+        ;(commentsData || []).forEach((c: any) => commentsMap.set(c.catch_id, (commentsMap.get(c.catch_id) || 0) + 1))
+        enrichedCatches = catchesData.map((c: any) => ({
+          ...c,
+          likes_count: likesMap.get(c.id) || 0,
+          comments_count: commentsMap.get(c.id) || 0,
+        }))
+      }
+
+      setCatches(enrichedCatches)
       if (pinnedIds.length > 0) {
         const orderedPinned = pinnedIds
-          .map((id: string) => catchesData.find((catchItem: PublicCatch) => catchItem.id === id))
+          .map((id: string) => enrichedCatches.find((catchItem: PublicCatch) => catchItem.id === id))
           .filter(Boolean) as PublicCatch[]
         setPinnedCatches(orderedPinned)
       } else {
