@@ -14,6 +14,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const setUser = useCatchStore.getState().setUser
       setUser(session?.user ?? null)
+      useCatchStore.setState({ authLoading: false })
     })
 
     // Listen for auth changes

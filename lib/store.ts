@@ -42,6 +42,7 @@ export interface Catch {
 interface CatchStore {
   catches: Catch[]
   user: User | null
+  authLoading: boolean
   loading: boolean
   isCatchModalOpen: boolean
   isAiAnalyzing: boolean
@@ -66,6 +67,7 @@ interface CatchStore {
 export const useCatchStore = create<CatchStore>((set, get) => ({
   catches: [],
   user: null,
+  authLoading: true,
   loading: false,
   isCatchModalOpen: false,
   isAiAnalyzing: false,

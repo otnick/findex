@@ -7,17 +7,18 @@ import { useCatchStore } from '@/lib/store'
 
 export default function Home() {
   const user = useCatchStore((state) => state.user)
+  const authLoading = useCatchStore((state) => state.authLoading)
   const router = useRouter()
 
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user) {
       router.replace('/dashboard')
     }
-  }, [user, router])
+  }, [user, authLoading, router])
 
-  if (user) {
-    return null
-  }
+  if (authLoading) return null
+
+  if (user) return null
 
   return <Auth onSuccess={() => router.push('/dashboard')} />
 }
