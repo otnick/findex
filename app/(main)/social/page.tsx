@@ -7,7 +7,8 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Heart, MessageCircle, MapPin, Ruler, Image as ImageIcon } from 'lucide-react'
+import { Heart, MessageCircle, MapPin, Ruler, Image as ImageIcon, Search, UserPlus, UserCheck } from 'lucide-react'
+import { useToast } from '@/components/ToastProvider'
 import VerificationBadge from '@/components/VerificationBadge'
 import Avatar from '@/components/Avatar'
 
@@ -30,19 +31,61 @@ interface Activity {
   photo_count?: number
 }
 
+interface SearchResult {
+  id: string
+  username: string
+  bio?: string
+  avatar_url?: string | null
+}
+
 export default function SocialPage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'friends' | 'explore'>('friends')
+  const [activeTab, setActiveTab] = useState<'friends' | 'explore' | 'search'>('friends')
   const [friendIds, setFriendIds] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [sentRequests, setSentRequests] = useState<Set<string>>(new Set())
   const user = useCatchStore((state) => state.user)
+  const { toast } = useToast()
 
   useEffect(() => {
-    if (user) {
+    if (user && activeTab !== 'search') {
       fetchActivities()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeTab])
+
+  const searchUsers = async (query: string) => {
+    setSearchQuery(query)
+    if (!query.trim() || !user) { setSearchResults([]); return }
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, username, bio, avatar_url')
+      .ilike('username', `%${query}%`)
+      .neq('id', user.id)
+      .limit(10)
+    setSearchResults(data || [])
+  }
+
+  const sendRequest = async (friendId: string) => {
+    if (!user) return
+    try {
+      const { error } = await supabase
+        .from('friendships')
+        .insert({ user_id: user.id, friend_id: friendId, status: 'pending' })
+      if (error) throw error
+      setSentRequests(prev => new Set([...prev, friendId]))
+      toast('Freundschaftsanfrage gesendet!', 'success')
+    } catch (error: any) {
+      if (error.code === '23505') {
+        setSentRequests(prev => new Set([...prev, friendId]))
+        toast('Anfrage bereits gesendet!', 'info')
+      } else {
+        toast('Fehler beim Senden der Anfrage', 'error')
+      }
+    }
+  }
 
   const fetchActivities = async () => {
     if (!user) return
@@ -179,7 +222,7 @@ export default function SocialPage() {
     }
   }
 
-  if (loading) {
+  if (loading && activeTab !== 'search') {
     return (
       <div className="space-y-6">
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
@@ -208,27 +251,75 @@ export default function SocialPage() {
       <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1">
         <button
           onClick={() => setActiveTab('friends')}
-          className={`flex-1 py-2 px-4 rounded-lg transition-all text-sm font-semibold ${
-            activeTab === 'friends'
-              ? 'bg-ocean text-white'
-              : 'text-ocean-light hover:text-white'
+          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+            activeTab === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
           Freunde{friendIds.length > 0 ? ` (${friendIds.length})` : ''}
         </button>
         <button
           onClick={() => setActiveTab('explore')}
-          className={`flex-1 py-2 px-4 rounded-lg transition-all text-sm font-semibold ${
-            activeTab === 'explore'
-              ? 'bg-ocean text-white'
-              : 'text-ocean-light hover:text-white'
+          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+            activeTab === 'explore' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
           Entdecken
         </button>
+        <button
+          onClick={() => setActiveTab('search')}
+          className={`flex-1 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center justify-center gap-1 ${
+            activeTab === 'search' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+          }`}
+        >
+          <Search className="w-3.5 h-3.5" />
+          Suchen
+        </button>
       </div>
 
-      {showEmptyState ? (
+      {activeTab === 'search' ? (
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ocean-light/60" />
+            <input
+              type="text"
+              placeholder="Nach Benutzername suchen..."
+              value={searchQuery}
+              onChange={(e) => searchUsers(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-sm"
+            />
+          </div>
+          {searchResults.length === 0 && searchQuery.trim() && (
+            <div className="text-center text-ocean-light/60 py-8 text-sm">Keine Benutzer gefunden</div>
+          )}
+          <div className="space-y-3">
+            {searchResults.map((result) => (
+              <div key={result.id} className="flex items-center gap-3 bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+                <Link href={`/user/${result.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                  <Avatar seed={result.username || result.id} src={result.avatar_url} size={40} className="w-10 h-10 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <div className="text-white font-semibold text-sm truncate">@{result.username}</div>
+                    {result.bio && <div className="text-ocean-light/70 text-xs truncate">{result.bio}</div>}
+                  </div>
+                </Link>
+                {sentRequests.has(result.id) ? (
+                  <span className="flex items-center gap-1.5 text-xs text-ocean-light/60 flex-shrink-0">
+                    <UserCheck className="w-4 h-4" />
+                    Gesendet
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => sendRequest(result.id)}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-ocean-light/20 text-ocean-light hover:bg-ocean-light/30 hover:text-white transition-colors flex-shrink-0"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    Anfrage senden
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : showEmptyState ? (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
           <div className="text-6xl mb-4">?</div>
           <h3 className="text-2xl font-bold text-white mb-2">Keine Aktivitäten</h3>

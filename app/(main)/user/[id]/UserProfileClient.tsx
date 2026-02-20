@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit, Star, GripVertical, X } from 'lucide-react'
+import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Edit, Star, GripVertical, X, UserPlus, UserCheck } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
@@ -58,6 +58,7 @@ export default function UserProfileClient({ id }: { id: string }) {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [friendshipStatus, setFriendshipStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'accepted'>('none')
   const currentUser = useCatchStore((state) => state.user)
   const { toast } = useToast()
 
@@ -78,6 +79,22 @@ export default function UserProfileClient({ id }: { id: string }) {
       if (profileError) throw profileError
 
       setProfile(profileData)
+
+      if (currentUser && currentUser.id !== profileData.id) {
+        const { data: friendships } = await supabase
+          .from('friendships')
+          .select('status, user_id')
+          .or(`and(user_id.eq.${currentUser.id},friend_id.eq.${profileData.id}),and(user_id.eq.${profileData.id},friend_id.eq.${currentUser.id})`)
+
+        if (!friendships || friendships.length === 0) {
+          setFriendshipStatus('none')
+        } else if (friendships.some(f => f.status === 'accepted')) {
+          setFriendshipStatus('accepted')
+        } else {
+          const pending = friendships.find(f => f.status === 'pending')
+          setFriendshipStatus(pending?.user_id === currentUser.id ? 'pending_sent' : 'pending_received')
+        }
+      }
 
       const isOwnProfile = currentUser?.id === profileData.id
       const publicOnly = !isOwnProfile || showPublicOnly
@@ -279,6 +296,25 @@ export default function UserProfileClient({ id }: { id: string }) {
     setDraggingId(null)
   }
 
+  const sendFriendRequest = async () => {
+    if (!currentUser || !profile) return
+    try {
+      const { error } = await supabase
+        .from('friendships')
+        .insert({ user_id: currentUser.id, friend_id: profile.id, status: 'pending' })
+      if (error) throw error
+      setFriendshipStatus('pending_sent')
+      toast('Freundschaftsanfrage gesendet!', 'success')
+    } catch (error: any) {
+      if (error.code === '23505') {
+        setFriendshipStatus('pending_sent')
+        toast('Anfrage bereits gesendet!', 'info')
+      } else {
+        toast('Fehler beim Senden der Anfrage', 'error')
+      }
+    }
+  }
+
   const showcaseSlots = Array.from({ length: 6 }, (_, index) => pinnedCatches[index] || null)
 
   return (
@@ -292,7 +328,7 @@ export default function UserProfileClient({ id }: { id: string }) {
           <ArrowLeft className="w-5 h-5" />
           Zurück
         </Link>
-        {isOwnProfile && (
+        {isOwnProfile ? (
           <Link
             href="/settings"
             className="flex items-center gap-2 text-ocean-light hover:text-white text-sm transition-colors"
@@ -300,6 +336,36 @@ export default function UserProfileClient({ id }: { id: string }) {
             <Edit className="w-4 h-4" />
             Einstellungen
           </Link>
+        ) : currentUser && (
+          <>
+            {friendshipStatus === 'none' && (
+              <button
+                onClick={sendFriendRequest}
+                className="flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg bg-ocean-light/20 text-ocean-light hover:bg-ocean-light/30 hover:text-white transition-colors"
+              >
+                <UserPlus className="w-4 h-4" />
+                Anfrage senden
+              </button>
+            )}
+            {friendshipStatus === 'pending_sent' && (
+              <span className="flex items-center gap-2 text-sm text-ocean-light/60">
+                <UserPlus className="w-4 h-4" />
+                Anfrage gesendet
+              </span>
+            )}
+            {friendshipStatus === 'pending_received' && (
+              <span className="flex items-center gap-2 text-sm text-ocean-light/60">
+                <UserCheck className="w-4 h-4" />
+                Möchte Freund sein
+              </span>
+            )}
+            {friendshipStatus === 'accepted' && (
+              <span className="flex items-center gap-2 text-sm text-ocean-light">
+                <UserCheck className="w-4 h-4" />
+                Befreundet
+              </span>
+            )}
+          </>
         )}
       </div>
 

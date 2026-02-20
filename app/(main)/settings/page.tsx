@@ -126,18 +126,20 @@ export default function ProfilePage() {
         .from('avatars')
         .getPublicUrl(avatarPath)
 
+      const urlWithBust = `${publicUrl}?t=${Date.now()}`
+
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          avatar_url: publicUrl,
+          avatar_url: urlWithBust,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
 
       if (updateError) throw updateError
 
-      setProfileForm((prev) => ({ ...prev, avatar_url: publicUrl }))
-      setProfile((prev) => (prev ? { ...prev, avatar_url: publicUrl } : prev))
+      setProfileForm((prev) => ({ ...prev, avatar_url: urlWithBust }))
+      setProfile((prev) => (prev ? { ...prev, avatar_url: urlWithBust } : prev))
       toast('Profilfoto aktualisiert!', 'success')
     } catch (error: any) {
       toast(`Upload fehlgeschlagen: ${error.message}`, 'error')
