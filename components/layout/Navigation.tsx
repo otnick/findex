@@ -16,12 +16,14 @@ import {
   Plus,
   Menu,
   Loader2,
+  Map,
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Fänge', href: '/catches', icon: Fish },
   { name: 'FinDex', href: '/fishdex', icon: BookOpen },
+  { name: 'Karte', href: '/map', icon: Map },
   { name: 'Social', href: '/social', icon: Users },
   { name: 'Profil', href: '/profile', icon: UserCircle },
 ]
@@ -42,12 +44,16 @@ export default function Navigation() {
   useEffect(() => {
     if (!mobileMenuOpen) return
     setDragY(0)
+    document.documentElement.style.overflow = 'hidden'
     const prevent = (e: TouchEvent) => {
       if (sheetRef.current?.contains(e.target as Node)) return
       e.preventDefault()
     }
     document.addEventListener('touchmove', prevent, { passive: false })
-    return () => document.removeEventListener('touchmove', prevent)
+    return () => {
+      document.documentElement.style.overflow = ''
+      document.removeEventListener('touchmove', prevent)
+    }
   }, [mobileMenuOpen])
 
   const handleSheetTouchStart = (e: React.TouchEvent) => {
@@ -248,22 +254,6 @@ export default function Navigation() {
                 </Link>
               )
             })}
-            <div className="border-t border-ocean-light/10 pt-2 mt-2">
-              <Link
-                href="/settings"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`
-                  flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all
-                  ${pathname === '/settings'
-                    ? 'bg-gradient-to-r from-ocean-light/20 to-ocean/20 text-white'
-                    : 'text-ocean-light hover:bg-ocean/30'
-                  }
-                `}
-              >
-                <Settings className="w-5 h-5" />
-                <span>Einstellungen</span>
-              </Link>
-            </div>
           </div>
         </div>
       )}

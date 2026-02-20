@@ -89,7 +89,7 @@ export default function SocialPage() {
   const { toast } = useToast()
   const { confirm } = useConfirm()
 
-  const tabOrder = ['friends', 'explore', 'search', 'requests', 'leaderboard'] as const
+  const tabOrder = ['friends', 'leaderboard', 'explore', 'search', 'requests'] as const
 
   const switchTab = (newTab: typeof tabOrder[number], direction: 'left' | 'right') => {
     hapticLight()
@@ -457,7 +457,7 @@ export default function SocialPage() {
       : ''
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onTouchStart={handleSwipeStart} onTouchMove={handleSwipeMove} onTouchEnd={handleSwipeEnd}>
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
@@ -469,56 +469,60 @@ export default function SocialPage() {
         </p>
       </div>
 
-      {/* Tabs — scrollable so they never overflow */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 overflow-x-auto scrollbar-hide">
-        <button
-          onClick={() => setActiveTab('friends')}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
-            activeTab === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-          }`}
-        >
-          Feed
-        </button>
-        <button
-          onClick={() => setActiveTab('explore')}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
-            activeTab === 'explore' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-          }`}
-        >
-          Entdecken
-        </button>
-        <button
-          onClick={() => setActiveTab('search')}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
-            activeTab === 'search' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-          }`}
-        >
-          <Search className="w-3.5 h-3.5" />
-          Suchen
-        </button>
-        <button
-          onClick={() => setActiveTab('requests')}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center gap-1 ${
-            activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-          }`}
-        >
-          <Users className="w-3.5 h-3.5" />
-          Kontakte
-          {requests.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white leading-none">
-              {requests.length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('leaderboard')}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
-            activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-          }`}
-        >
-          <Trophy className="w-3.5 h-3.5" />
-          Ranking
-        </button>
+      {/* Tabs — scrollable, Ranking near front, fade-right indicates overflow */}
+      <div className="relative">
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 overflow-x-auto scrollbar-hide">
+          <button
+            onClick={() => setActiveTab('friends')}
+            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+              activeTab === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            }`}
+          >
+            Feed
+          </button>
+          <button
+            onClick={() => setActiveTab('leaderboard')}
+            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
+              activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5" />
+            Ranking
+          </button>
+          <button
+            onClick={() => setActiveTab('explore')}
+            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+              activeTab === 'explore' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            }`}
+          >
+            Entdecken
+          </button>
+          <button
+            onClick={() => setActiveTab('search')}
+            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
+              activeTab === 'search' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            }`}
+          >
+            <Search className="w-3.5 h-3.5" />
+            Suchen
+          </button>
+          <button
+            onClick={() => setActiveTab('requests')}
+            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center gap-1 ${
+              activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            Kontakte
+            {requests.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white leading-none">
+                {requests.length}
+              </span>
+            )}
+          </button>
+        </div>
+        {/* Fade indicating more tabs to the right */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-ocean-deeper to-transparent pointer-events-none rounded-r-lg" />
       </div>
 
       {/* Pull-to-refresh indicator */}
@@ -534,14 +538,8 @@ export default function SocialPage() {
         </div>
       )}
 
-      {/* Tab content — swipeable */}
-      <div
-        key={activeTab}
-        className={contentAnimClass}
-        onTouchStart={handleSwipeStart}
-        onTouchMove={handleSwipeMove}
-        onTouchEnd={handleSwipeEnd}
-      >
+      {/* Tab content */}
+      <div key={activeTab} className={contentAnimClass}>
 
       {activeTab === 'search' ? (
         <div className="space-y-4">
