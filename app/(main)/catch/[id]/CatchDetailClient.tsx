@@ -23,6 +23,7 @@ import {
   Gauge,
   Droplets,
   Star,
+  Share2,
 } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import { useToast } from '@/components/ToastProvider'
@@ -276,6 +277,30 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
     await persistPinned(nextPinned)
     toast(isPinned ? 'Fang aus Vitrine entfernt' : 'Fang in Vitrine gepinnt', 'success')
+  }
+
+  const handleShare = async () => {
+    if (!catchData) return
+    const weightStr = catchData.weight
+      ? catchData.weight > 1000
+        ? `, ${(catchData.weight / 1000).toFixed(1)} kg`
+        : `, ${catchData.weight} g`
+      : ''
+    const shareData = {
+      title: `${catchData.species} – ${catchData.length} cm`,
+      text: `${catchData.species}, ${catchData.length} cm${weightStr} – gefangen auf FinDex 🎣`,
+      url: window.location.href,
+    }
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+      } else {
+        await navigator.clipboard.writeText(window.location.href)
+        toast('Link kopiert!', 'success')
+      }
+    } catch (e: any) {
+      if (e.name !== 'AbortError') toast('Teilen fehlgeschlagen', 'error')
+    }
   }
 
   if (loading) {
@@ -599,6 +624,14 @@ export default function CatchDetailClient({ id }: { id: string }) {
                 <MessageCircle className="w-6 h-6" />
                 <span className="font-semibold">{catchData.comments_count}</span>
               </div>
+              {catchData.is_public && (
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors ml-auto"
+                >
+                  <Share2 className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>

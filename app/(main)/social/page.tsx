@@ -79,7 +79,10 @@ export default function SocialPage() {
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
   const [leaderboardTimeframe, setLeaderboardTimeframe] = useState<'week' | 'month' | 'all'>('month')
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [pullProgress, setPullProgress] = useState(0)
   const swipeTouchStartX = useRef(0)
+  const swipeTouchStartY = useRef(0)
   const user = useCatchStore((state) => state.user)
   const { toast } = useToast()
   const { confirm } = useConfirm()
@@ -99,9 +102,29 @@ export default function SocialPage() {
 
   const handleSwipeStart = (e: React.TouchEvent) => {
     swipeTouchStartX.current = e.touches[0].clientX
+    swipeTouchStartY.current = e.touches[0].clientY
+  }
+
+  const handleSwipeMove = (e: React.TouchEvent) => {
+    if (activeTab !== 'friends' && activeTab !== 'explore') return
+    if (isRefreshing) return
+    const dy = e.touches[0].clientY - swipeTouchStartY.current
+    const dx = Math.abs(e.touches[0].clientX - swipeTouchStartX.current)
+    if (dy > 10 && dy > dx && window.scrollY <= 0) {
+      setPullProgress(Math.min((dy - 10) / 70, 1))
+    } else if (pullProgress > 0) {
+      setPullProgress(0)
+    }
   }
 
   const handleSwipeEnd = (e: React.TouchEvent) => {
+    if (pullProgress >= 1 && (activeTab === 'friends' || activeTab === 'explore')) {
+      setPullProgress(0)
+      setIsRefreshing(true)
+      fetchActivities(true)
+      return
+    }
+    setPullProgress(0)
     const dx = e.changedTouches[0].clientX - swipeTouchStartX.current
     if (Math.abs(dx) < 60) return
     const currentIndex = tabOrder.indexOf(activeTab)
@@ -284,11 +307,11 @@ export default function SocialPage() {
     } catch (e) { console.error(e) }
   }
 
-  const fetchActivities = async () => {
+  const fetchActivities = async (silent = false) => {
     if (!user) return
 
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
 
       let catchQuery = supabase
         .from('catches')
@@ -378,6 +401,7 @@ export default function SocialPage() {
       console.error('Error fetching activities:', error)
     } finally {
       setLoading(false)
+      setIsRefreshing(false)
     }
   }
 
@@ -502,11 +526,25 @@ export default function SocialPage() {
         </button>
       </div>
 
+      {/* Pull-to-refresh indicator */}
+      {(activeTab === 'friends' || activeTab === 'explore') && (
+        <div
+          className="overflow-hidden flex items-end justify-center"
+          style={{ height: isRefreshing ? '44px' : `${pullProgress * 44}px`, transition: 'height 0.1s ease-out' }}
+        >
+          <div
+            className={`w-7 h-7 rounded-full border-2 border-ocean-light/70 border-t-transparent mb-1 ${isRefreshing ? 'animate-spin' : ''}`}
+            style={!isRefreshing ? { transform: `rotate(${pullProgress * 720}deg)` } : undefined}
+          />
+        </div>
+      )}
+
       {/* Tab content — swipeable */}
       <div
         key={activeTab}
         className={contentAnimClass}
         onTouchStart={handleSwipeStart}
+        onTouchMove={handleSwipeMove}
         onTouchEnd={handleSwipeEnd}
       >
 
