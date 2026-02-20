@@ -1,9 +1,12 @@
 ﻿'use client'
 
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import CatchForm from '@/components/CatchForm'
 import { useCatchStore } from '@/lib/store'
 import Navigation from './Navigation'
+
+const SWIPE_PAGES = ['/dashboard', '/catches', '/fishdex']
 
 interface MainLayoutProps {
   children: ReactNode
@@ -12,6 +15,25 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const isCatchModalOpen = useCatchStore((state) => state.isCatchModalOpen)
   const closeCatchModal = useCatchStore((state) => state.closeCatchModal)
+  const router = useRouter()
+  const pathname = usePathname()
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    const dy = e.changedTouches[0].clientY - touchStartY.current
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    const idx = SWIPE_PAGES.indexOf(pathname)
+    if (idx === -1) return
+    if (dx < 0 && idx < SWIPE_PAGES.length - 1) router.push(SWIPE_PAGES[idx + 1])
+    else if (dx > 0 && idx > 0) router.push(SWIPE_PAGES[idx - 1])
+  }
 
   useEffect(() => {
     if (!isCatchModalOpen) return
@@ -39,7 +61,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Navigation />
 
         {/* Main Content */}
-        <main className="lg:pl-64 pb-20 lg:pb-4">
+        <main
+          className="lg:pl-64 pb-20 lg:pb-4"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="px-4 sm:px-6 lg:px-8 py-8">{children}</div>
         </main>
 
