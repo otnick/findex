@@ -27,11 +27,12 @@ import {
 } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import { useToast } from '@/components/ToastProvider'
-import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/utils/haptics'
+import { hapticLight, hapticMedium } from '@/lib/utils/haptics'
 import Skeleton from '@/components/Skeleton'
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
 const Comments = dynamic(() => import('@/components/Comments'), { ssr: false })
+const PhotoLightbox = dynamic(() => import('@/components/PhotoLightbox'), { ssr: false })
 
 interface CatchDetail {
   id: string
@@ -73,6 +74,7 @@ function getWeatherSourceClass(source?: 'historical' | 'forecast' | 'current'): 
 export default function CatchDetailClient({ id }: { id: string }) {
   const [catchData, setCatchData] = useState<CatchDetail | null>(null)
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const [pinnedCatchIds, setPinnedCatchIds] = useState<string[]>([])
   const [pinSaving, setPinSaving] = useState(false)
   const [shinyRank, setShinyRank] = useState<{ total: number; above: number } | null>(null)
@@ -373,15 +375,19 @@ export default function CatchDetailClient({ id }: { id: string }) {
           {/* Photo */}
           {(catchData.photos && catchData.photos.length > 0) || catchData.photo_url ? (
             <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
-              <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-ocean-dark">
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                className="relative w-full aspect-video rounded-lg overflow-hidden bg-ocean-dark block cursor-zoom-in"
+              >
                 <Image
                   src={catchData.photos?.[selectedPhotoIndex] || catchData.photo_url || ''}
                   alt={catchData.species}
                   fill
                   sizes="100vw"
-            className="object-cover"
+                  className="object-cover"
                 />
-              </div>
+              </button>
               {catchData.photos && catchData.photos.length > 1 && (
                 <div className="mt-3 grid grid-cols-5 gap-2">
                   {catchData.photos.map((photoUrl, index) => (
@@ -664,6 +670,20 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
       {/* Comments - Full Width */}
       <Comments catchId={id} />
+
+      {/* Lightbox */}
+      {lightboxOpen && (() => {
+        const allPhotos = (catchData.photos && catchData.photos.length > 0)
+          ? catchData.photos
+          : catchData.photo_url ? [catchData.photo_url] : []
+        return allPhotos.length > 0 ? (
+          <PhotoLightbox
+            photos={allPhotos.map((url) => ({ id: url, url, species: catchData.species, date: catchData.date }))}
+            initialIndex={selectedPhotoIndex}
+            onClose={() => setLightboxOpen(false)}
+          />
+        ) : null
+      })()}
     </div>
   )
 }

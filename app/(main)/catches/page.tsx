@@ -2,13 +2,15 @@
 
 import { useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import CatchForm from '@/components/CatchForm'
 import CatchList from '@/components/CatchList'
 import { useCatchStore } from '@/lib/store'
 import { Fish, List, LayoutGrid } from 'lucide-react'
 import type { Coordinates } from '@/lib/utils/geolocation'
+
+const PhotoLightbox = dynamic(() => import('@/components/PhotoLightbox'), { ssr: false })
 
 export default function CatchesPage() {
   const searchParams = useSearchParams()
@@ -17,6 +19,7 @@ export default function CatchesPage() {
   const [filterSpecies, setFilterSpecies] = useState('all')
   const [sortBy, setSortBy] = useState<'date' | 'length' | 'weight'>('date')
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const catches = useCatchStore((state) => state.catches)
 
   const prefill = useMemo(() => {
@@ -164,39 +167,55 @@ export default function CatchesPage() {
       {/* Content */}
       {!effectiveShowForm && (
         viewMode === 'grid' ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1">
-            {filteredCatches.map((c) => (
-              <Link
-                key={c.id}
-                href={`/catch/${c.id}`}
-                className="relative aspect-square bg-ocean-dark/50 overflow-hidden group"
-              >
-                {c.photo ? (
-                  <Image
-                    src={c.photo}
-                    alt={c.species}
-                    fill
-                    sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-200"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-ocean/40 to-ocean-dark/60">
-                    <Fish className="w-8 h-8 text-ocean-light/40" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute bottom-0 left-0 right-0 p-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-                  <p className="text-white text-xs font-semibold truncate leading-tight">{c.species}</p>
-                  <p className="text-white/70 text-xs">{c.length} cm</p>
+          <>
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1">
+              {filteredCatches.map((c) => {
+                const photosOnly = filteredCatches.filter(x => x.photo)
+                const photoIdx = photosOnly.findIndex(x => x.id === c.id)
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => c.photo ? setLightboxIndex(photoIdx) : undefined}
+                    className="relative aspect-square bg-ocean-dark/50 overflow-hidden group"
+                  >
+                    {c.photo ? (
+                      <Image
+                        src={c.photo}
+                        alt={c.species}
+                        fill
+                        sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-ocean/40 to-ocean-dark/60">
+                        <Fish className="w-8 h-8 text-ocean-light/40" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-0 left-0 right-0 p-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                      <p className="text-white text-xs font-semibold truncate leading-tight">{c.species}</p>
+                      <p className="text-white/70 text-xs">{c.length} cm</p>
+                    </div>
+                  </button>
+                )
+              })}
+              {filteredCatches.length === 0 && (
+                <div className="col-span-3 sm:col-span-4 lg:col-span-5 text-center py-16 text-ocean-light">
+                  Keine Fänge gefunden
                 </div>
-              </Link>
-            ))}
-            {filteredCatches.length === 0 && (
-              <div className="col-span-3 sm:col-span-4 lg:col-span-5 text-center py-16 text-ocean-light">
-                Keine Fänge gefunden
-              </div>
+              )}
+            </div>
+            {lightboxIndex !== null && (
+              <PhotoLightbox
+                photos={filteredCatches
+                  .filter(c => c.photo)
+                  .map(c => ({ id: c.id, url: c.photo!, species: c.species, date: String(c.date) }))}
+                initialIndex={lightboxIndex}
+                onClose={() => setLightboxIndex(null)}
+              />
             )}
-          </div>
+          </>
         ) : (
           <CatchList catches={filteredCatches} />
         )
