@@ -6,10 +6,12 @@ import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import Link from 'next/link'
-import Map from '@/components/Map'
+import dynamic from 'next/dynamic'
 import VerificationBadge from '@/components/VerificationBadge'
-import { Fish, Heart, Share2 } from 'lucide-react'
+import { Fish, Heart, Share2, MapPin, Ruler, Scale, Utensils } from 'lucide-react'
 import { useToast } from '@/components/ToastProvider'
+
+const Map = dynamic(() => import('@/components/Map'), { ssr: false })
 
 interface SharedCatch {
   id: string
@@ -23,10 +25,11 @@ interface SharedCatch {
   photo_url?: string
   coordinates?: { lat: number; lng: number }
   weather?: any
-  user_email?: string
+  username?: string
   verification_status?: 'pending' | 'verified' | 'rejected' | 'manual'
   ai_verified?: boolean
   likes_count: number
+  is_shiny?: boolean
 }
 
 export default function SharedCatchClient({ id }: { id: string }) {
@@ -51,12 +54,21 @@ export default function SharedCatchClient({ id }: { id: string }) {
 
       if (error) throw error
 
-      // Get user email
-      const { data: { user } } = await supabase.auth.admin.getUserById(data.user_id)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', data.user_id)
+        .single()
+
+      const { count: likesCount } = await supabase
+        .from('catch_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('catch_id', id)
 
       setCatchData({
         ...data,
-        user_email: user?.email,
+        username: profile?.username,
+        likes_count: likesCount || 0,
       })
     } catch (err) {
       console.error('Error fetching catch:', err)
@@ -68,30 +80,23 @@ export default function SharedCatchClient({ id }: { id: string }) {
 
   const handleShare = async () => {
     if (!catchData) return
-
     const shareData = {
-      title: `${catchData.species} - ${catchData.length} cm`,
+      title: `${catchData.species} – ${catchData.length} cm`,
       text: `Schau dir diesen ${catchData.species}-Fang auf FinDex an!`,
       url: window.location.href,
     }
-
     if (navigator.share) {
-      try {
-        await navigator.share(shareData)
-      } catch (err) {
-        // User cancelled
-      }
+      try { await navigator.share(shareData) } catch { /* cancelled */ }
     } else {
-      // Fallback: Copy to clipboard
       await navigator.clipboard.writeText(window.location.href)
-      toast('Link in Zwischenablage kopiert!', 'success')
+      toast('Link kopiert!', 'success')
     }
   }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark flex items-center justify-center">
-        <div className="text-white text-2xl">Laden...</div>
+        <div className="w-10 h-10 border-4 border-ocean-light/30 border-t-ocean-light rounded-full animate-spin" />
       </div>
     )
   }
@@ -102,13 +107,8 @@ export default function SharedCatchClient({ id }: { id: string }) {
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center max-w-md">
           <div className="mb-4 flex justify-center"><Fish className="w-14 h-14 text-ocean-light" /></div>
           <h1 className="text-2xl font-bold text-white mb-4">Fang nicht gefunden</h1>
-          <p className="text-ocean-light mb-6">
-            Dieser Fang existiert nicht oder ist nicht Öffentlich geteilt.
-          </p>
-          <Link
-            href="/"
-            className="inline-block bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors"
-          >
+          <p className="text-ocean-light mb-6">Dieser Fang existiert nicht oder ist nicht öffentlich.</p>
+          <Link href="/" className="inline-block bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors">
             Zur Startseite
           </Link>
         </div>
@@ -116,140 +116,157 @@ export default function SharedCatchClient({ id }: { id: string }) {
     )
   }
 
+  const weightStr = catchData.weight
+    ? catchData.weight > 1000
+      ? `${(catchData.weight / 1000).toFixed(2)} kg`
+      : `${catchData.weight} g`
+    : null
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="mb-4 flex justify-center"><Fish className="w-12 h-12 text-ocean-light" /></div>
-          <h1 className="text-3xl font-bold text-white mb-2">FinDex</h1>
-          <p className="text-ocean-light">Geteilter Fang von {catchData.user_email?.split('@')[0]}</p>
+      <div className="max-w-lg mx-auto px-4 py-8 pb-16">
+
+        {/* App Banner */}
+        <div className="bg-ocean-light/10 border border-ocean-light/30 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <Fish className="w-5 h-5 text-ocean-light" />
+              <span className="text-white font-bold text-sm">FinDex</span>
+            </div>
+            <p className="text-ocean-light text-xs">In der App ansehen & liken</p>
+          </div>
+          <a
+            href={`findex://catch/${id}`}
+            className="shrink-0 bg-ocean-light text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-ocean transition-colors"
+          >
+            App öffnen
+          </a>
         </div>
 
-        {/* Catch Card */}
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden mb-6">
-          {/* Photo */}
-          {catchData.photo_url && (
-            <div className="relative w-full h-96">
-              <Image
-                src={catchData.photo_url}
-                alt={catchData.species}
-                fill
-                sizes="100vw"
-            className="object-cover"
-              />
-            </div>
-          )}
-
-          {/* Content */}
-          <div className="p-8">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-2">{catchData.species}</h2>
-                <div className="flex items-center gap-2 mb-3">
-                  <VerificationBadge
-                    status={catchData.verification_status}
-                    aiVerified={catchData.ai_verified}
-                  />
-                  <span className="text-xs text-ocean-light">
-                    {catchData.verification_status === 'verified' || catchData.ai_verified
-                      ? 'Verifiziert'
-                      : catchData.verification_status === 'manual'
-                        ? 'Manuell'
-                        : catchData.verification_status === 'rejected'
-                          ? 'Abgelehnt'
-                          : 'Ausstehend'}
-                  </span>
-                </div>
-                <p className="text-ocean-light">
-                  {format(new Date(catchData.date), 'dd. MMMM yyyy', { locale: de })}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-ocean-light">
-                <Heart className="w-4 h-4" />
-                <span>{catchData.likes_count || 0}</span>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-ocean-dark/50 rounded-lg p-4">
-                <div className="text-ocean-light text-sm">Länge</div>
-                <div className="text-2xl font-bold text-white">{catchData.length} cm</div>
-              </div>
-
-              {catchData.weight && (
-                <div className="bg-ocean-dark/50 rounded-lg p-4">
-                  <div className="text-ocean-light text-sm">Gewicht</div>
-                  <div className="text-2xl font-bold text-white">
-                    {catchData.weight > 1000
-                      ? `${(catchData.weight / 1000).toFixed(2)} kg`
-                      : `${catchData.weight} g`}
-                  </div>
-                </div>
-              )}
-
-              {catchData.weather && (
-                <div className="bg-ocean-dark/50 rounded-lg p-4">
-                  <div className="text-ocean-light text-sm">Wetter</div>
-                  <div className="text-xl font-bold text-white">
-                    {catchData.weather.temperature}°C
-                  </div>
-                </div>
-              )}
-
-              {catchData.bait && (
-                <div className="bg-ocean-dark/50 rounded-lg p-4">
-                  <div className="text-ocean-light text-sm">Köder</div>
-                  <div className="text-lg font-bold text-white truncate">{catchData.bait}</div>
-                </div>
-              )}
-            </div>
-
-            {/* Notes */}
-            {catchData.notes && (
-              <div className="mb-6 p-4 bg-ocean-dark/50 rounded-lg">
-                <p className="text-white italic">&quot;{catchData.notes}&quot;</p>
+        {/* Photo */}
+        {catchData.photo_url && (
+          <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4 shadow-2xl">
+            <Image
+              src={catchData.photo_url}
+              alt={catchData.species}
+              fill
+              sizes="(max-width: 640px) 100vw, 640px"
+              className="object-cover"
+              priority
+            />
+            {catchData.is_shiny && (
+              <div className="absolute top-3 left-3 bg-yellow-400/90 text-black text-xs font-bold px-2.5 py-1 rounded-full">
+                ✨ Shiny
               </div>
             )}
+          </div>
+        )}
 
-            {/* Map */}
-            {catchData.coordinates && (
-              <div className="mb-6">
-                <Map
-                  coordinates={catchData.coordinates}
-                  location={catchData.location}
-                  height="300px"
-                />
-              </div>
-            )}
-
-            {/* Share Button */}
-            <button
-              onClick={handleShare}
-              className="w-full bg-ocean hover:bg-ocean-light text-white font-bold py-4 px-8 rounded-lg transition-colors mb-4 inline-flex items-center justify-center gap-2"
-            >
-              <Share2 className="w-5 h-5" />
-              Teilen
-            </button>
-
-            {/* CTA */}
-            <div className="text-center pt-6 border-t border-ocean-light/20">
-              <p className="text-ocean-light mb-4">
-                Tracke auch du deine Fänge mit FinDex!
-              </p>
-              <Link
-                href="/"
-                className="inline-block bg-ocean-dark hover:bg-ocean text-white font-semibold py-3 px-8 rounded-lg transition-colors"
-              >
-                Jetzt starten
-              </Link>
+        {/* Catch Info Card */}
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-2xl p-6 mb-4">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-white">{catchData.species}</h1>
+              {catchData.username && (
+                <p className="text-ocean-light text-sm mt-0.5">von {catchData.username}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 text-ocean-light">
+              <Heart className="w-4 h-4" />
+              <span className="text-sm font-medium">{catchData.likes_count}</span>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 mb-4">
+            <VerificationBadge status={catchData.verification_status} aiVerified={catchData.ai_verified} />
+            <span className="text-ocean-light text-xs">
+              {format(new Date(catchData.date), 'dd. MMMM yyyy', { locale: de })}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2">
+              <Ruler className="w-4 h-4 text-ocean-light shrink-0" />
+              <div>
+                <div className="text-ocean-light text-xs">Länge</div>
+                <div className="text-white font-bold">{catchData.length} cm</div>
+              </div>
+            </div>
+            {weightStr && (
+              <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2">
+                <Scale className="w-4 h-4 text-ocean-light shrink-0" />
+                <div>
+                  <div className="text-ocean-light text-xs">Gewicht</div>
+                  <div className="text-white font-bold">{weightStr}</div>
+                </div>
+              </div>
+            )}
+            {catchData.location && (
+              <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2 col-span-2">
+                <MapPin className="w-4 h-4 text-ocean-light shrink-0" />
+                <div>
+                  <div className="text-ocean-light text-xs">Ort</div>
+                  <div className="text-white font-bold truncate">{catchData.location}</div>
+                </div>
+              </div>
+            )}
+            {catchData.bait && (
+              <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2 col-span-2">
+                <Utensils className="w-4 h-4 text-ocean-light shrink-0" />
+                <div>
+                  <div className="text-ocean-light text-xs">Köder</div>
+                  <div className="text-white font-bold">{catchData.bait}</div>
+                </div>
+              </div>
+            )}
+            {catchData.weather && (
+              <div className="bg-ocean-dark/50 rounded-xl p-3 col-span-2">
+                <div className="text-ocean-light text-xs mb-1">Wetter</div>
+                <div className="text-white font-bold">{catchData.weather.temperature}°C · {catchData.weather.description}</div>
+              </div>
+            )}
+          </div>
+
+          {catchData.notes && (
+            <div className="mt-3 p-3 bg-ocean-dark/50 rounded-xl">
+              <p className="text-white/80 text-sm italic">„{catchData.notes}"</p>
+            </div>
+          )}
+        </div>
+
+        {/* Map */}
+        {catchData.coordinates && (
+          <div className="rounded-2xl overflow-hidden mb-4 h-52">
+            <Map coordinates={catchData.coordinates} location={catchData.location} />
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            onClick={handleShare}
+            className="flex-1 flex items-center justify-center gap-2 bg-ocean/40 border border-ocean-light/20 text-white font-semibold py-3 rounded-xl hover:bg-ocean/60 transition-colors"
+          >
+            <Share2 className="w-4 h-4" />
+            Teilen
+          </button>
+          <a
+            href={`findex://catch/${id}`}
+            className="flex-1 flex items-center justify-center gap-2 bg-ocean-light text-white font-semibold py-3 rounded-xl hover:bg-ocean transition-colors"
+          >
+            <Fish className="w-4 h-4" />
+            In App öffnen
+          </a>
+        </div>
+
+        {/* Download CTA */}
+        <div className="text-center mt-6 pt-6 border-t border-ocean-light/10">
+          <p className="text-ocean-light text-sm mb-3">Noch kein FinDex? Tracke deine Fänge kostenlos.</p>
+          <Link href="/" className="inline-block bg-ocean-dark border border-ocean-light/20 hover:bg-ocean text-white font-semibold py-2.5 px-6 rounded-xl transition-colors text-sm">
+            Jetzt starten
+          </Link>
         </div>
       </div>
     </div>
   )
 }
-
-

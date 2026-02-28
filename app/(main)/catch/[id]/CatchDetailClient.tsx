@@ -297,16 +297,17 @@ export default function CatchDetailClient({ id }: { id: string }) {
         ? `, ${(catchData.weight / 1000).toFixed(1)} kg`
         : `, ${catchData.weight} g`
       : ''
+    const shareUrl = `${window.location.origin}/sharedcatch/${catchData.id}`
     const shareData = {
       title: `${catchData.species} – ${catchData.length} cm`,
       text: `${catchData.species}, ${catchData.length} cm${weightStr} – gefangen auf FinDex 🎣`,
-      url: window.location.href,
+      url: shareUrl,
     }
     try {
       if (navigator.share) {
         await navigator.share(shareData)
       } else {
-        await navigator.clipboard.writeText(window.location.href)
+        await navigator.clipboard.writeText(shareUrl)
         toast('Link kopiert!', 'success')
       }
     } catch (e: any) {

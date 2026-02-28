@@ -103,8 +103,8 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
   const handleShare = async () => {
     const photo = photos[currentIndex]
-    // photo.id is the catch ID — always link to the catch detail page
-    const shareUrl = `${window.location.origin}/catch/${photo.id}`
+    // photo.id is the catch ID — link to public share page (no login required)
+    const shareUrl = `${window.location.origin}/sharedcatch/${photo.id}`
     if (navigator.share) {
       try {
         await navigator.share({
