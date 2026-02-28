@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["DEIN_TEAM_ID.is.nickot.fishbox"],
+        "components": [
+          { "/": "/catch/*" },
+          { "/": "/user/*" },
+          { "/": "/fishdex/*" },
+          { "/": "/dashboard" },
+          { "/": "/social" }
+        ]
+      }
+    ]
+  }
+}

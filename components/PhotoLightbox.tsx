@@ -72,23 +72,26 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
       const response = await fetch(photo.url, { mode: 'cors' })
       if (!response.ok) throw new Error('fetch failed')
       const blob = await response.blob()
+      const filename = `findex-${photo.species || 'catch'}-${Date.now()}.jpg`
+      const file = new File([blob], filename, { type: blob.type || 'image/jpeg' })
+
+      // iOS / modern mobile: share as actual file → "Bild sichern" erscheint im Share-Sheet
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] })
+        return
+      }
+
+      // Desktop: blob URL download
       const blobUrl = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = blobUrl
-      a.download = `findex-${photo.species || 'catch'}-${Date.now()}.jpg`
+      a.download = filename
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(blobUrl)
-    } catch {
-      // iOS Capacitor: blob download not supported — open share sheet so user can save to Photos
-      if (navigator.share) {
-        try {
-          await navigator.share({ url: photo.url })
-        } catch { /* share cancelled */ }
-      } else {
-        window.open(photo.url, '_blank')
-      }
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') toast('Download fehlgeschlagen', 'error')
     }
   }
 
