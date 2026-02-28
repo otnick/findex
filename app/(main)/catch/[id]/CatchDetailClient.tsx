@@ -80,8 +80,13 @@ export default function CatchDetailClient({ id }: { id: string }) {
   const [shinyRank, setShinyRank] = useState<{ total: number; above: number } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [isNative, setIsNative] = useState(true)
   const user = useCatchStore((state) => state.user)
   const { toast } = useToast()
+
+  useEffect(() => {
+    setIsNative(!!(window as any).Capacitor?.isNativePlatform?.())
+  }, [])
 
   const fetchCatch = useCallback(async () => {
     if (!user) return
@@ -368,6 +373,19 @@ export default function CatchDetailClient({ id }: { id: string }) {
         <ArrowLeft className="w-5 h-5" />
         Zurück
       </Link>
+
+      {/* Open in App Banner — only shown in browser, not in native app */}
+      {!isNative && (
+        <div className="flex items-center justify-between gap-4 bg-ocean/40 border border-ocean-light/20 rounded-xl px-4 py-3">
+          <div className="text-sm text-white font-medium">Diesen Fang in der FinDex App ansehen</div>
+          <a
+            href={`findex://catch/${id}`}
+            className="shrink-0 bg-ocean-light text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-ocean transition-colors"
+          >
+            App öffnen
+          </a>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Photo & Map */}
