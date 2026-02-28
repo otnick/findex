@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Share2 } from 'lucide-react'
 import { useToast } from '@/components/ToastProvider'
@@ -22,6 +22,8 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [isZoomed, setIsZoomed] = useState(false)
   const { toast } = useToast()
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,6 +50,20 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const handleNext = () => {
     setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))
     setIsZoomed(false)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isZoomed) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    const dy = e.changedTouches[0].clientY - touchStartY.current
+    if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return
+    if (dx < 0) handleNext()
+    else handlePrev()
   }
 
   const handleDownload = async () => {
@@ -87,7 +103,11 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const currentPhoto = photos[currentIndex]
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl animate-fade-in">
+    <div
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl animate-fade-in"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Header */}
       <div
         className="absolute top-0 inset-x-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4"
