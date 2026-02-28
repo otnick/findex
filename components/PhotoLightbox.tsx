@@ -89,7 +89,10 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   return (
     <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl animate-fade-in">
       {/* Header */}
-      <div className="absolute top-0 inset-x-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4">
+      <div
+        className="absolute top-0 inset-x-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
+      >
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="text-white">
             <div className="font-semibold">{currentPhoto.species || 'Fang'}</div>
@@ -131,7 +134,17 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
       </div>
 
       {/* Main Image */}
-      <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          paddingTop: 'calc(env(safe-area-inset-top) + 5rem)',
+          paddingBottom: photos.length > 1
+            ? 'calc(env(safe-area-inset-bottom) + 6rem)'
+            : 'calc(env(safe-area-inset-bottom) + 1rem)',
+          paddingLeft: '1rem',
+          paddingRight: '1rem',
+        }}
+      >
         <div 
           className={`relative w-full h-full transition-transform duration-300 ${
             isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'
@@ -171,7 +184,10 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
       {/* Thumbnails */}
       {photos.length > 1 && (
-        <div className="absolute bottom-0 inset-x-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-4">
+        <div
+          className="absolute bottom-0 inset-x-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-4"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+        >
           <div className="flex gap-2 justify-center overflow-x-auto max-w-7xl mx-auto pb-2">
             {photos.map((photo, index) => (
               <button
