@@ -673,14 +673,12 @@ export default function CatchDetailClient({ id }: { id: string }) {
                 <MessageCircle className="w-6 h-6" />
                 <span className="font-semibold">{catchData.comments_count}</span>
               </div>
-              {catchData.is_public && (
-                <button
-                  onClick={handleShare}
-                  className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors ml-auto"
-                >
-                  <Share2 className="w-5 h-5" />
-                </button>
-              )}
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 text-ocean-light hover:text-white transition-colors ml-auto"
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>

@@ -30,12 +30,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     const cap = (window as any).Capacitor
     if (!cap?.isNativePlatform?.()) return
+    let handle: { remove: () => void } | null = null
     import('@capacitor/app').then(({ App }) => {
-      const listener = App.addListener('appUrlOpen', ({ url }: { url: string }) => {
+      App.addListener('appUrlOpen', ({ url }: { url: string }) => {
         handleAppUrl(url, router)
-      })
-      return () => { listener.then((h: { remove: () => void }) => h.remove()) }
-    }).catch(() => { /* @capacitor/app not installed */ })
+      }).then((h: { remove: () => void }) => { handle = h })
+    }).catch(() => {})
+    return () => { handle?.remove() }
   }, [router])
 
   if (authLoading || !user) {

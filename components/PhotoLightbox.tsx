@@ -61,6 +61,12 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
     if (isZoomed) return
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
+    // Swipe down to close
+    if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+      onClose()
+      return
+    }
+    // Swipe left/right to navigate
     if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return
     if (dx < 0) handleNext()
     else handlePrev()
@@ -97,18 +103,18 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
   const handleShare = async () => {
     const photo = photos[currentIndex]
+    // photo.id is the catch ID — always link to the catch detail page
+    const shareUrl = `${window.location.origin}/catch/${photo.id}`
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Mein ${photo.species || 'Fang'}`,
-          text: `Check out meinen ${photo.species || 'Fang'}!`,
-          url: window.location.href,
+          title: `${photo.species || 'Fang'} auf FinDex`,
+          text: `Schau dir diesen ${photo.species || 'Fang'} auf FinDex an!`,
+          url: shareUrl,
         })
-      } catch (error) {
-        console.log('Share cancelled')
-      }
+      } catch { /* share cancelled */ }
     } else {
-      navigator.clipboard.writeText(window.location.href)
+      navigator.clipboard.writeText(shareUrl)
       toast('Link kopiert!', 'success')
     }
   }
@@ -248,12 +254,6 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         </div>
       )}
 
-      {/* Touch Swipe Hint */}
-      {photos.length > 1 && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-white/50 text-sm animate-pulse md:hidden">
-          Swipe für nächstes Foto
-        </div>
-      )}
     </div>
   )
 }
