@@ -69,16 +69,26 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const handleDownload = async () => {
     const photo = photos[currentIndex]
     try {
-      const response = await fetch(photo.url)
+      const response = await fetch(photo.url, { mode: 'cors' })
+      if (!response.ok) throw new Error('fetch failed')
       const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
+      const blobUrl = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url
+      a.href = blobUrl
       a.download = `findex-${photo.species || 'catch'}-${Date.now()}.jpg`
+      document.body.appendChild(a)
       a.click()
-      window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Download failed:', error)
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(blobUrl)
+    } catch {
+      // iOS Capacitor: blob download not supported — open share sheet so user can save to Photos
+      if (navigator.share) {
+        try {
+          await navigator.share({ url: photo.url })
+        } catch { /* share cancelled */ }
+      } else {
+        window.open(photo.url, '_blank')
+      }
     }
   }
 
