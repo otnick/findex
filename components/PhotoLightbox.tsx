@@ -104,7 +104,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl animate-fade-in"
+      className="fixed inset-0 z-[70] bg-black animate-fade-in"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -157,7 +157,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
       <div
         className="absolute inset-0 flex items-center justify-center"
         style={{
-          paddingTop: 'calc(env(safe-area-inset-top) + 5rem)',
+          paddingTop: 'calc(env(safe-area-inset-top) + 4rem)',
           paddingBottom: photos.length > 1
             ? 'calc(env(safe-area-inset-bottom) + 6rem)'
             : 'calc(env(safe-area-inset-bottom) + 1rem)',
