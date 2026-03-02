@@ -69,7 +69,7 @@ interface LeaderboardEntry {
 export default function SocialPage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard' | 'search' | 'requests'>('feed')
+  const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard' | 'requests'>('feed')
   const [feedMode, setFeedMode] = useState<'friends' | 'all'>('friends')
   const [friendIds, setFriendIds] = useState<string[]>([])
   const [friends, setFriends] = useState<FriendProfile[]>([])
@@ -227,6 +227,7 @@ export default function SocialPage() {
         .eq('status', 'accepted')
 
       const ids = (data || []).map(f => f.friend_id)
+      setFriendIds(ids)
       if (ids.length === 0) { setFriends([]); return }
 
       const { data: profiles } = await supabase
@@ -474,15 +475,6 @@ export default function SocialPage() {
           Ranking
         </button>
         <button
-          onClick={() => { setActiveTab('search'); hapticLight() }}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
-            activeTab === 'search' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-          }`}
-        >
-          <Search className="w-3.5 h-3.5" />
-          Suchen
-        </button>
-        <button
           onClick={() => { setActiveTab('requests'); hapticLight() }}
           className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center gap-1 ${
             activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
@@ -514,51 +506,60 @@ export default function SocialPage() {
       {/* Tab content */}
       <div key={activeTab} className={contentAnimClass}>
 
-      {activeTab === 'search' ? (
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ocean-light/60" />
-            <input
-              type="text"
-              placeholder="Nach Benutzername suchen..."
-              value={searchQuery}
-              onChange={(e) => searchUsers(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-sm"
-            />
-          </div>
-          {searchResults.length === 0 && searchQuery.trim() && (
-            <div className="text-center text-ocean-light/60 py-8 text-sm">Keine Benutzer gefunden</div>
-          )}
-          <div className="space-y-3">
-            {searchResults.map((result) => (
-              <div key={result.id} className="flex items-center gap-3 bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
-                <Link href={`/user/${result.id}`} className="flex items-center gap-3 flex-1 min-w-0">
-                  <Avatar seed={result.username || result.id} src={result.avatar_url} size={40} className="w-10 h-10 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-white font-semibold text-sm truncate">@{result.username}</div>
-                    {result.bio && <div className="text-ocean-light/70 text-xs truncate">{result.bio}</div>}
-                  </div>
-                </Link>
-                {sentRequests.has(result.id) ? (
-                  <span className="flex items-center gap-1.5 text-xs text-ocean-light/60 flex-shrink-0">
-                    <UserCheck className="w-4 h-4" />
-                    Gesendet
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => sendRequest(result.id)}
-                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-ocean-light/20 text-ocean-light hover:bg-ocean-light/30 hover:text-white transition-colors flex-shrink-0"
-                  >
-                    <UserPlus className="w-3.5 h-3.5" />
-                    Anfrage senden
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : activeTab === 'requests' ? (
+      {activeTab === 'requests' ? (
         <div className="space-y-6">
+          {/* Search */}
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ocean-light/60" />
+              <input
+                type="text"
+                placeholder="Angler suchen..."
+                value={searchQuery}
+                onChange={(e) => searchUsers(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-sm"
+              />
+            </div>
+            {searchQuery.trim() && (
+              searchResults.length === 0 ? (
+                <div className="text-center text-ocean-light/60 py-4 text-sm">Keine Benutzer gefunden</div>
+              ) : (
+                <div className="space-y-2">
+                  {searchResults.map((result) => (
+                    <div key={result.id} className="flex items-center gap-3 bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+                      <Link href={`/user/${result.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                        <Avatar seed={result.username || result.id} src={result.avatar_url} size={40} className="w-10 h-10 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <div className="text-white font-semibold text-sm truncate">@{result.username}</div>
+                          {result.bio && <div className="text-ocean-light/70 text-xs truncate">{result.bio}</div>}
+                        </div>
+                      </Link>
+                      {friendIds.includes(result.id) ? (
+                        <span className="flex items-center gap-1.5 text-xs text-green-400/80 flex-shrink-0">
+                          <UserCheck className="w-4 h-4" />
+                          Befreundet
+                        </span>
+                      ) : sentRequests.has(result.id) ? (
+                        <span className="flex items-center gap-1.5 text-xs text-ocean-light/60 flex-shrink-0">
+                          <UserCheck className="w-4 h-4" />
+                          Gesendet
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => sendRequest(result.id)}
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-ocean-light/20 text-ocean-light hover:bg-ocean-light/30 hover:text-white transition-colors flex-shrink-0"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          Anfrage
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+          </div>
+
           {/* Pending requests */}
           {requests.length > 0 && (
             <div className="space-y-3">
@@ -596,7 +597,7 @@ export default function SocialPage() {
             ) : friends.length === 0 ? (
               <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-8 text-center">
                 <Users className="w-12 h-12 text-ocean-light/40 mx-auto mb-3" />
-                <p className="text-ocean-light text-sm">Noch keine Freunde. Nutze Suchen um Angler zu finden!</p>
+                <p className="text-ocean-light text-sm">Noch keine Freunde. Suche oben nach Anglern!</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
