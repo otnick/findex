@@ -16,7 +16,9 @@
       "Bash(npm run build)",
       "Bash(node --version:*)",
       "Bash(./gradlew assembleDebug:*)",
-      "Bash(npx cap sync:*)"
+      "Bash(npx cap sync:*)",
+      "Bash(winget list --id GitHub.cli)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
