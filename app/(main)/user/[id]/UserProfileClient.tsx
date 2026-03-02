@@ -12,9 +12,9 @@ import { getLevelInfo, XP_PER_CATCH, XP_PER_SPECIES, XP_PER_SHINY } from '@/lib/
 import VerificationBadge from '@/components/VerificationBadge'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
-import { getSpeciesRarity } from '@/lib/utils/speciesInfo'
 import { useToast } from '@/components/ToastProvider'
 import Avatar from '@/components/Avatar'
+import HolographicCard from '@/components/HolographicCard'
 
 interface UserProfile {
   id: string
@@ -47,8 +47,6 @@ export default function UserProfileClient({ id }: { id: string }) {
   const [pinnedCatchIds, setPinnedCatchIds] = useState<string[]>([])
   const [pinSaving, setPinSaving] = useState(false)
   const [draggingId, setDraggingId] = useState<string | null>(null)
-  const [FinDexEntries, setFinDexEntries] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<'gallery' | 'FinDex'>('gallery')
   const [showPublicOnly, setShowPublicOnly] = useState(true)
   const [stats, setStats] = useState({
     totalCatches: 0,
@@ -160,68 +158,6 @@ export default function UserProfileClient({ id }: { id: string }) {
         shinyCount,
       })
 
-      // Get user's FinDex (discovered species)
-      const { data: FinDexData } = await supabase
-        .from('user_FinDex')
-        .select(`
-          *,
-          species:fish_species(*)
-        `)
-        .eq('user_id', profileData.id)
-        .order('discovered_at', { ascending: false })
-
-      if (FinDexData) {
-        let catchesQuery = supabase
-          .from('catches')
-          .select('species, verification_status, ai_verified, photo_url, length, is_public')
-          .eq('user_id', profileData.id)
-          .or('verification_status.eq.verified,ai_verified.eq.true')
-
-        if (publicOnly) {
-          catchesQuery = catchesQuery.eq('is_public', true)
-        }
-
-        const { data: allCatches } = await catchesQuery
-
-        const statsMap = new Map<
-          string,
-          {
-            bestPhoto?: string | null
-            bestLength: number
-          }
-        >()
-
-        ;(allCatches || []).forEach((c) => {
-          const name = (c.species || '').toLowerCase()
-          if (!name) return
-
-          const length = c.length || 0
-          const stats = statsMap.get(name) || {
-            bestPhoto: null,
-            bestLength: 0,
-          }
-
-          if (c.photo_url && length >= stats.bestLength) {
-            stats.bestLength = length
-            stats.bestPhoto = c.photo_url
-          }
-
-          statsMap.set(name, stats)
-        })
-
-        const progressWithPhotos = FinDexData.map((entry: any) => {
-          const speciesName = entry.species?.name || ''
-          const stats = statsMap.get(speciesName.toLowerCase())
-
-          return {
-            ...entry,
-            photo_url: stats?.bestPhoto || null,
-            verified: true,
-          }
-        })
-
-        setFinDexEntries(progressWithPhotos)
-      }
     } catch (err) {
       console.error('Error fetching profile:', err)
       setError(true)
@@ -495,8 +431,8 @@ export default function UserProfileClient({ id }: { id: string }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {(isOwnProfile ? showcaseSlots : pinnedCatches).map((catchData, index) =>
               catchData ? (
+                <HolographicCard key={catchData.id} enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'}>
                 <div
-                  key={catchData.id}
                   draggable={isOwnProfile}
                   onDragStart={(event) => isOwnProfile && handleDragStart(event, catchData.id)}
                   onDragOver={(event) => isOwnProfile && handleDragOver(event)}
@@ -596,6 +532,7 @@ export default function UserProfileClient({ id }: { id: string }) {
                     )}
                   </div>
                 </div>
+                </HolographicCard>
               ) : (
                 <div
                   key={`slot-${index}`}
@@ -619,74 +556,38 @@ export default function UserProfileClient({ id }: { id: string }) {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-2">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {isOwnProfile && (
-            <div className="flex items-center justify-between rounded-lg bg-ocean-dark/40 px-4 py-3 sm:order-2 sm:w-[260px]">
-              <div>
-                <div className="text-white font-semibold text-sm">Nur Öffentlich</div>
-                <div className="text-ocean-light text-xs">Privates ausblenden</div>
-              </div>
-              <label className="inline-flex cursor-pointer items-center gap-3">
-                <span className="sr-only">öffentliche Fänge umschalten</span>
-                <input
-                  type="checkbox"
-                  className="sr-only"
-                  checked={showPublicOnly}
-                  onChange={() => setShowPublicOnly(prev => !prev)}
-                />
-                <span
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
-                    showPublicOnly
-                      ? 'bg-green-500/90 border-green-400/60'
-                      : 'bg-gray-700 border-gray-500/60'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                      showPublicOnly ? 'translate-x-5' : 'translate-x-1'
-                    }`}
-                  />
-                </span>
-              </label>
-            </div>
-          )}
-
-          <div className="flex gap-2 sm:flex-1">
-            <button
-              onClick={() => setActiveTab('gallery')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
-                activeTab === 'gallery'
-                  ? 'bg-ocean text-white'
-                  : 'text-ocean-light hover:text-white'
+      {/* Gallery header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <Fish className="w-5 h-5 text-ocean-light" />
+          Galerie ({catches.length})
+        </h2>
+        {isOwnProfile && (
+          <label className="inline-flex cursor-pointer items-center gap-2">
+            <span className="text-ocean-light text-sm">Nur öffentlich</span>
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={showPublicOnly}
+              onChange={() => setShowPublicOnly(prev => !prev)}
+            />
+            <span
+              className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
+                showPublicOnly ? 'bg-green-500/90 border-green-400/60' : 'bg-gray-700 border-gray-500/60'
               }`}
             >
-              <div className="flex items-center justify-center gap-2">
-                <Fish className="w-5 h-5" />
-                Galerie ({catches.length})
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('FinDex')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
-                activeTab === 'FinDex'
-                  ? 'bg-ocean text-white'
-                  : 'text-ocean-light hover:text-white'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Award className="w-5 h-5" />
-                FinDex ({FinDexEntries.length})
-              </div>
-            </button>
-          </div>
-        </div>
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                  showPublicOnly ? 'translate-x-5' : 'translate-x-1'
+                }`}
+              />
+            </span>
+          </label>
+        )}
       </div>
 
-      {/* Gallery Tab */}
-      {activeTab === 'gallery' && (
-        <div>
+      {/* Gallery */}
+      <div>
           {catches.length === 0 ? (
             <EmptyState
               icon={Fish}
@@ -774,74 +675,7 @@ export default function UserProfileClient({ id }: { id: string }) {
             </div>
           )}
         </div>
-      )}
-
-      {/* FinDex Tab */}
-      {activeTab === 'FinDex' && (
-        <div>
-          {FinDexEntries.length === 0 ? (
-            <EmptyState
-              icon={Award}
-              title="Noch keine Arten entdeckt"
-              description="Fange verifizierte Fische, um sie im FinDex freizuschalten."
-            />
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {FinDexEntries.map((entry) => (
-                <Link
-                  key={entry.id}
-                  href={entry.species?.id ? `/FinDex/${entry.species.id}` : '#'}
-                  className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-3 hover:bg-ocean/40 transition-all duration-300 hover:scale-105 ${
-                    entry.species?.id ? '' : 'pointer-events-none'
-                  }`}
-                >
-                  <div className="aspect-square bg-ocean-dark rounded-lg mb-2 flex items-center justify-center relative overflow-hidden">
-                    {entry.photo_url || entry.species?.image_url ? (
-                      <Image
-                        src={entry.photo_url || entry.species.image_url}
-                        alt={entry.species.name}
-                        fill
-                        sizes="100vw"
-            className="object-cover"
-                      />
-                    ) : (
-                      <Fish className="w-12 h-12 text-ocean-light/50" />
-                    )}
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-white font-semibold text-sm mb-1">
-                      {entry.species?.name || 'Unbekannt'}
-                    </h3>
-                    <div className="text-ocean-light text-xs">
-                      {entry.total_caught}x gefangen
-                    </div>
-                    <div className="text-ocean-light text-xs">
-                      Größte: {entry.biggest_length}cm
-                    </div>
-                    {/* Rarity Stars */}
-                    {entry.species?.rarity && (
-                      <div className="mt-1 inline-flex items-center gap-0.5">
-                        {Array.from({
-                          length: getSpeciesRarity({
-                            scientificName: entry.species?.scientific_name,
-                            germanName: entry.species?.name,
-                            fallback: entry.species?.rarity,
-                          }),
-                        }).map((_, idx) => (
-                          <Star
-                            key={`rarity-${entry.id}-${idx}`}
-                            className="w-3 h-3 fill-yellow-400 text-yellow-400"
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      </div>
     </div>
   )
 }

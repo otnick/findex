@@ -11,6 +11,7 @@ import { Eye, Trash2, MapPin, Calendar, Ruler, Fish, Star } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import VerificationBadge from '@/components/VerificationBadge'
 import EmptyState from '@/components/EmptyState'
+import HolographicCard from '@/components/HolographicCard'
 import { useToast } from '@/components/ToastProvider'
 import { useConfirm } from '@/components/ConfirmDialogProvider'
 
@@ -154,8 +155,8 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
         {catches.map((catchItem) => {
           const isLegendary = catchItem.shiny_reason === 'legendary'
           return (
+            <HolographicCard key={catchItem.id} enabled={!!catchItem.is_shiny} isLegendary={isLegendary}>
             <div
-              key={catchItem.id}
               className={`bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 ${
                 catchItem.is_shiny ? (isLegendary ? 'legendary-ring' : 'shiny-ring') : ''
               }`}
@@ -349,6 +350,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
               </div>
             )}
           </div>
+            </HolographicCard>
           )
         })}
       </div>

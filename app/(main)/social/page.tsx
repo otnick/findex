@@ -459,7 +459,7 @@ export default function SocialPage() {
       <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1">
         <button
           onClick={() => { setActiveTab('feed'); hapticLight() }}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+          className={`flex-1 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
             activeTab === 'feed' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
@@ -467,7 +467,7 @@ export default function SocialPage() {
         </button>
         <button
           onClick={() => { setActiveTab('leaderboard'); hapticLight() }}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
+          className={`flex-1 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center justify-center gap-1 ${
             activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
@@ -476,7 +476,7 @@ export default function SocialPage() {
         </button>
         <button
           onClick={() => { setActiveTab('requests'); hapticLight() }}
-          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center gap-1 ${
+          className={`flex-1 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center justify-center gap-1 ${
             activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
           }`}
         >
