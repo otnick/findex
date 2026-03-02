@@ -1,14 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Image as ImageIcon, Calendar, Fish, Filter, Download, Star } from 'lucide-react'
+import { Image as ImageIcon, Calendar, Fish, Download, Star } from 'lucide-react'
 import EmptyState from '@/components/EmptyState'
-import FilterBar from '@/components/FilterBar'
 import dynamic from 'next/dynamic'
 import { useConfirm } from '@/components/ConfirmDialogProvider'
 
@@ -34,7 +32,18 @@ export default function GalleryPage() {
   const [filterShiny, setFilterShiny] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'species'>('date')
   const [loading, setLoading] = useState(true)
+  const [showAllSpecies, setShowAllSpecies] = useState(false)
   const { confirm } = useConfirm()
+
+  const speciesByCount = useMemo(() => {
+    const countMap = new Map<string, number>()
+    photos.forEach(p => countMap.set(p.species, (countMap.get(p.species) || 0) + 1))
+    return [...new Set(photos.map(p => p.species))]
+      .map(s => ({ name: s, count: countMap.get(s) || 0 }))
+      .sort((a, b) => b.count - a.count)
+  }, [photos])
+
+  const shinyCount = useMemo(() => photos.filter(p => p.isShiny).length, [photos])
 
   useEffect(() => {
     loadPhotos()
@@ -114,8 +123,6 @@ export default function GalleryPage() {
     }
   }
 
-  const uniqueSpecies = [...new Set(photos.map(p => p.species))].sort()
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -152,64 +159,98 @@ export default function GalleryPage() {
 
       {/* Filters */}
       {photos.length > 0 && (
-        <FilterBar
-          title="Filter"
-          icon={Filter}
-          activeFilters={[
-            ...(filterSpecies !== 'all'
-              ? [{ id: 'species', label: `Art: ${filterSpecies}`, onClear: () => setFilterSpecies('all') }]
-              : []),
-            ...(filterShiny ? [{ id: 'trophies', label: 'Trophäen', onClear: () => setFilterShiny(false) }] : []),
-          ]}
-          onClearAll={() => {
-            setFilterSpecies('all')
-            setFilterShiny(false)
-          }}
-          clearAllLabel="Alle Filter"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-ocean-light text-sm mb-2">Fischart</label>
-              <select
-                value={filterSpecies}
-                onChange={(e) => setFilterSpecies(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none transition-all"
+        <div className="space-y-3">
+          {/* Sort chips */}
+          <div className="flex gap-2">
+            {(['date', 'species'] as const).map((val, i) => (
+              <button
+                key={val}
+                onClick={() => setSortBy(val)}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  sortBy === val
+                    ? 'bg-ocean-light text-white shadow-sm'
+                    : 'bg-ocean/40 text-ocean-light hover:text-white'
+                }`}
               >
-                <option value="all">Alle Arten ({photos.length})</option>
-                {uniqueSpecies.map(species => (
-                  <option key={species} value={species}>
-                    {species} ({photos.filter(p => p.species === species).length})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-ocean-light text-sm mb-2">Trophäen</label>
-              <label className="flex items-center gap-2 bg-ocean-dark/50 border border-ocean-light/20 rounded-lg px-3 py-2 text-ocean-light">
-                <input
-                  type="checkbox"
-                  checked={filterShiny}
-                  onChange={(e) => setFilterShiny(e.target.checked)}
-                  className="accent-yellow-400"
-                />
-                Nur Trophäen-Fotos
-              </label>
-            </div>
-
-            <div>
-              <label className="block text-ocean-light text-sm mb-2">Sortierung</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'date' | 'species')}
-                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none transition-all"
-              >
-                <option value="date">Neueste zuerst</option>
-                <option value="species">Nach Fischart</option>
-              </select>
-            </div>
+                {['Neueste', 'Nach Fischart'][i]}
+              </button>
+            ))}
           </div>
-        </FilterBar>
+
+          {/* Species + Trophäen chips */}
+          {(speciesByCount.length > 1 || shinyCount > 0) && (() => {
+            const LIMIT = 5
+            const visible = showAllSpecies ? speciesByCount : speciesByCount.slice(0, LIMIT)
+            const hiddenCount = speciesByCount.length - LIMIT
+            return (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {shinyCount > 0 && (
+                  <button
+                    onClick={() => setFilterShiny(!filterShiny)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
+                      filterShiny
+                        ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/40'
+                        : 'bg-ocean/40 text-ocean-light hover:text-white'
+                    }`}
+                  >
+                    ⭐ Trophäen
+                  </button>
+                )}
+                {speciesByCount.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setFilterSpecies('all')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
+                        filterSpecies === 'all'
+                          ? 'bg-ocean-light text-white shadow-sm'
+                          : 'bg-ocean/40 text-ocean-light hover:text-white'
+                      }`}
+                    >
+                      Alle
+                    </button>
+                    {visible.map(({ name, count }) => (
+                      <button
+                        key={name}
+                        onClick={() => setFilterSpecies(filterSpecies === name ? 'all' : name)}
+                        className={`px-3 py-1.5 rounded-full text-sm flex-shrink-0 transition-all flex items-center gap-1.5 ${
+                          filterSpecies === name
+                            ? 'bg-ocean-light text-white font-semibold shadow-sm'
+                            : 'bg-ocean/40 text-ocean-light hover:text-white'
+                        }`}
+                      >
+                        {name}
+                        <span className={`text-xs ${filterSpecies === name ? 'text-white/70' : 'text-ocean-light/50'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    ))}
+                    {!showAllSpecies && hiddenCount > 0 && (
+                      <button
+                        onClick={() => setShowAllSpecies(true)}
+                        className="px-3 py-1.5 rounded-full text-sm flex-shrink-0 bg-ocean/40 text-ocean-light hover:text-white transition-all"
+                      >
+                        +{hiddenCount} weitere
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Result count + reset */}
+          {(filterSpecies !== 'all' || filterShiny) && (
+            <div className="text-ocean-light text-sm flex items-center gap-2">
+              {filteredPhotos.length} von {photos.length} Fotos
+              <button
+                onClick={() => { setFilterSpecies('all'); setFilterShiny(false) }}
+                className="text-white hover:underline"
+              >
+                Zurücksetzen
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Gallery Grid */}

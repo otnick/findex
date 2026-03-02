@@ -7,7 +7,8 @@ import { supabase } from '@/lib/supabase'
 import { useCatchStore } from '@/lib/store'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Settings, Star, GripVertical, X, UserPlus, UserCheck, BarChart3 } from 'lucide-react'
+import { User, Calendar, Fish, Award, Heart, MessageCircle, ArrowLeft, Settings, Star, GripVertical, X, UserPlus, UserCheck, BarChart3, Zap } from 'lucide-react'
+import { getLevelInfo, XP_PER_CATCH, XP_PER_SPECIES, XP_PER_SHINY } from '@/lib/levelSystem'
 import VerificationBadge from '@/components/VerificationBadge'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import EmptyState from '@/components/EmptyState'
@@ -254,6 +255,12 @@ export default function UserProfileClient({ id }: { id: string }) {
 
   const isOwnProfile = currentUser?.id === profile.id
 
+  const levelInfo = getLevelInfo(
+    stats.totalCatches * XP_PER_CATCH +
+    stats.uniqueSpecies * XP_PER_SPECIES +
+    stats.shinyCount * XP_PER_SHINY
+  )
+
   const savePinnedCatchIds = async (nextPinned: string[]) => {
     if (!currentUser) return
     setPinSaving(true)
@@ -414,6 +421,16 @@ export default function UserProfileClient({ id }: { id: string }) {
               <Calendar className="w-4 h-4" />
               Mitglied seit {format(new Date(profile.created_at), 'MMMM yyyy', { locale: de })}
             </div>
+            {/* Level Badge */}
+            <Link
+              href={isOwnProfile ? '/fishdex/achievements' : '#'}
+              className={`inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-gradient-to-r ${levelInfo.currentLevel.gradient} border border-white/20 hover:scale-105 transition-transform ${isOwnProfile ? 'cursor-pointer' : 'cursor-default pointer-events-none'}`}
+            >
+              <span className="text-base">{levelInfo.currentLevel.emoji}</span>
+              <span className={`text-xs font-bold ${levelInfo.currentLevel.accent}`}>Lv.{levelInfo.currentLevel.level}</span>
+              <span className="text-white/80 text-xs font-semibold">{levelInfo.currentLevel.title}</span>
+              {isOwnProfile && <Zap className="w-3 h-3 text-yellow-400" />}
+            </Link>
           </div>
         </div>
 

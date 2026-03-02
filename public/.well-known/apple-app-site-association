@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["DEIN_TEAM_ID.is.nickot.fishbox"],
+        "appIDs": ["BK3MDP3L75.is.nickot.fishbox"],
         "components": [
           { "/": "/catch/*" },
           { "/": "/user/*" },

@@ -7,11 +7,10 @@ import { useCatchStore, type Catch } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Eye, Trash2, MapPin, Calendar, Ruler, Fish, Star, Filter } from 'lucide-react'
+import { Eye, Trash2, MapPin, Calendar, Ruler, Fish, Star } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import VerificationBadge from '@/components/VerificationBadge'
 import EmptyState from '@/components/EmptyState'
-import FilterBar from '@/components/FilterBar'
 import { useToast } from '@/components/ToastProvider'
 import { useConfirm } from '@/components/ConfirmDialogProvider'
 
@@ -29,7 +28,6 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
   const [expandedMapId, setExpandedMapId] = useState<string | null>(null)
   const [pinnedCatchIds, setPinnedCatchIds] = useState<string[]>([])
   const [pinSaving, setPinSaving] = useState(false)
-  const [showTrophiesOnly, setShowTrophiesOnly] = useState(false)
   const { toast } = useToast()
   const { confirm } = useConfirm()
 
@@ -149,37 +147,11 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
     toast(isPinned ? 'Fang aus Vitrine entfernt' : 'Fang in Vitrine gepinnt', 'success')
   }
 
-  const visibleCatches = showTrophiesOnly
-    ? catches.filter((c) => c.is_shiny)
-    : catches
-
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-white mb-4">
-        Meine Fänge ({visibleCatches.length})
-      </h2>
-
-      <FilterBar
-        title="Filter"
-        icon={Filter}
-        activeFilters={showTrophiesOnly ? [{ id: 'trophies', label: 'Trophäen', onClear: () => setShowTrophiesOnly(false) }] : []}
-        onClearAll={() => setShowTrophiesOnly(false)}
-        clearAllLabel="Alle Filter"
-      >
-        <label className="flex items-center gap-2 text-ocean-light">
-          <input
-            type="checkbox"
-            checked={showTrophiesOnly}
-            onChange={(e) => setShowTrophiesOnly(e.target.checked)}
-            className="accent-yellow-400"
-          />
-          Nur Trophäen anzeigen
-        </label>
-      </FilterBar>
-
-      {/* Grid Layout - Like Social Page */}
+      {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {visibleCatches.map((catchItem) => {
+        {catches.map((catchItem) => {
           const isLegendary = catchItem.shiny_reason === 'legendary'
           return (
             <div

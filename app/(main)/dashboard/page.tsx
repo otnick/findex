@@ -7,9 +7,10 @@ import { useCatchStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, isAfter } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { MapPin, BookOpen, Trophy, Lightbulb, Fish as FishIcon } from 'lucide-react'
+import { MapPin, BookOpen, Lightbulb, Fish as FishIcon, Zap, ChevronRight } from 'lucide-react'
 import VerificationBadge from '@/components/VerificationBadge'
 import { DashboardStatsSkeleton, CatchRowSkeleton } from '@/components/Skeleton'
+import { getLevelInfo, XP_PER_CATCH, XP_PER_SPECIES, XP_PER_SHINY } from '@/lib/levelSystem'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -71,8 +72,15 @@ export default function DashboardPage() {
     const recentCatches = catches.filter(c =>
       isAfter(new Date(c.date), subDays(new Date(), 7))
     ).length
-    return { totalCatches, uniqueSpecies, biggestCatch, recentCatches }
+    const shinyCount = catches.filter(c => c.is_shiny).length
+    return { totalCatches, uniqueSpecies, biggestCatch, recentCatches, shinyCount }
   }, [catches])
+
+  const levelInfo = useMemo(() => getLevelInfo(
+    stats.totalCatches * XP_PER_CATCH +
+    stats.uniqueSpecies * XP_PER_SPECIES +
+    stats.shinyCount * XP_PER_SHINY
+  ), [stats])
 
   const recentCatchesList = catches.slice(0, 3)
 
@@ -126,88 +134,6 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-white">{greeting}</h1>
         <p className="text-ocean-light mt-1">Hier ist deine Übersicht.</p>
       </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
-          <div className="text-ocean-light text-sm">Gesamt</div>
-          <div className="text-3xl font-bold text-white mt-1">{stats.totalCatches}</div>
-          <div className="text-ocean-light text-xs mt-1">Fänge</div>
-        </div>
-
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
-          <div className="text-ocean-light text-sm">Diese Woche</div>
-          <div className="text-3xl font-bold text-white mt-1">{stats.recentCatches}</div>
-          <div className="text-ocean-light text-xs mt-1">Neue Fänge</div>
-        </div>
-
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
-          <div className="text-ocean-light text-sm">Größter</div>
-          <div className="text-3xl font-bold text-white mt-1">{stats.biggestCatch}</div>
-          <div className="text-ocean-light text-xs mt-1">cm</div>
-        </div>
-
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
-          <div className="text-ocean-light text-sm">Arten</div>
-          <div className="text-3xl font-bold text-white mt-1">{stats.uniqueSpecies}</div>
-          <div className="text-ocean-light text-xs mt-1">Verschiedene</div>
-        </div>
-      </div>
-
-      {/* FinDex Widget */}
-      {fishDexStats && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <BookOpen className="w-6 h-6 text-ocean-light" />
-              <h2 className="text-xl font-bold text-white">FinDex</h2>
-            </div>
-            <Link href="/fishdex" className="text-ocean-light hover:text-white text-sm transition-colors">
-              Zur FinDex →
-            </Link>
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-ocean-light">Deutschland</span>
-              <span className="text-white font-semibold">
-                {fishDexStats.discovered}/{fishDexStats.total} ({fishDexStats.total > 0
-                  ? Math.round((fishDexStats.discovered / fishDexStats.total) * 100)
-                  : 0}%)
-              </span>
-            </div>
-            <div className="w-full bg-ocean-dark rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-ocean-light to-ocean h-full transition-all duration-500"
-                style={{ width: `${fishDexStats.total > 0 ? (fishDexStats.discovered / fishDexStats.total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/fishdex" className="bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors">
-              <div className="text-2xl font-bold text-white mb-1">{fishDexStats.discovered}</div>
-              <div className="text-ocean-light text-sm">Entdeckt</div>
-            </Link>
-            <Link href="/fishdex/achievements" className="bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-yellow-400 mb-1">{fishDexStats.total - fishDexStats.discovered}</div>
-                <div className="text-ocean-light text-sm">Zu finden</div>
-              </div>
-              <Trophy className="w-8 h-8 text-yellow-400/50" />
-            </Link>
-          </div>
-
-          {fishDexStats.discovered === 0 && (
-            <div className="mt-4 text-center p-4 bg-ocean-dark/30 rounded-lg">
-              <p className="text-ocean-light text-sm inline-flex items-center gap-1">
-                <Lightbulb className="w-4 h-4" />
-                Fange deinen ersten Fisch um die FinDex zu starten!
-              </p>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Recent Catches */}
       <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
@@ -278,6 +204,120 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+          <div className="text-ocean-light text-sm">Gesamt</div>
+          <div className="text-3xl font-bold text-white mt-1">{stats.totalCatches}</div>
+          <div className="text-ocean-light text-xs mt-1">Fänge</div>
+        </div>
+
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+          <div className="text-ocean-light text-sm">Diese Woche</div>
+          <div className="text-3xl font-bold text-white mt-1">{stats.recentCatches}</div>
+          <div className="text-ocean-light text-xs mt-1">Neue Fänge</div>
+        </div>
+
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+          <div className="text-ocean-light text-sm">Größter</div>
+          <div className="text-3xl font-bold text-white mt-1">{stats.biggestCatch}</div>
+          <div className="text-ocean-light text-xs mt-1">cm</div>
+        </div>
+
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+          <div className="text-ocean-light text-sm">Arten</div>
+          <div className="text-3xl font-bold text-white mt-1">{stats.uniqueSpecies}</div>
+          <div className="text-ocean-light text-xs mt-1">Verschiedene</div>
+        </div>
+      </div>
+
+      {/* FinDex Widget */}
+      {fishDexStats && (
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-6 h-6 text-ocean-light" />
+              <h2 className="text-xl font-bold text-white">FinDex</h2>
+            </div>
+            <Link href="/fishdex" className="text-ocean-light hover:text-white text-sm transition-colors">
+              Zur FinDex →
+            </Link>
+          </div>
+
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-ocean-light">Deutschland</span>
+              <span className="text-white font-semibold">
+                {fishDexStats.discovered}/{fishDexStats.total} ({fishDexStats.total > 0
+                  ? Math.round((fishDexStats.discovered / fishDexStats.total) * 100)
+                  : 0}%)
+              </span>
+            </div>
+            <div className="w-full bg-ocean-dark rounded-full h-3 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-ocean-light to-ocean h-full transition-all duration-500"
+                style={{ width: `${fishDexStats.total > 0 ? (fishDexStats.discovered / fishDexStats.total) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Link href="/fishdex" className="bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors">
+              <div className="text-2xl font-bold text-white mb-1">{fishDexStats.discovered}</div>
+              <div className="text-ocean-light text-sm">Entdeckt</div>
+            </Link>
+            <Link href="/fishdex/achievements" className="bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-yellow-400 mb-1 flex items-center gap-1">
+                  {levelInfo.currentLevel.emoji} {levelInfo.currentLevel.level}
+                </div>
+                <div className="text-ocean-light text-sm">{levelInfo.currentLevel.title}</div>
+              </div>
+              <Zap className="w-5 h-5 text-yellow-400/60" />
+            </Link>
+          </div>
+
+          {fishDexStats.discovered === 0 && (
+            <div className="mt-4 text-center p-4 bg-ocean-dark/30 rounded-lg">
+              <p className="text-ocean-light text-sm inline-flex items-center gap-1">
+                <Lightbulb className="w-4 h-4" />
+                Fange deinen ersten Fisch um die FinDex zu starten!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Level Widget */}
+      <Link href="/fishdex/achievements" className="block">
+        <div className={`relative rounded-2xl overflow-hidden bg-gradient-to-r ${levelInfo.currentLevel.gradient} border border-white/10 shadow-lg hover:scale-[1.01] transition-transform`}>
+          <div className="relative px-5 py-4 flex items-center gap-4">
+            <div className="flex-shrink-0 text-center">
+              <div className="text-3xl">{levelInfo.currentLevel.emoji}</div>
+              <div className={`text-xs font-black ${levelInfo.currentLevel.accent}`}>LV.{levelInfo.currentLevel.level}</div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-white font-black text-base leading-tight truncate">{levelInfo.currentLevel.title}</div>
+              <div className="mt-1.5">
+                <div className="w-full h-1.5 rounded-full bg-black/30 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-white/80 transition-all duration-700"
+                    style={{ width: `${levelInfo.progressPercent}%` }}
+                  />
+                </div>
+                <div className="text-white/50 text-xs mt-1">
+                  {levelInfo.nextLevel
+                    ? `${levelInfo.xpInCurrentLevel} / ${levelInfo.xpForNextLevel} XP · nächstes: ${levelInfo.nextLevel.title}`
+                    : 'Maximum erreicht 🔥'}
+                </div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/40 flex-shrink-0" />
+          </div>
+        </div>
+      </Link>
+
     </div>
   )
 }

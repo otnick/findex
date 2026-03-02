@@ -1,20 +1,15 @@
 ﻿'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
-import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCatchStore } from '@/lib/store'
-import { MapPin, Fish, Filter, TrendingUp, RotateCcw } from 'lucide-react'
-import FilterBar from '@/components/FilterBar'
+import { MapPin, Fish, TrendingUp, RotateCcw, Layers } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 
 const SpotsMap = dynamic(() => import('@/components/SpotsMap'), { ssr: false })
 
-type VerificationFilter = 'all' | 'verified' | 'manual' | 'pending'
-
-type SortBy = 'catches' | 'species' | 'recent' | 'quality'
 type MobileView = 'map' | 'spots'
 
 export default function MapPage() {
@@ -26,25 +21,16 @@ export default function MapPage() {
 
   const [filterSpecies, setFilterSpecies] = useState<string>('all')
   const [filterTimeframe, setFilterTimeframe] = useState<string>('all')
-  const [filterVerification, setFilterVerification] = useState<VerificationFilter>('all')
-  const [sortBy, setSortBy] = useState<SortBy>('catches')
   const [mobileView, setMobileView] = useState<MobileView>('map')
   const [selectedSpot, setSelectedSpot] = useState<{ lat: number; lng: number } | null>(null)
   const [showHeatmap, setShowHeatmap] = useState(false)
+  const [showAllSpecies, setShowAllSpecies] = useState(false)
 
   const filteredCatches = useMemo(() => {
     let filtered = catches.filter((c) => c.coordinates)
 
     if (filterSpecies !== 'all') {
       filtered = filtered.filter((c) => c.species === filterSpecies)
-    }
-
-    if (filterVerification !== 'all') {
-      filtered = filtered.filter((c) => {
-        if (filterVerification === 'verified') return Boolean(c.ai_verified || c.verification_status === 'verified')
-        if (filterVerification === 'manual') return c.verification_status === 'manual'
-        return c.verification_status === 'pending' && !c.ai_verified
-      })
     }
 
     if (filterTimeframe !== 'all') {
@@ -67,7 +53,7 @@ export default function MapPage() {
     }
 
     return filtered
-  }, [catches, filterSpecies, filterTimeframe, filterVerification])
+  }, [catches, filterSpecies, filterTimeframe])
 
   const spotStats = useMemo(() => {
     const spots = new Map<
@@ -131,27 +117,16 @@ export default function MapPage() {
     })
 
     const spotsArray = Array.from(spots.values())
-
-    switch (sortBy) {
-      case 'catches':
-        spotsArray.sort((a, b) => b.catches - a.catches)
-        break
-      case 'species':
-        spotsArray.sort((a, b) => b.species.size - a.species.size)
-        break
-      case 'recent':
-        spotsArray.sort((a, b) => b.lastCatch.getTime() - a.lastCatch.getTime())
-        break
-      case 'quality':
-        spotsArray.sort((a, b) => b.score - a.score)
-        break
-    }
-
+    spotsArray.sort((a, b) => b.catches - a.catches)
     return spotsArray
-  }, [filteredCatches, sortBy])
+  }, [filteredCatches])
 
-  const uniqueSpecies = useMemo(() => {
-    return [...new Set(catches.filter((c) => c.coordinates).map((c) => c.species))].sort((a, b) => a.localeCompare(b, 'de'))
+  const speciesByCount = useMemo(() => {
+    const countMap = new Map<string, number>()
+    catches.filter(c => c.coordinates).forEach(c => countMap.set(c.species, (countMap.get(c.species) || 0) + 1))
+    return [...new Set(catches.filter(c => c.coordinates).map(c => c.species))]
+      .map(s => ({ name: s, count: countMap.get(s) || 0 }))
+      .sort((a, b) => b.count - a.count)
   }, [catches])
 
   useEffect(() => {
@@ -159,20 +134,12 @@ export default function MapPage() {
 
     const qSpecies = searchParams.get('species')
     const qTimeframe = searchParams.get('timeframe')
-    const qVerify = searchParams.get('verify')
-    const qSort = searchParams.get('sort')
     const qHeatmap = searchParams.get('heatmap')
     const qView = searchParams.get('view')
 
     if (qSpecies) setFilterSpecies(qSpecies)
     if (qTimeframe === 'all' || qTimeframe === 'week' || qTimeframe === 'month' || qTimeframe === 'year') {
       setFilterTimeframe(qTimeframe)
-    }
-    if (qVerify === 'all' || qVerify === 'verified' || qVerify === 'manual' || qVerify === 'pending') {
-      setFilterVerification(qVerify)
-    }
-    if (qSort === 'catches' || qSort === 'species' || qSort === 'recent' || qSort === 'quality') {
-      setSortBy(qSort)
     }
     if (qHeatmap === '1') setShowHeatmap(true)
     if (qView === 'map' || qView === 'spots') setMobileView(qView)
@@ -186,8 +153,6 @@ export default function MapPage() {
     const params = new URLSearchParams()
     if (filterSpecies !== 'all') params.set('species', filterSpecies)
     if (filterTimeframe !== 'all') params.set('timeframe', filterTimeframe)
-    if (filterVerification !== 'all') params.set('verify', filterVerification)
-    if (sortBy !== 'catches') params.set('sort', sortBy)
     if (showHeatmap) params.set('heatmap', '1')
     if (mobileView !== 'map') params.set('view', mobileView)
 
@@ -196,13 +161,11 @@ export default function MapPage() {
     if (nextQuery === currentQuery) return
 
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false })
-  }, [filterSpecies, filterTimeframe, filterVerification, sortBy, showHeatmap, mobileView, pathname, router, searchParams])
+  }, [filterSpecies, filterTimeframe, showHeatmap, mobileView, pathname, router, searchParams])
 
   const resetFilters = () => {
     setFilterSpecies('all')
     setFilterTimeframe('all')
-    setFilterVerification('all')
-    setSortBy('catches')
     setShowHeatmap(false)
     setMobileView('map')
   }
@@ -228,139 +191,102 @@ export default function MapPage() {
         </p>
       </div>
 
-      <FilterBar
-        title="Filter & Sortierung"
-        icon={Filter}
-        activeFilters={[
-          ...(filterSpecies !== 'all'
-            ? [{ id: 'species', label: `Art: ${filterSpecies}`, onClear: () => setFilterSpecies('all') }]
-            : []),
-          ...(filterTimeframe !== 'all'
-            ? [{
-                id: 'timeframe',
-                label:
-                  filterTimeframe === 'week'
-                    ? 'Zeit: Letzte Woche'
-                    : filterTimeframe === 'month'
-                      ? 'Zeit: Letzter Monat'
-                      : 'Zeit: Letztes Jahr',
-                onClear: () => setFilterTimeframe('all'),
-              }]
-            : []),
-          ...(filterVerification !== 'all'
-            ? [{
-                id: 'verify',
-                label:
-                  filterVerification === 'verified'
-                    ? 'Verifiziert'
-                    : filterVerification === 'manual'
-                      ? 'Manuell'
-                      : 'Ausstehend',
-                onClear: () => setFilterVerification('all'),
-              }]
-            : []),
-          ...(showHeatmap ? [{ id: 'heatmap', label: 'Heatmap', onClear: () => setShowHeatmap(false) }] : []),
-        ]}
-        onClearAll={resetFilters}
-        clearAllLabel="Alles zurücksetzen"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-ocean-light text-sm mb-2">Fischart</label>
-            <select
-              value={filterSpecies}
-              onChange={(e) => setFilterSpecies(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-            >
-              <option value="all">Alle Arten ({catches.filter((c) => c.coordinates).length})</option>
-              {uniqueSpecies.map((species) => (
-                <option key={species} value={species}>
-                  {species} ({catches.filter((c) => c.coordinates && c.species === species).length})
-                </option>
-              ))}
-            </select>
-          </div>
+      <div className="space-y-2">
+        {/* Unified filter card */}
+        <div className="bg-ocean/30 backdrop-blur-sm rounded-2xl border border-ocean-light/10 overflow-hidden">
 
-          <div>
-            <label className="block text-ocean-light text-sm mb-2">Zeitraum</label>
-            <select
-              value={filterTimeframe}
-              onChange={(e) => setFilterTimeframe(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-            >
-              <option value="all">Alle Zeit</option>
-              <option value="week">Letzte Woche</option>
-              <option value="month">Letzter Monat</option>
-              <option value="year">Letztes Jahr</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-ocean-light text-sm mb-2">Verifizierung</label>
-            <select
-              value={filterVerification}
-              onChange={(e) => setFilterVerification(e.target.value as VerificationFilter)}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-            >
-              <option value="all">Alle</option>
-              <option value="verified">Verifiziert</option>
-              <option value="manual">Manuell</option>
-              <option value="pending">Ausstehend</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-ocean-light text-sm mb-2">Sortierung</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortBy)}
-              className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-            >
-              <option value="catches">Meiste Fänge</option>
-              <option value="species">Meiste Arten</option>
-              <option value="recent">Neueste zuerst</option>
-              <option value="quality">Beste Spot-Qualität</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between rounded-lg bg-ocean-dark/40 px-4 py-3">
-          <div>
-            <div className="text-white font-semibold">Heatmap</div>
-            <div className="text-ocean-light text-sm">Dichte der Fänge visualisieren</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-3">
-              <span className="sr-only">Heatmap umschalten</span>
-              <input
-                type="checkbox"
-                className="sr-only"
-                checked={showHeatmap}
-                onChange={() => setShowHeatmap((prev) => !prev)}
-              />
-              <span
-                className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors shadow-inner ${
-                  showHeatmap ? 'bg-amber-500/90 border-amber-400/60' : 'bg-gray-700 border-gray-500/60'
-                }`}
-              >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                    showHeatmap ? 'translate-x-5' : 'translate-x-1'
+          {/* Row 1: Zeitraum + Heatmap icon */}
+          <div className="flex items-center border-b border-ocean-light/10">
+            <div className="flex gap-0.5 overflow-x-auto scrollbar-hide p-1.5 flex-1">
+              {([
+                { val: 'all', label: 'Alle Zeit' },
+                { val: 'week', label: 'Woche' },
+                { val: 'month', label: 'Monat' },
+                { val: 'year', label: 'Jahr' },
+              ]).map(({ val, label }) => (
+                <button
+                  key={val}
+                  onClick={() => setFilterTimeframe(val)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex-shrink-0 transition-all ${
+                    filterTimeframe === val
+                      ? 'bg-ocean-light text-white shadow-sm'
+                      : 'text-ocean-light/70 hover:text-white hover:bg-white/5'
                   }`}
-                />
-              </span>
-            </label>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="inline-flex items-center gap-2 text-sm text-ocean-light hover:text-white transition-colors"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Reset
-            </button>
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex-shrink-0 border-l border-ocean-light/10 p-1.5">
+              <button
+                onClick={() => setShowHeatmap(!showHeatmap)}
+                className={`p-2 rounded-lg transition-all ${
+                  showHeatmap
+                    ? 'bg-amber-500/20 text-amber-400'
+                    : 'text-ocean-light/60 hover:text-ocean-light hover:bg-white/5'
+                }`}
+                title="Heatmap"
+              >
+                <Layers className="w-4 h-4" />
+              </button>
+            </div>
           </div>
+
+          {/* Row 2: Species (only if multiple) */}
+          {speciesByCount.length > 0 && (() => {
+            const LIMIT = 5
+            const visible = showAllSpecies ? speciesByCount : speciesByCount.slice(0, LIMIT)
+            const hiddenCount = speciesByCount.length - LIMIT
+            return (
+              <div className="flex gap-0.5 overflow-x-auto scrollbar-hide p-1.5">
+                <button
+                  onClick={() => setFilterSpecies('all')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex-shrink-0 transition-all ${
+                    filterSpecies === 'all'
+                      ? 'bg-ocean-light text-white shadow-sm'
+                      : 'text-ocean-light/70 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  Alle
+                </button>
+                {visible.map(({ name, count }) => (
+                  <button
+                    key={name}
+                    onClick={() => setFilterSpecies(filterSpecies === name ? 'all' : name)}
+                    className={`px-3 py-1.5 rounded-lg text-sm flex-shrink-0 transition-all flex items-center gap-1.5 ${
+                      filterSpecies === name
+                        ? 'bg-ocean-light text-white font-semibold shadow-sm'
+                        : 'text-ocean-light/70 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {name}
+                    <span className={`text-xs ${filterSpecies === name ? 'text-white/70' : 'text-ocean-light/40'}`}>{count}</span>
+                  </button>
+                ))}
+                {!showAllSpecies && hiddenCount > 0 && (
+                  <button
+                    onClick={() => setShowAllSpecies(true)}
+                    className="px-3 py-1.5 rounded-lg text-sm flex-shrink-0 text-ocean-light/60 hover:text-ocean-light hover:bg-white/5 transition-all"
+                  >
+                    +{hiddenCount} mehr
+                  </button>
+                )}
+              </div>
+            )
+          })()}
         </div>
-      </FilterBar>
+
+        {/* Reset */}
+        {(filterSpecies !== 'all' || filterTimeframe !== 'all' || showHeatmap) && (
+          <button
+            onClick={resetFilters}
+            className="text-xs text-ocean-light/50 hover:text-ocean-light flex items-center gap-1.5 transition-colors pl-1"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Zurücksetzen
+          </button>
+        )}
+      </div>
 
       <div className="md:hidden inline-flex w-full rounded-xl bg-ocean/30 border border-ocean-light/20 p-1">
         <button
@@ -387,98 +313,82 @@ export default function MapPage() {
         </div>
       ) : (
         <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <MapPin className="w-16 h-16 text-ocean-light mx-auto mb-4" />
+          <MapPin className="w-16 h-16 text-ocean-light/40 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">Keine Spots gefunden</h3>
-          <p className="text-ocean-light mb-6">
-            {filterSpecies !== 'all' || filterTimeframe !== 'all' || filterVerification !== 'all'
+          <p className="text-ocean-light text-sm">
+            {filterSpecies !== 'all' || filterTimeframe !== 'all'
               ? 'Versuche andere Filter'
-              : 'Füge Fänge mit GPS-Koordinaten hinzu'}
+              : 'Aktiviere GPS beim Eintragen von Fängen, um Spots zu sehen'}
           </p>
-          <Link
-            href="/catches"
-            className="inline-block bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors"
-          >
-            Fang hinzufügen
-          </Link>
         </div>
       )}
 
       {spotStats.length > 0 && (
-        <div className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-6 ${mobileView === 'map' ? 'hidden md:block' : ''}`}>
+        <div className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-4 sm:p-6 ${mobileView === 'map' ? 'hidden md:block' : ''}`}>
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-ocean-light" />
             <h2 className="text-xl font-bold text-white">Spots</h2>
           </div>
 
-          <p className="text-ocean-light text-sm mb-4">Tippe auf einen Spot, um die Karte dorthin zu zoomen.</p>
-
-          <div className="space-y-3">
-            {spotStats.map((spot, index) => (
-              <button
-                key={`${spot.coordinates.lat}-${spot.coordinates.lng}`}
-                type="button"
-                onClick={() => setSelectedSpot(spot.coordinates)}
-                className={`w-full text-left bg-ocean-dark/50 rounded-lg p-4 transition-colors ${
-                  selectedSpot &&
-                  selectedSpot.lat === spot.coordinates.lat &&
-                  selectedSpot.lng === spot.coordinates.lng
-                    ? 'ring-2 ring-ocean-light'
-                    : 'hover:bg-ocean-dark'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-ocean text-white font-bold text-sm">
-                      #{index + 1}
+          <div className="space-y-2">
+            {spotStats.map((spot, index) => {
+              const isSelected = selectedSpot?.lat === spot.coordinates.lat && selectedSpot?.lng === spot.coordinates.lng
+              const speciesArr = Array.from(spot.species)
+              const qualityColor = spot.score >= 70 ? 'bg-green-400' : spot.score >= 40 ? 'bg-yellow-400' : 'bg-ocean-light'
+              return (
+                <button
+                  key={`${spot.coordinates.lat}-${spot.coordinates.lng}`}
+                  type="button"
+                  onClick={() => setSelectedSpot(spot.coordinates)}
+                  className={`w-full text-left rounded-xl p-4 transition-all ${
+                    isSelected
+                      ? 'bg-ocean-dark ring-2 ring-ocean-light'
+                      : 'bg-ocean-dark/50 hover:bg-ocean-dark'
+                  }`}
+                >
+                  {/* Header row */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-6 h-6 rounded-full bg-ocean text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
+                      {index + 1}
                     </div>
-                    <div>
-                      <div className="font-semibold text-white">{spot.location}</div>
-                      <div className="text-xs text-ocean-light">
-                        {spot.coordinates.lat.toFixed(4)}, {spot.coordinates.lng.toFixed(4)}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-white truncate">{spot.location}</div>
+                      <div className="text-xs text-ocean-light">{format(spot.lastCatch, 'dd.MM.yy', { locale: de })}</div>
+                    </div>
+                    <div className="flex gap-4 shrink-0 text-right">
+                      <div>
+                        <div className="text-white font-bold text-sm leading-none">{spot.catches}</div>
+                        <div className="text-ocean-light text-xs mt-0.5">Fänge</div>
+                      </div>
+                      <div>
+                        <div className="text-white font-bold text-sm leading-none">{spot.species.size}</div>
+                        <div className="text-ocean-light text-xs mt-0.5">Arten</div>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-ocean-light text-xs">Qualität</div>
-                    <div className="text-white text-sm font-semibold">{spot.score}/100</div>
-                    <div className="text-ocean-light text-xs">Letzter Fang</div>
-                    <div className="text-white text-sm font-semibold">{format(spot.lastCatch, 'dd.MM.yyyy', { locale: de })}</div>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-ocean-deeper/50 rounded p-2">
-                    <div className="text-ocean-light text-xs flex items-center gap-1">
-                      <Fish className="w-3 h-3" />
-                      Fänge
+                  {/* Quality bar */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-ocean-deeper overflow-hidden">
+                      <div className={`h-full rounded-full ${qualityColor} transition-all`} style={{ width: `${spot.score}%` }} />
                     </div>
-                    <div className="text-white font-semibold">{spot.catches}</div>
+                    <span className="text-xs text-ocean-light/50 w-7 text-right">{spot.score}</span>
                   </div>
-                  <div className="bg-ocean-deeper/50 rounded p-2">
-                    <div className="text-ocean-light text-xs">Arten</div>
-                    <div className="text-white font-semibold">{spot.species.size}</div>
-                  </div>
-                </div>
 
-                {spot.species.size > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {Array.from(spot.species).map((species) => (
-                      <span key={species} className="text-xs bg-ocean/50 text-ocean-light px-2 py-1 rounded-full">
-                        {species}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="mt-3">
-                  <Link
-                    href={`/catches?new=1&lat=${spot.coordinates.lat}&lng=${spot.coordinates.lng}&location=${encodeURIComponent(spot.location)}`}
-                    className="inline-flex items-center gap-2 text-xs text-ocean-light hover:text-white transition-colors"
-                  >
-                    + Fang hier eintragen
-                  </Link>
-                </div>
-              </button>
-            ))}
+                  {/* Species tags */}
+                  {speciesArr.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {speciesArr.slice(0, 4).map(s => (
+                        <span key={s} className="text-xs bg-ocean/60 text-ocean-light px-2 py-0.5 rounded-full">{s}</span>
+                      ))}
+                      {speciesArr.length > 4 && (
+                        <span className="text-xs text-ocean-light/40">+{speciesArr.length - 4}</span>
+                      )}
+                    </div>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

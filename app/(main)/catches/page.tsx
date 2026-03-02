@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 import CatchForm from '@/components/CatchForm'
 import CatchList from '@/components/CatchList'
 import { useCatchStore } from '@/lib/store'
-import { Fish, List, LayoutGrid } from 'lucide-react'
+import { Fish, List, LayoutGrid, X } from 'lucide-react'
 import type { Coordinates } from '@/lib/utils/geolocation'
 
 const PhotoLightbox = dynamic(() => import('@/components/PhotoLightbox'), { ssr: false })
@@ -17,7 +17,9 @@ export default function CatchesPage() {
   const [dismissPrefillOpen, setDismissPrefillOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterSpecies, setFilterSpecies] = useState('all')
+  const [filterShiny, setFilterShiny] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'length' | 'weight'>('date')
+  const [showAllSpecies, setShowAllSpecies] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const catches = useCatchStore((state) => state.catches)
@@ -38,10 +40,15 @@ export default function CatchesPage() {
 
   const effectiveShowForm = prefill.autoOpen && !dismissPrefillOpen
 
-  const species = useMemo(() => {
-    const uniqueSpecies = [...new Set(catches.map(c => c.species))].sort()
-    return uniqueSpecies
+  const speciesByCount = useMemo(() => {
+    const countMap = new Map<string, number>()
+    catches.forEach(c => countMap.set(c.species, (countMap.get(c.species) || 0) + 1))
+    return [...new Set(catches.map(c => c.species))]
+      .map(s => ({ name: s, count: countMap.get(s) || 0 }))
+      .sort((a, b) => b.count - a.count)
   }, [catches])
+
+  const shinyCount = useMemo(() => catches.filter(c => c.is_shiny).length, [catches])
 
   const filteredCatches = useMemo(() => {
     let filtered = [...catches]
@@ -58,6 +65,10 @@ export default function CatchesPage() {
       filtered = filtered.filter(c => c.species === filterSpecies)
     }
 
+    if (filterShiny) {
+      filtered = filtered.filter(c => c.is_shiny)
+    }
+
     filtered.sort((a, b) => {
       if (sortBy === 'date') return new Date(b.date).getTime() - new Date(a.date).getTime()
       if (sortBy === 'length') return b.length - a.length
@@ -66,7 +77,7 @@ export default function CatchesPage() {
     })
 
     return filtered
-  }, [catches, searchTerm, filterSpecies, sortBy])
+  }, [catches, searchTerm, filterSpecies, filterShiny, sortBy])
 
   return (
     <div className="space-y-6">
@@ -110,55 +121,115 @@ export default function CatchesPage() {
 
       {/* Filters */}
       {!effectiveShowForm && catches.length > 0 && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-ocean-light text-sm mb-2">Suche</label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Art, Ort, Köder..."
-                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-ocean-light text-sm mb-2">Fischart</label>
-              <select
-                value={filterSpecies}
-                onChange={(e) => setFilterSpecies(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+        <div className="space-y-3">
+          {/* Search with clear button */}
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Art, Ort, Köder..."
+              className="w-full px-4 py-2.5 pr-10 rounded-xl bg-ocean/30 backdrop-blur-sm text-white border border-ocean-light/20 focus:border-ocean-light focus:outline-none placeholder:text-ocean-light/50"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ocean-light hover:text-white transition-colors"
+                aria-label="Suche löschen"
               >
-                <option value="all">Alle Arten</option>
-                {species.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-ocean-light text-sm mb-2">Sortierung</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
-              >
-                <option value="date">Neueste zuerst</option>
-                <option value="length">Größte zuerst</option>
-                <option value="weight">Schwerste zuerst</option>
-              </select>
-            </div>
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
+
+          {/* Sort chips */}
+          <div className="flex gap-2">
+            {(['date', 'length', 'weight'] as const).map((val, i) => (
+              <button
+                key={val}
+                onClick={() => setSortBy(val)}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  sortBy === val
+                    ? 'bg-ocean-light text-white shadow-sm'
+                    : 'bg-ocean/40 text-ocean-light hover:text-white'
+                }`}
+              >
+                {['Neueste', 'Längste', 'Schwerste'][i]}
+              </button>
+            ))}
+          </div>
+
+          {/* Species + Trophäen filter chips */}
+          {(speciesByCount.length > 1 || shinyCount > 0) && (() => {
+            const LIMIT = 5
+            const visible = showAllSpecies ? speciesByCount : speciesByCount.slice(0, LIMIT)
+            const hiddenCount = speciesByCount.length - LIMIT
+            return (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {shinyCount > 0 && (
+                  <button
+                    onClick={() => setFilterShiny(!filterShiny)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
+                      filterShiny
+                        ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/40'
+                        : 'bg-ocean/40 text-ocean-light hover:text-white'
+                    }`}
+                  >
+                    ⭐ Trophäen
+                  </button>
+                )}
+                {speciesByCount.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setFilterSpecies('all')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
+                        filterSpecies === 'all'
+                          ? 'bg-ocean-light text-white shadow-sm'
+                          : 'bg-ocean/40 text-ocean-light hover:text-white'
+                      }`}
+                    >
+                      Alle
+                    </button>
+                    {visible.map(({ name, count }) => (
+                      <button
+                        key={name}
+                        onClick={() => setFilterSpecies(filterSpecies === name ? 'all' : name)}
+                        className={`px-3 py-1.5 rounded-full text-sm flex-shrink-0 transition-all flex items-center gap-1.5 ${
+                          filterSpecies === name
+                            ? 'bg-ocean-light text-white font-semibold shadow-sm'
+                            : 'bg-ocean/40 text-ocean-light hover:text-white'
+                        }`}
+                      >
+                        {name}
+                        <span className={`text-xs ${filterSpecies === name ? 'text-white/70' : 'text-ocean-light/50'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    ))}
+                    {!showAllSpecies && hiddenCount > 0 && (
+                      <button
+                        onClick={() => setShowAllSpecies(true)}
+                        className="px-3 py-1.5 rounded-full text-sm flex-shrink-0 bg-ocean/40 text-ocean-light hover:text-white transition-all"
+                      >
+                        +{hiddenCount} weitere
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Result count + reset */}
           {filteredCatches.length !== catches.length && (
-            <div className="mt-4 text-ocean-light text-sm">
+            <div className="text-ocean-light text-sm flex items-center gap-2">
               {filteredCatches.length} von {catches.length} Fängen
-              {(searchTerm || filterSpecies !== 'all') && (
-                <button
-                  onClick={() => { setSearchTerm(''); setFilterSpecies('all') }}
-                  className="ml-2 text-white hover:underline"
-                >
-                  Filter zurücksetzen
-                </button>
-              )}
+              <button
+                onClick={() => { setSearchTerm(''); setFilterSpecies('all'); setFilterShiny(false) }}
+                className="text-white hover:underline"
+              >
+                Zurücksetzen
+              </button>
             </div>
           )}
         </div>
