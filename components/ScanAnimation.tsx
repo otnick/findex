@@ -10,10 +10,11 @@ import { Trophy, Star, ArrowRight, Radio, PartyPopper, Fish as FishIcon, X } fro
 interface ScanAnimationProps {
   species: FishSpecies
   newAchievements?: Achievement[]
+  catchPhotoUrl?: string | null
   onClose: () => void
 }
 
-export default function ScanAnimation({ species, newAchievements = [], onClose }: ScanAnimationProps) {
+export default function ScanAnimation({ species, newAchievements = [], catchPhotoUrl, onClose }: ScanAnimationProps) {
   const [stage, setStage] = useState<'scanning' | 'reveal' | 'achievements'>('scanning')
   const [progress, setProgress] = useState(0)
 
@@ -100,7 +101,10 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
               </div>
               <div className="text-ocean-light text-xs">{progress}%</div>
 
-              <div className="relative h-20 mt-5 overflow-hidden rounded-lg">
+              <div className="relative h-40 mt-5 overflow-hidden rounded-lg bg-ocean-dark">
+                {catchPhotoUrl && (
+                  <Image src={catchPhotoUrl} alt="Fang" fill sizes="100vw" className="object-cover opacity-50" />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ocean-light/20 to-transparent animate-scan" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-green-400/20 to-transparent animate-scan-slow" />
               </div>
@@ -140,7 +144,9 @@ export default function ScanAnimation({ species, newAchievements = [], onClose }
               {/* Species Card */}
               <div className="bg-ocean/30 rounded-xl p-4 mb-4 ring-1 ring-yellow-400/40">
                 <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-ocean-dark mb-3">
-                  {species.image_url ? (
+                  {catchPhotoUrl ? (
+                    <Image src={catchPhotoUrl} alt={species.name} fill sizes="100vw" className="object-cover" />
+                  ) : species.image_url ? (
                     <Image src={species.image_url} alt={species.name} fill sizes="100vw" className="object-contain" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">

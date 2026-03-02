@@ -7,11 +7,17 @@ export interface Coordinates {
  * Get current GPS position
  * @returns Promise with coordinates or null if failed
  */
-export async function getCurrentPosition(): Promise<Coordinates | null> {
+export type GeolocationError = 'permission_denied' | 'unavailable' | 'timeout' | 'unsupported'
+
+export async function getCurrentPosition(): Promise<Coordinates | null>
+export async function getCurrentPosition(returnError: true): Promise<{ coords: Coordinates | null; error?: GeolocationError }>
+export async function getCurrentPosition(returnError?: boolean): Promise<any> {
   if (!navigator.geolocation) {
-    console.error('Geolocation is not supported by this browser.')
-    return null
+    const err = { coords: null, error: 'unsupported' as GeolocationError }
+    return returnError ? err : null
   }
+
+  let lastError: GeolocationError | undefined
 
   const tryGet = (highAccuracy: boolean): Promise<Coordinates | null> =>
     new Promise((resolve) => {
@@ -23,21 +29,26 @@ export async function getCurrentPosition(): Promise<Coordinates | null> {
           })
         },
         (error) => {
-          console.error(`Geolocation error (highAccuracy=${highAccuracy}):`, error)
+          if (error.code === 1) lastError = 'permission_denied'
+          else if (error.code === 3) lastError = 'timeout'
+          else lastError = 'unavailable'
+          console.error(`Geolocation error (highAccuracy=${highAccuracy}):`, error.code, error.message)
           resolve(null)
         },
         {
           enableHighAccuracy: highAccuracy,
-          timeout: highAccuracy ? 10000 : 5000,
-          maximumAge: highAccuracy ? 0 : 60000,
+          // Allow up to 30s-old cached position on high accuracy — avoids forcing
+          // a cold GPS fix on iOS which regularly timeouts indoors
+          timeout: highAccuracy ? 15000 : 10000,
+          maximumAge: highAccuracy ? 30000 : 300000,
         }
       )
     })
 
   // Try high accuracy first (GPS), fall back to low accuracy (network/WiFi)
-  const result = await tryGet(true)
-  if (result) return result
-  return tryGet(false)
+  const result = (await tryGet(true)) ?? (await tryGet(false))
+  if (returnError) return { coords: result, error: result ? undefined : lastError }
+  return result
 }
 
 /**

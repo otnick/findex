@@ -105,6 +105,7 @@ export default function CatchForm({
   const [newDiscovery, setNewDiscovery] = useState<{
     species: FishSpecies
     achievements: Achievement[]
+    photoUrl?: string | null
   } | null>(null)
 
   // AI Verification states
@@ -346,9 +347,9 @@ export default function CatchForm({
   const getLocation = async () => {
     setGettingLocation(true)
     try {
-      const position = await getCurrentPosition()
+      const { coords: position, error: geoError } = await getCurrentPosition(true)
       setCoordinates(position)
-      
+
       if (position) {
         const locationName = await getLocationName(position)
         setFormData(prev => ({ ...prev, location: locationName || '' }))
@@ -357,7 +358,13 @@ export default function CatchForm({
         const weatherData = await getWeatherData(position, targetDate)
         setWeather(weatherData)
       } else {
-        toast('Standortzugriff verweigert – bitte in den Einstellungen erlauben', 'error')
+        if (geoError === 'permission_denied') {
+          toast('Standort verweigert – Einstellungen > FinDex > Standort aktivieren', 'error')
+        } else if (geoError === 'timeout') {
+          toast('GPS-Timeout – bitte im Freien erneut versuchen', 'error')
+        } else {
+          toast('Standort nicht verfügbar', 'error')
+        }
       }
     } catch (error) {
       console.error('Location error:', error)
@@ -475,9 +482,10 @@ export default function CatchForm({
       // Check if this was a new discovery (only verified)
       // Use a return value instead of reading state (setState is async –
       // newDiscovery would still be null in this closure even after setNewDiscovery)
+      const catchPhotoUrl = uploadedPhotoUrls[0] || null
       let foundDiscovery = false
       if (verificationData.verification_status === 'verified') {
-        foundDiscovery = await checkForNewDiscovery(catchData.species)
+        foundDiscovery = await checkForNewDiscovery(catchData.species, catchPhotoUrl)
         if (foundDiscovery) hapticWild()
       }
 
@@ -514,7 +522,7 @@ export default function CatchForm({
     }
   }
 
-  const checkForNewDiscovery = async (speciesName: string): Promise<boolean> => {
+  const checkForNewDiscovery = async (speciesName: string, photoUrl?: string | null): Promise<boolean> => {
     if (!user) return false
 
     try {
@@ -559,7 +567,8 @@ export default function CatchForm({
 
         const discoveryData = {
           species,
-          achievements: achievements?.map(a => a.achievement).filter(Boolean) || []
+          achievements: achievements?.map(a => a.achievement).filter(Boolean) || [],
+          photoUrl: photoUrl || null,
         }
 
         setNewDiscovery(discoveryData)
@@ -711,6 +720,7 @@ export default function CatchForm({
         <ScanAnimation
           species={newDiscovery.species}
           newAchievements={newDiscovery.achievements}
+          catchPhotoUrl={newDiscovery.photoUrl}
           onClose={() => {
             setNewDiscovery(null)
             onSuccess()
