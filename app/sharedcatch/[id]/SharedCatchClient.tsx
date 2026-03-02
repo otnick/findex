@@ -229,7 +229,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
 
           {catchData.notes && (
             <div className="mt-3 p-3 bg-ocean-dark/50 rounded-xl">
-              <p className="text-white/80 text-sm italic">„{catchData.notes}"</p>
+              <p className="text-white/80 text-sm italic">&bdquo;{catchData.notes}&ldquo;</p>
             </div>
           )}
         </div>
