@@ -29,6 +29,7 @@ import VerificationBadge from '@/components/VerificationBadge'
 import { useToast } from '@/components/ToastProvider'
 import { hapticLight, hapticMedium } from '@/lib/utils/haptics'
 import Skeleton from '@/components/Skeleton'
+import HolographicCard from '@/components/HolographicCard'
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
 const Comments = dynamic(() => import('@/components/Comments'), { ssr: false })
@@ -454,6 +455,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
         {/* Right Column - Info */}
         <div className="space-y-4">
           {/* Main Info Card */}
+          <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'}>
           <div className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-6 ${catchData.is_shiny ? (catchData.shiny_reason === 'legendary' ? 'legendary-ring' : 'shiny-ring') : ''}`}>
             <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
               <FishIcon className="w-8 h-8 text-ocean-light" />
@@ -682,6 +684,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
               </button>
             </div>
           </div>
+          </HolographicCard>
         </div>
       </div>
 
