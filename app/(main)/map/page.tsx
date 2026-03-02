@@ -339,7 +339,7 @@ export default function MapPage() {
                 <button
                   key={`${spot.coordinates.lat}-${spot.coordinates.lng}`}
                   type="button"
-                  onClick={() => setSelectedSpot(spot.coordinates)}
+                  onClick={() => { setSelectedSpot(spot.coordinates); setMobileView('map') }}
                   className={`w-full text-left rounded-xl p-4 transition-all ${
                     isSelected
                       ? 'bg-ocean-dark ring-2 ring-ocean-light'
