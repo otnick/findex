@@ -69,7 +69,8 @@ interface LeaderboardEntry {
 export default function SocialPage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'friends' | 'explore' | 'search' | 'requests' | 'leaderboard'>('friends')
+  const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard' | 'search' | 'requests'>('feed')
+  const [feedMode, setFeedMode] = useState<'friends' | 'all'>('friends')
   const [friendIds, setFriendIds] = useState<string[]>([])
   const [friends, setFriends] = useState<FriendProfile[]>([])
   const [requests, setRequests] = useState<FriendRequest[]>([])
@@ -89,14 +90,6 @@ export default function SocialPage() {
   const { toast } = useToast()
   const { confirm } = useConfirm()
 
-  const tabOrder = ['friends', 'leaderboard', 'explore', 'search', 'requests'] as const
-
-  const switchTab = (newTab: typeof tabOrder[number], direction: 'left' | 'right') => {
-    hapticLight()
-    setSlideDirection(direction)
-    setActiveTab(newTab)
-  }
-
   useEffect(() => {
     if (!slideDirection) return
     const t = setTimeout(() => setSlideDirection(null), 280)
@@ -109,7 +102,7 @@ export default function SocialPage() {
   }
 
   const handleSwipeMove = (e: React.TouchEvent) => {
-    if (activeTab !== 'friends' && activeTab !== 'explore') return
+    if (activeTab !== 'feed') return
     if (isRefreshing) return
     const dy = e.touches[0].clientY - swipeTouchStartY.current
     const dx = Math.abs(e.touches[0].clientX - swipeTouchStartX.current)
@@ -120,8 +113,8 @@ export default function SocialPage() {
     }
   }
 
-  const handleSwipeEnd = (e: React.TouchEvent) => {
-    if (pullProgress >= 1 && (activeTab === 'friends' || activeTab === 'explore')) {
+  const handleSwipeEnd = () => {
+    if (pullProgress >= 1 && activeTab === 'feed') {
       setPullProgress(0)
       hapticMedium()
       setIsRefreshing(true)
@@ -129,22 +122,14 @@ export default function SocialPage() {
       return
     }
     setPullProgress(0)
-    const dx = e.changedTouches[0].clientX - swipeTouchStartX.current
-    if (Math.abs(dx) < 60) return
-    const currentIndex = tabOrder.indexOf(activeTab)
-    if (dx < 0 && currentIndex < tabOrder.length - 1) {
-      switchTab(tabOrder[currentIndex + 1], 'left')
-    } else if (dx > 0 && currentIndex > 0) {
-      switchTab(tabOrder[currentIndex - 1], 'right')
-    }
   }
 
   useEffect(() => {
-    if (user && activeTab !== 'search' && activeTab !== 'requests' && activeTab !== 'leaderboard') {
+    if (user && activeTab === 'feed') {
       fetchActivities()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, activeTab])
+  }, [user, activeTab, feedMode])
 
   useEffect(() => {
     if (user) {
@@ -325,7 +310,7 @@ export default function SocialPage() {
         .order('created_at', { ascending: false })
         .limit(30)
 
-      if (activeTab === 'friends') {
+      if (feedMode === 'friends') {
         const { data: friendships, error: friendsError } = await supabase
           .from('friendships')
           .select('friend_id')
@@ -469,64 +454,52 @@ export default function SocialPage() {
         </p>
       </div>
 
-      {/* Tabs — scrollable, Ranking near front, fade-right indicates overflow */}
-      <div className="relative">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 overflow-x-auto scrollbar-hide">
-          <button
-            onClick={() => setActiveTab('friends')}
-            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
-              activeTab === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-            }`}
-          >
-            Feed
-          </button>
-          <button
-            onClick={() => setActiveTab('leaderboard')}
-            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
-              activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-            }`}
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            Ranking
-          </button>
-          <button
-            onClick={() => setActiveTab('explore')}
-            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
-              activeTab === 'explore' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-            }`}
-          >
-            Entdecken
-          </button>
-          <button
-            onClick={() => setActiveTab('search')}
-            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
-              activeTab === 'search' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-            }`}
-          >
-            <Search className="w-3.5 h-3.5" />
-            Suchen
-          </button>
-          <button
-            onClick={() => setActiveTab('requests')}
-            className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center gap-1 ${
-              activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            Kontakte
-            {requests.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white leading-none">
-                {requests.length}
-              </span>
-            )}
-          </button>
-        </div>
-        {/* Fade indicating more tabs to the right */}
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-ocean-deeper to-transparent pointer-events-none rounded-r-lg" />
+      {/* Tabs */}
+      <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1">
+        <button
+          onClick={() => { setActiveTab('feed'); hapticLight() }}
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
+            activeTab === 'feed' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+          }`}
+        >
+          Feed
+        </button>
+        <button
+          onClick={() => { setActiveTab('leaderboard'); hapticLight() }}
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
+            activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+          }`}
+        >
+          <Trophy className="w-3.5 h-3.5" />
+          Ranking
+        </button>
+        <button
+          onClick={() => { setActiveTab('search'); hapticLight() }}
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center gap-1 ${
+            activeTab === 'search' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+          }`}
+        >
+          <Search className="w-3.5 h-3.5" />
+          Suchen
+        </button>
+        <button
+          onClick={() => { setActiveTab('requests'); hapticLight() }}
+          className={`flex-shrink-0 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center gap-1 ${
+            activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          Kontakte
+          {requests.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white leading-none">
+              {requests.length}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Pull-to-refresh indicator */}
-      {(activeTab === 'friends' || activeTab === 'explore') && (
+      {activeTab === 'feed' && (
         <div
           className="overflow-hidden flex items-end justify-center"
           style={{ height: isRefreshing ? '44px' : `${pullProgress * 44}px`, transition: 'height 0.1s ease-out' }}
@@ -699,24 +672,42 @@ export default function SocialPage() {
             </div>
           )}
         </div>
-      ) : loading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => <SocialCardSkeleton key={i} />)}
-        </div>
-      ) : showEmptyState ? (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
-          <div className="text-6xl mb-4">?</div>
-          <h3 className="text-2xl font-bold text-white mb-2">Keine Aktivitäten</h3>
-          <p className="text-ocean-light">
-            {activeTab === 'friends'
-              ? 'Noch keine öffentlichen Fänge von deinen Freunden.'
-              : 'Noch keine öffentlichen Fänge verfügbar.'}
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Feed Grid - Better Desktop Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      ) : activeTab === 'feed' ? (
+        <div className="space-y-4">
+          {/* Freunde / Alle sub-toggle */}
+          <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 w-fit">
+            <button
+              onClick={() => { setFeedMode('friends'); hapticLight() }}
+              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${feedMode === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+            >
+              Freunde
+            </button>
+            <button
+              onClick={() => { setFeedMode('all'); hapticLight() }}
+              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${feedMode === 'all' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+            >
+              Alle
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => <SocialCardSkeleton key={i} />)}
+            </div>
+          ) : showEmptyState ? (
+            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+              <div className="text-6xl mb-4">?</div>
+              <h3 className="text-2xl font-bold text-white mb-2">Keine Aktivitäten</h3>
+              <p className="text-ocean-light">
+                {feedMode === 'friends'
+                  ? 'Noch keine öffentlichen Fänge von deinen Freunden.'
+                  : 'Noch keine öffentlichen Fänge verfügbar.'}
+              </p>
+            </div>
+          ) : (
+            <>
+            {/* Feed Grid - Better Desktop Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {activities.map((activity) => (
               <Link
                 key={activity.id}
@@ -846,11 +837,13 @@ export default function SocialPage() {
                 </div>
               </Link>
             ))}
-          </div>
-        </>
-      )}
+            </div>
+            </>
+          )}
+        </div>
+      ) : null}
 
-      </div>{/* end swipeable tab content */}
+      </div>{/* end tab content */}
     </div>
   )
 }
