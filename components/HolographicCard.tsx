@@ -13,7 +13,6 @@ interface Props {
 
 // ── Shared orientation callbacks (singleton) ──────────────────────────────────
 const gyroCallbacks = new Set<(gamma: number, beta: number) => void>()
-let gyroStarted = false
 
 function addGyroCallback(cb: (gamma: number, beta: number) => void) {
   gyroCallbacks.add(cb)
@@ -25,77 +24,48 @@ function dispatchOrientation(gamma: number, beta: number) {
   gyroCallbacks.forEach((cb) => cb(gamma, beta))
 }
 
-// ── Native path: CMMotionManager via our custom Capacitor plugin ──────────────
-async function startNativeGyro() {
-  if (gyroStarted) return
-  gyroStarted = true
-  try {
-    const { registerPlugin } = await import('@capacitor/core')
-    // 'NativeMotion' matches @objc(NativeMotionPlugin) in Swift (suffix stripped)
-    const NativeMotion = registerPlugin<{
-      addListener(
-        event: 'orientation',
-        handler: (data: { beta: number; gamma: number }) => void,
-      ): Promise<unknown>
-    }>('NativeMotion')
-    await NativeMotion.addListener('orientation', (data) => {
-      dispatchOrientation(data.gamma, data.beta)
-    })
-  } catch {
-    // Plugin unavailable — fall back to browser events
-    gyroStarted = false
-    startWebGyroListener()
-  }
+// ── Native iOS: custom event dispatched by CMMotionManager via evaluateJavaScript
+let nativeMotionListenerAdded = false
+function startNativeMotionListener() {
+  if (nativeMotionListenerAdded) return
+  nativeMotionListenerAdded = true
+  window.addEventListener('nativemotion', (e: Event) => {
+    const { beta, gamma } = (e as CustomEvent<{ beta: number; gamma: number }>).detail
+    dispatchOrientation(gamma, beta)
+  })
 }
 
-// ── Web fallback: browser DeviceOrientationEvent ──────────────────────────────
+// ── Web fallback: browser DeviceOrientationEvent (Android / desktop / browser)
 let webListenerAdded = false
 let windowTouchListenerAdded = false
-
-function onWebOrientation(e: DeviceOrientationEvent) {
-  dispatchOrientation(e.gamma ?? 0, e.beta ?? 40)
-}
 
 function startWebGyroListener() {
   if (webListenerAdded) return
   webListenerAdded = true
-  window.addEventListener('deviceorientation', onWebOrientation, { passive: true })
+  window.addEventListener(
+    'deviceorientation',
+    (e: DeviceOrientationEvent) => dispatchOrientation(e.gamma ?? 0, e.beta ?? 40),
+    { passive: true },
+  )
 }
 
-function requestIOSWebPermission(): void {
-  const DOE = DeviceOrientationEvent as any
-  if (typeof DOE?.requestPermission !== 'function') {
-    startWebGyroListener()
-    return
-  }
-  DOE.requestPermission()
-    .then((result: string) => {
-      if (result === 'granted') startWebGyroListener()
-    })
-    .catch(() => {})
-}
-
-// Register a one-time window touchstart so any touch triggers iOS permission
 function ensureWebGyroOnNextTouch() {
   if (windowTouchListenerAdded) return
   windowTouchListenerAdded = true
-  window.addEventListener('touchstart', () => requestIOSWebPermission(), {
-    once: true,
-    passive: true,
-  })
-}
-
-// ── Platform detection ────────────────────────────────────────────────────────
-let isNative: boolean | null = null
-function checkNative(): boolean {
-  if (isNative !== null) return isNative
-  try {
-    const cap = (window as any).Capacitor
-    isNative = typeof cap?.isNativePlatform === 'function' && cap.isNativePlatform()
-  } catch {
-    isNative = false
-  }
-  return isNative!
+  window.addEventListener(
+    'touchstart',
+    () => {
+      const DOE = DeviceOrientationEvent as any
+      if (typeof DOE?.requestPermission !== 'function') {
+        startWebGyroListener()
+      } else {
+        DOE.requestPermission()
+          .then((r: string) => { if (r === 'granted') startWebGyroListener() })
+          .catch(() => {})
+      }
+    },
+    { once: true, passive: true },
+  )
 }
 
 export default function HolographicCard({
@@ -117,7 +87,6 @@ export default function HolographicCard({
     rafRef.current = requestAnimationFrame(() => {
       setTiltX(rx)
       setTiltY(ry)
-      // shimmer moves opposite to tilt — like light reflecting off foil
       setShimmerX(50 - ry * 2.5)
       setShimmerY(50 + rx * 2.5)
       setIsActive(true)
@@ -136,19 +105,15 @@ export default function HolographicCard({
   useEffect(() => {
     if (!enabled) return
 
-    if (checkNative()) {
-      // Capacitor native app: use CMMotionManager via Swift plugin — no permission dialog
-      startNativeGyro()
+    // Native iOS Capacitor: Swift dispatches 'nativemotion' via evaluateJavaScript
+    startNativeMotionListener()
+
+    // Browser / Android / iOS Safari: DeviceOrientationEvent
+    const DOE = DeviceOrientationEvent as any
+    if (typeof DOE?.requestPermission !== 'function') {
+      startWebGyroListener()
     } else {
-      // Browser: use DeviceOrientationEvent with iOS permission handling
-      const DOE = DeviceOrientationEvent as any
-      if (typeof DOE?.requestPermission !== 'function') {
-        // Android / desktop: start immediately
-        startWebGyroListener()
-      } else {
-        // iOS Safari: request permission on next touch anywhere on page
-        ensureWebGyroOnNextTouch()
-      }
+      ensureWebGyroOnNextTouch()
     }
 
     addGyroCallback(handleOrientation)
