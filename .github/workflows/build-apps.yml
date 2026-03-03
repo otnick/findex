@@ -159,18 +159,12 @@ jobs:
           # Capacitor already generates MainViewController.swift – we just overwrite it.
           # backgroundColor is handled by capacitor.config.ts (ios.backgroundColor).
           # IMPORTANT: do NOT set webView?.isOpaque = false – it causes a black re-render flash.
-          # JS signals Swift via webkit.messageHandlers when React is mounted and ready.
-          # Swift then starts CMMotionManager and pushes events back via evaluateJavaScript.
-          # This avoids the race condition where events fire before the JS listener exists.
           cat > ios/App/App/MainViewController.swift << 'SWIFT_EOF'
           import UIKit
           import Capacitor
           import WebKit
-          import CoreMotion
 
-          class MainViewController: CAPBridgeViewController, WKScriptMessageHandler {
-              private let motionManager = CMMotionManager()
-
+          class MainViewController: CAPBridgeViewController {
               override func viewDidLoad() {
                   super.viewDidLoad()
                   // Disable rubber-band overscroll that shows black bars on bounce
@@ -179,31 +173,6 @@ jobs:
                   webView?.scrollView.alwaysBounceVertical = false
                   // Enable native iOS swipe-from-left-edge back gesture
                   webView?.allowsBackForwardNavigationGestures = true
-                  // JS calls webkit.messageHandlers.nativemotionready.postMessage({})
-                  // once the event listener is registered — then we start CMMotionManager.
-                  webView?.configuration.userContentController.add(self, name: "nativemotionready")
-              }
-
-              func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-                  guard message.name == "nativemotionready" else { return }
-                  startMotionUpdates()
-              }
-
-              private func startMotionUpdates() {
-                  guard motionManager.isDeviceMotionAvailable,
-                        !motionManager.isDeviceMotionActive else { return }
-                  motionManager.deviceMotionUpdateInterval = 1.0 / 30.0
-                  motionManager.startDeviceMotionUpdates(to: .main) { [weak self] data, _ in
-                      guard let data = data, let webView = self?.webView else { return }
-                      let g = data.gravity
-                      // Angles matching web DeviceOrientationEvent convention:
-                      //   beta  ≈ 0° flat, ≈ 90° upright portrait
-                      //   gamma ≈ 0° no tilt, + right, - left
-                      let gamma = atan2(g.x, sqrt(g.y * g.y + g.z * g.z)) * 180.0 / .pi
-                      let beta  = atan2(-g.y, g.z) * 180.0 / .pi
-                      let js = "window.dispatchEvent(new CustomEvent('nativemotion',{detail:{beta:\(beta),gamma:\(gamma)}}))"
-                      webView.evaluateJavaScript(js, completionHandler: nil)
-                  }
               }
 
               // iOS 15+: grant geolocation permission for the WKWebView.
