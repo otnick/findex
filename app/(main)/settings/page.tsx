@@ -242,7 +242,8 @@ export default function ProfilePage() {
       </div>
 
       {/* User Info */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+      <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Profil</h2>
           <button
@@ -277,7 +278,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={uploadingAvatar}
-                    className="px-3 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 hover:border-ocean-light disabled:opacity-60 transition-colors text-sm"
+                    className="px-3 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] hover:border-white/30 disabled:opacity-60 transition-colors text-sm"
                   >
                     {uploadingAvatar ? 'Lade hoch...' : 'Foto hochladen'}
                   </button>
@@ -301,7 +302,7 @@ export default function ProfilePage() {
                 type="text"
                 value={profileForm.username}
                 onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+                className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
                 placeholder="dein_username"
               />
               <p className="text-xs text-ocean-light mt-1">Wird überall als @{profileForm.username} angezeigt</p>
@@ -312,7 +313,7 @@ export default function ProfilePage() {
               <textarea
                 value={profileForm.bio}
                 onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+                className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
                 rows={3}
                 placeholder="Erzähl etwas über dich..."
               />
@@ -372,7 +373,8 @@ export default function ProfilePage() {
 
       {/* Public Profile Link */}
       {profile?.username && (
-        <div className="bg-gradient-to-r from-ocean-light/20 to-ocean/20 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/30">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-xl p-6 relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
@@ -384,7 +386,7 @@ export default function ProfilePage() {
               <p className="text-ocean-light text-sm mb-3">
                 Teile deinen FinDex und deine besten Fänge mit anderen Anglern
               </p>
-              <div className="flex flex-wrap items-center gap-2 bg-ocean-dark/50 rounded-lg px-3 py-2 w-full sm:w-fit">
+              <div className="flex flex-wrap items-center gap-2 bg-white/[0.08] border border-white/[0.10] rounded-lg px-3 py-2 w-full sm:w-fit">
                 <span className="text-ocean-light text-sm">findex.app/user/</span>
                 <div className="flex items-center gap-2">
                   <span className="text-white font-mono font-semibold break-all">{user?.id}</span>
@@ -417,7 +419,7 @@ export default function ProfilePage() {
       )}
 
       {/* Export */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+      <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
         <h2 className="text-xl font-bold text-white mb-4">Daten exportieren</h2>
         <p className="text-ocean-light text-sm mb-4">
           Exportiere deine Fänge als Backup oder zur Weiterverarbeitung
@@ -441,10 +443,10 @@ export default function ProfilePage() {
       </div>
 
       {/* Settings */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+      <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
         <h2 className="text-xl font-bold text-white mb-4">Einstellungen</h2>
         <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-3 border-b border-ocean-light/20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-3 border-b border-white/[0.08]">
             <div>
               <div className="text-white font-semibold">Benachrichtigungen</div>
               <div className="text-ocean-light text-sm">
@@ -489,7 +491,7 @@ export default function ProfilePage() {
       <div className="text-center">
         <button
           onClick={signOut}
-          className="bg-ocean-dark hover:bg-ocean text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+          className="bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.12] text-white/70 hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors"
         >
           Abmelden
         </button>

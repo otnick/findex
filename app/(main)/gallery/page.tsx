@@ -126,7 +126,7 @@ export default function GalleryPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center">
           <div className="text-ocean-light">Lade Galerie...</div>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function GalleryPage() {
         {filteredPhotos.length > 0 && (
           <button
             onClick={downloadAll}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-ocean hover:bg-ocean-light text-white px-4 py-2 rounded-lg transition-colors text-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white px-4 py-2 rounded-lg transition-colors text-sm"
           >
             <Download className="w-4 h-4" />
             Alle herunterladen
@@ -168,8 +168,8 @@ export default function GalleryPage() {
                 onClick={() => setSortBy(val)}
                 className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${
                   sortBy === val
-                    ? 'bg-ocean-light text-white shadow-sm'
-                    : 'bg-ocean/40 text-ocean-light hover:text-white'
+                    ? 'bg-white/[0.18] text-white shadow-sm'
+                    : 'bg-white/[0.07] text-white/60 hover:text-white'
                 }`}
               >
                 {['Neueste', 'Nach Fischart'][i]}
@@ -190,7 +190,7 @@ export default function GalleryPage() {
                     className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
                       filterShiny
                         ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/40'
-                        : 'bg-ocean/40 text-ocean-light hover:text-white'
+                        : 'bg-white/[0.07] text-white/60 hover:text-white'
                     }`}
                   >
                     ⭐ Trophäen
@@ -202,8 +202,8 @@ export default function GalleryPage() {
                       onClick={() => setFilterSpecies('all')}
                       className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
                         filterSpecies === 'all'
-                          ? 'bg-ocean-light text-white shadow-sm'
-                          : 'bg-ocean/40 text-ocean-light hover:text-white'
+                          ? 'bg-white/[0.18] text-white shadow-sm'
+                          : 'bg-white/[0.07] text-white/60 hover:text-white'
                       }`}
                     >
                       Alle
@@ -214,8 +214,8 @@ export default function GalleryPage() {
                         onClick={() => setFilterSpecies(filterSpecies === name ? 'all' : name)}
                         className={`px-3 py-1.5 rounded-full text-sm flex-shrink-0 transition-all flex items-center gap-1.5 ${
                           filterSpecies === name
-                            ? 'bg-ocean-light text-white font-semibold shadow-sm'
-                            : 'bg-ocean/40 text-ocean-light hover:text-white'
+                            ? 'bg-white/[0.18] text-white font-semibold shadow-sm'
+                            : 'bg-white/[0.07] text-white/60 hover:text-white'
                         }`}
                       >
                         {name}
@@ -227,7 +227,7 @@ export default function GalleryPage() {
                     {!showAllSpecies && hiddenCount > 0 && (
                       <button
                         onClick={() => setShowAllSpecies(true)}
-                        className="px-3 py-1.5 rounded-full text-sm flex-shrink-0 bg-ocean/40 text-ocean-light hover:text-white transition-all"
+                        className="px-3 py-1.5 rounded-full text-sm flex-shrink-0 bg-white/[0.07] text-white/60 hover:text-white transition-all"
                       >
                         +{hiddenCount} weitere
                       </button>
@@ -274,7 +274,7 @@ export default function GalleryPage() {
             <div
               key={photo.id}
               onClick={() => setSelectedIndex(index)}
-              className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer bg-ocean-dark hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl animate-scale-in ${
+              className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer bg-white/[0.05] hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl animate-scale-in ${
                 photo.isShiny ? (isLegendary ? 'legendary-ring' : 'shiny-ring') : ''
               }`}
               style={{ animationDelay: `${index * 30}ms` }}
@@ -314,7 +314,7 @@ export default function GalleryPage() {
               </div>
 
               {/* Species Badge */}
-              <div className="absolute top-2 left-2 bg-ocean/90 backdrop-blur-sm px-2 py-1 rounded-full text-white text-xs font-semibold">
+              <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-white text-xs font-semibold">
                 {photo.species}
               </div>
             </div>

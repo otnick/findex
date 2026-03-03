@@ -32,11 +32,11 @@ const CATEGORIES = [
 ]
 
 const BADGE_STYLES: Record<string, string> = {
-  bronze:   'bg-gradient-to-br from-orange-900/80 to-orange-950 border-orange-600/60 shadow-orange-900/30',
-  silver:   'bg-gradient-to-br from-gray-600/80 to-gray-700 border-gray-400/50 shadow-gray-800/30',
-  gold:     'bg-gradient-to-br from-yellow-800/80 to-amber-900 border-yellow-500/60 shadow-yellow-900/30',
-  platinum: 'bg-gradient-to-br from-purple-900/80 to-purple-950 border-purple-500/60 shadow-purple-900/30',
-  diamond:  'bg-gradient-to-br from-cyan-900/80 to-cyan-950 border-cyan-400/50 shadow-cyan-900/30',
+  bronze:   'bg-orange-950/35 backdrop-blur-xl border-orange-500/30 shadow-orange-900/20',
+  silver:   'bg-gray-700/30 backdrop-blur-xl border-gray-400/25 shadow-gray-800/20',
+  gold:     'bg-amber-950/35 backdrop-blur-xl border-yellow-400/30 shadow-yellow-900/20',
+  platinum: 'bg-purple-950/35 backdrop-blur-xl border-purple-400/30 shadow-purple-900/20',
+  diamond:  'bg-cyan-950/35 backdrop-blur-xl border-cyan-300/30 shadow-cyan-900/20',
 }
 
 const BADGE_TEXT: Record<string, string> = {
@@ -158,7 +158,11 @@ export default function AchievementsPage() {
       </Link>
 
       {/* ── LEVEL HERO ── */}
-      <div className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${currentLevel.gradient} border border-white/10 shadow-2xl`}>
+      <div className="relative rounded-2xl overflow-hidden backdrop-blur-2xl bg-white/[0.07] border border-white/[0.13] shadow-2xl">
+        {/* level color tint */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${currentLevel.gradient} opacity-[0.22] pointer-events-none`} />
+        {/* prismatic top edge highlight */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent pointer-events-none" />
         {/* decorative glow */}
         <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/5 blur-3xl pointer-events-none" />
 
@@ -238,15 +242,18 @@ export default function AchievementsPage() {
 
       {/* ── QUICK STATS ── */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 text-center relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="text-2xl font-black text-white">{unlockedCount}<span className="text-ocean-light font-normal text-lg">/{achievements.length}</span></div>
           <div className="text-ocean-light text-xs mt-1">Erfolge</div>
         </div>
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 text-center relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="text-2xl font-black text-yellow-400">{totalXP.toLocaleString('de')}</div>
           <div className="text-ocean-light text-xs mt-1">Gesamt XP</div>
         </div>
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 text-center relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="text-2xl font-black text-cyan-400">
             {achievements.filter((a) => a.unlocked && a.badge_color === 'diamond').length}
           </div>
@@ -264,16 +271,16 @@ export default function AchievementsPage() {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all font-semibold text-sm flex-shrink-0 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all font-semibold text-sm flex-shrink-0 border ${
                 selectedCategory === cat.id
-                  ? 'bg-ocean-light text-white shadow-lg shadow-ocean-light/20'
-                  : 'bg-ocean/30 text-ocean-light hover:bg-ocean/50 hover:text-white'
+                  ? 'bg-white/[0.18] backdrop-blur-xl border-white/25 text-white shadow-lg shadow-white/10'
+                  : 'bg-white/[0.05] backdrop-blur-sm border-white/[0.08] text-ocean-light hover:bg-white/[0.10] hover:text-white'
               }`}
             >
               <Icon className="w-4 h-4" />
               {cat.name}
               <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                selectedCategory === cat.id ? 'bg-white/20' : 'bg-ocean-dark/40'
+                selectedCategory === cat.id ? 'bg-white/20' : 'bg-black/30'
               }`}>
                 {unlocked}/{count.length}
               </span>
@@ -292,12 +299,15 @@ export default function AchievementsPage() {
           return (
             <div
               key={achievement.id}
-              className={`rounded-2xl border-2 p-4 sm:p-5 transition-all duration-200 shadow-lg flex flex-col ${
+              className={`rounded-2xl border-2 p-4 sm:p-5 transition-all duration-200 shadow-lg flex flex-col relative overflow-hidden ${
                 achievement.unlocked
                   ? `${style} hover:scale-[1.02] hover:shadow-xl`
-                  : 'bg-ocean-dark/60 border-ocean-light/10 opacity-60'
+                  : 'bg-white/[0.03] backdrop-blur-sm border-white/[0.06] opacity-50'
               }`}
             >
+              {achievement.unlocked && (
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+              )}
               {/* Header: icon left, tier + lock right */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className={`text-4xl leading-none transition-all flex-shrink-0 ${achievement.unlocked ? 'drop-shadow-lg' : 'grayscale opacity-30'}`}>
@@ -350,7 +360,7 @@ export default function AchievementsPage() {
       </div>
 
       {filteredAchievements.length === 0 && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-2xl p-12 text-center">
+        <div className="bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-12 text-center">
           <Trophy className="w-14 h-14 text-ocean-light mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-bold text-white mb-2">Keine Erfolge</h3>
           <p className="text-ocean-light text-sm">In dieser Kategorie gibt es noch nichts.</p>
@@ -358,7 +368,8 @@ export default function AchievementsPage() {
       )}
 
       {/* XP Guide */}
-      <div className="bg-ocean/20 border border-ocean-light/10 rounded-2xl p-5">
+      <div className="bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
         <h3 className="text-white font-bold mb-3 flex items-center gap-2">
           <Zap className="w-4 h-4 text-yellow-400" /> XP verdienen
         </h3>

@@ -625,7 +625,7 @@ export default function StatsPage() {
           <BarChart3 className="w-8 h-8 text-ocean-light" />
           Statistiken
         </h1>
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-12 text-center">
           <div className="mb-4 flex justify-center"><BarChart3 className="w-14 h-14 text-ocean-light" /></div>
           <h3 className="text-2xl font-bold text-white mb-2">Noch keine Daten</h3>
           <p className="text-ocean-light">Füge Fänge hinzu, um deine Statistiken zu sehen.</p>
@@ -645,16 +645,16 @@ export default function StatsPage() {
           <p className="text-ocean-light mt-1">Analyse deiner Fänge ({filteredCatches.length} gefiltert)</p>
         </div>
         <div className="flex flex-col sm:items-end gap-2">
-          <div className="inline-flex bg-ocean/30 border border-ocean-light/20 rounded-xl p-1">
+          <div className="inline-flex bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-1">
             <button
               onClick={() => setTab('overview')}
-              className={`px-4 py-2 rounded-lg text-sm transition-colors ${tab === 'overview' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-sm transition-colors ${tab === 'overview' ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
               Übersicht
             </button>
             <button
               onClick={() => setTab('species')}
-              className={`px-4 py-2 rounded-lg text-sm transition-colors ${tab === 'species' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-sm transition-colors ${tab === 'species' ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
               Art-Detail
             </button>
@@ -663,7 +663,7 @@ export default function StatsPage() {
             <button
               type="button"
               onClick={() => exportChartAsPng(tab === 'overview' ? overviewTrendRef : speciesTrendRef, `findex-chart-${tab}`)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-ocean-dark text-ocean-light border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.07] text-white/60 border border-white/[0.10] hover:text-white hover:border-white/30 transition-colors text-sm"
             >
               <FileImage className="w-4 h-4" />
               PNG
@@ -671,7 +671,7 @@ export default function StatsPage() {
             <button
               type="button"
               onClick={exportFilteredCsv}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-ocean-dark text-ocean-light border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.07] text-white/60 border border-white/[0.10] hover:text-white hover:border-white/30 transition-colors text-sm"
             >
               <FileSpreadsheet className="w-4 h-4" />
               CSV
@@ -680,7 +680,7 @@ export default function StatsPage() {
               type="button"
               onClick={clearDrilldown}
               disabled={baitFilter === DEFAULT_BAIT && weatherDescFilter === DEFAULT_WEATHER_DESC}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-ocean-dark text-ocean-light border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.07] text-white/60 border border-white/[0.10] hover:text-white hover:border-white/30 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-4 h-4" />
               Drilldown reset
@@ -690,14 +690,14 @@ export default function StatsPage() {
       </div>
 
       {(baitFilter !== DEFAULT_BAIT || weatherDescFilter !== DEFAULT_WEATHER_DESC) && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-3 border border-ocean-light/10">
+        <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-3 border border-white/[0.08]">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-ocean-light">Aktive Drilldowns:</span>
             {baitFilter !== DEFAULT_BAIT && (
               <button
                 type="button"
                 onClick={() => setBaitFilter(DEFAULT_BAIT)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-ocean-dark text-xs text-ocean-light border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.07] text-xs text-white/60 border border-white/[0.10] hover:text-white hover:border-white/30 transition-colors"
               >
                 Köder: {baitFilter}
                 <X className="w-3 h-3" />
@@ -707,7 +707,7 @@ export default function StatsPage() {
               <button
                 type="button"
                 onClick={() => setWeatherDescFilter(DEFAULT_WEATHER_DESC)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-ocean-dark text-xs text-ocean-light border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.07] text-xs text-white/60 border border-white/[0.10] hover:text-white hover:border-white/30 transition-colors"
               >
                 Wettertyp: {weatherDescFilter}
                 <X className="w-3 h-3" />
@@ -766,7 +766,7 @@ export default function StatsPage() {
           <select
             value={rangeFilter}
             onChange={(e) => setRangeFilter(e.target.value as RangeFilter)}
-            className="bg-ocean-dark text-white border border-ocean-light/30 rounded-lg px-3 py-2 focus:outline-none focus:border-ocean-light"
+            className="bg-white/[0.07] text-white border border-white/[0.12] rounded-lg px-3 py-2 focus:outline-none focus:border-white/30"
           >
             <option value="all">Zeitraum: Alle</option>
             <option value="30d">Zeitraum: Letzte 30 Tage</option>
@@ -777,7 +777,7 @@ export default function StatsPage() {
           <select
             value={verificationFilter}
             onChange={(e) => setVerificationFilter(e.target.value as VerificationFilter)}
-            className="bg-ocean-dark text-white border border-ocean-light/30 rounded-lg px-3 py-2 focus:outline-none focus:border-ocean-light"
+            className="bg-white/[0.07] text-white border border-white/[0.12] rounded-lg px-3 py-2 focus:outline-none focus:border-white/30"
           >
             <option value="all">Verifizierung: Alle</option>
             <option value="verified">Verifizierung: Verifiziert</option>
@@ -788,7 +788,7 @@ export default function StatsPage() {
           <select
             value={weatherFilter}
             onChange={(e) => setWeatherFilter(e.target.value as WeatherFilter)}
-            className="bg-ocean-dark text-white border border-ocean-light/30 rounded-lg px-3 py-2 focus:outline-none focus:border-ocean-light"
+            className="bg-white/[0.07] text-white border border-white/[0.12] rounded-lg px-3 py-2 focus:outline-none focus:border-white/30"
           >
             <option value="all">Wetter: Alle</option>
             <option value="with">Wetter: Mit Wetterdaten</option>
@@ -797,7 +797,7 @@ export default function StatsPage() {
           <select
             value={weatherDescFilter}
             onChange={(e) => setWeatherDescFilter(e.target.value)}
-            className="bg-ocean-dark text-white border border-ocean-light/30 rounded-lg px-3 py-2 focus:outline-none focus:border-ocean-light"
+            className="bg-white/[0.07] text-white border border-white/[0.12] rounded-lg px-3 py-2 focus:outline-none focus:border-white/30"
           >
             <option value={DEFAULT_WEATHER_DESC}>Wettertyp: Alle</option>
             {weatherDescOptions.map((label) => (
@@ -809,7 +809,7 @@ export default function StatsPage() {
           <select
             value={baitFilter}
             onChange={(e) => setBaitFilter(e.target.value)}
-            className="bg-ocean-dark text-white border border-ocean-light/30 rounded-lg px-3 py-2 focus:outline-none focus:border-ocean-light"
+            className="bg-white/[0.07] text-white border border-white/[0.12] rounded-lg px-3 py-2 focus:outline-none focus:border-white/30"
           >
             <option value={DEFAULT_BAIT}>Köder: Alle</option>
             {baitOptions.map((bait) => (
@@ -821,7 +821,7 @@ export default function StatsPage() {
           <button
             type="button"
             onClick={resetFilters}
-            className="inline-flex items-center justify-center gap-2 bg-ocean-dark text-ocean-light border border-ocean-light/30 rounded-lg px-3 py-2 hover:text-white hover:border-ocean-light transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-white/[0.07] text-white/60 border border-white/[0.10] rounded-lg px-3 py-2 hover:text-white hover:border-white/30 transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
             Reset Filter
@@ -831,7 +831,7 @@ export default function StatsPage() {
 
       {tab === 'overview' && (
         <div className="space-y-6">
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-5 border border-ocean-light/10">
+          <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-5 border border-white/[0.08]">
             <div className="text-white font-semibold inline-flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-ocean-light" />
               Insights
@@ -844,7 +844,7 @@ export default function StatsPage() {
           </div>
 
           {anomalies.length > 0 && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-5 border border-amber-300/20">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-5 border border-amber-300/20">
               <div className="text-white font-semibold inline-flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-4 h-4 text-amber-300" />
                 Auffälligkeiten
@@ -861,22 +861,22 @@ export default function StatsPage() {
           )}
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
               <div className="text-ocean-light text-sm">Ø Größe</div>
               <div className="text-3xl font-bold text-white mt-1">{overview.avgLength}</div>
               <div className="text-ocean-light text-xs mt-1">cm</div>
             </div>
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
               <div className="text-ocean-light text-sm">Ø Gewicht</div>
               <div className="text-3xl font-bold text-white mt-1">{overview.avgWeightKg ?? '-'}</div>
               <div className="text-ocean-light text-xs mt-1">kg</div>
             </div>
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
               <div className="text-ocean-light text-sm">Top Art</div>
               <div className="text-xl font-bold text-white mt-1 truncate">{overview.topSpecies?.[0] || '-'}</div>
               <div className="text-ocean-light text-xs mt-1">{overview.topSpecies?.[1] || 0}x</div>
             </div>
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
               <div className="text-ocean-light text-sm">Top Köder</div>
               <div className="text-xl font-bold text-white mt-1 truncate">{overview.topBait?.[0] || '-'}</div>
               <div className="text-ocean-light text-xs mt-1">{overview.topBait?.[1] || 0}x</div>
@@ -884,7 +884,7 @@ export default function StatsPage() {
           </div>
 
           {overview.weatherAvg && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
               <h2 className="text-lg font-bold text-white mb-4 inline-flex items-center gap-2"><CloudSun className="w-5 h-5 text-ocean-light" />Wetter-Einblicke</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -906,7 +906,7 @@ export default function StatsPage() {
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {overview.weatherSources.map((entry) => (
-                  <div key={entry.source} className="px-3 py-1.5 rounded-full bg-ocean-dark/60 text-xs text-ocean-light border border-ocean-light/20">
+                  <div key={entry.source} className="px-3 py-1.5 rounded-full bg-white/[0.07] text-xs text-white/60 border border-white/[0.08]">
                     {entry.label}: <span className="text-white">{entry.value}</span> ({entry.percent}%)
                   </div>
                 ))}
@@ -921,7 +921,7 @@ export default function StatsPage() {
                         setWeatherFilter('with')
                         setWeatherDescFilter(label)
                       }}
-                      className="px-3 py-1.5 rounded-full bg-ocean-dark text-ocean-light text-xs border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors"
+                      className="px-3 py-1.5 rounded-full bg-white/[0.07] text-white/60 text-xs border border-white/[0.10] hover:text-white hover:border-white/30 transition-colors"
                     >
                       {label} ({count})
                     </button>
@@ -932,7 +932,7 @@ export default function StatsPage() {
           )}
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
               <h2 className="text-lg font-bold text-white mb-4">Fänge pro Monat</h2>
               <div className="h-72">
                 <Line
@@ -961,7 +961,7 @@ export default function StatsPage() {
               </div>
             </div>
 
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
               <h2 className="text-lg font-bold text-white mb-4">Arten-Verteilung (Top 10)</h2>
               <div className="h-72">
                 <Doughnut
@@ -994,7 +994,7 @@ export default function StatsPage() {
               </div>
             </div>
 
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
               <h2 className="text-lg font-bold text-white mb-4">Beste Fangzeiten</h2>
               <div className="h-72">
                 <Bar
@@ -1020,7 +1020,7 @@ export default function StatsPage() {
               </div>
             </div>
 
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+            <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
               <h2 className="text-lg font-bold text-white mb-4">Erfolgreichste Köder</h2>
               <div className="h-72">
                 <Bar
@@ -1060,13 +1060,13 @@ export default function StatsPage() {
 
       {tab === 'species' && (
         <div className="space-y-6">
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 border border-ocean-light/10 flex flex-col gap-3">
+          <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-4 border border-white/[0.08] flex flex-col gap-3">
             <div className="text-white font-semibold inline-flex items-center gap-2"><GitCompare className="w-4 h-4 text-ocean-light" />Art-Vergleich</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <select
                 value={selectedSpecies}
                 onChange={(e) => setSelectedSpecies(e.target.value)}
-                className="bg-ocean-dark text-white border border-ocean-light/30 rounded-lg px-3 py-2 focus:outline-none focus:border-ocean-light"
+                className="bg-white/[0.07] text-white border border-white/[0.12] rounded-lg px-3 py-2 focus:outline-none focus:border-white/30"
               >
                 {speciesOptions.map((species) => (
                   <option key={species} value={species}>{species}</option>
@@ -1077,7 +1077,7 @@ export default function StatsPage() {
                 <select
                   value={compareSpecies}
                   onChange={(e) => setCompareSpecies(e.target.value)}
-                  className="bg-ocean-dark text-white border border-ocean-light/30 rounded-lg px-3 py-2 focus:outline-none focus:border-ocean-light"
+                  className="bg-white/[0.07] text-white border border-white/[0.12] rounded-lg px-3 py-2 focus:outline-none focus:border-white/30"
                 >
                   <option value="">Vergleichsart wählen</option>
                   {speciesOptions
@@ -1090,7 +1090,7 @@ export default function StatsPage() {
                 <button
                   type="button"
                   onClick={() => setShowCompare(true)}
-                  className="bg-ocean-dark text-ocean-light border border-ocean-light/30 rounded-lg px-3 py-2 hover:text-white hover:border-ocean-light transition-colors"
+                  className="bg-white/[0.07] text-white/60 border border-white/[0.10] rounded-lg px-3 py-2 hover:text-white hover:border-white/30 transition-colors"
                 >
                   + Vergleich hinzufügen
                 </button>
@@ -1111,21 +1111,21 @@ export default function StatsPage() {
               </div>
             )}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+              <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
                 <div className="text-ocean-light text-sm">Fänge ({primarySpeciesStats?.species || '-'})</div>
                 <div className="text-3xl font-bold text-white">{primarySpeciesStats?.total || 0}</div>
               </div>
-              <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+              <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
                 <div className="text-ocean-light text-sm">Ø Länge</div>
                 <div className="text-3xl font-bold text-white">{primarySpeciesStats?.avgLength || 0}</div>
                 <div className="text-ocean-light text-xs">cm</div>
               </div>
-              <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+              <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
                 <div className="text-ocean-light text-sm">Ø Gewicht</div>
                 <div className="text-3xl font-bold text-white">{primarySpeciesStats?.avgWeight ?? '-'}</div>
                 <div className="text-ocean-light text-xs">kg</div>
               </div>
-              <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-5 border border-ocean-light/10">
+              <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-5 border border-white/[0.08]">
                 <div className="text-ocean-light text-sm">Größter Fang</div>
                 <div className="text-3xl font-bold text-white">{primarySpeciesStats?.biggest || 0}</div>
                 <div className="text-ocean-light text-xs">cm</div>
@@ -1133,7 +1133,7 @@ export default function StatsPage() {
             </div>
             {speciesDeepInsights && (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-4 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-4 border border-white/[0.08]">
                   <div className="text-ocean-light text-xs inline-flex items-center gap-1">
                     <Clock3 className="w-3.5 h-3.5" />
                     Beste Uhrzeit
@@ -1141,7 +1141,7 @@ export default function StatsPage() {
                   <div className="text-white font-bold mt-1">{speciesDeepInsights.bestHour?.label || '-'}</div>
                   <div className="text-ocean-light text-xs">{speciesDeepInsights.bestHour?.value || 0} Fänge</div>
                 </div>
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-4 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-4 border border-white/[0.08]">
                   <div className="text-ocean-light text-xs inline-flex items-center gap-1">
                     <CalendarDays className="w-3.5 h-3.5" />
                     Stärkster Monat
@@ -1149,7 +1149,7 @@ export default function StatsPage() {
                   <div className="text-white font-bold mt-1">{speciesDeepInsights.bestMonth?.label || '-'}</div>
                   <div className="text-ocean-light text-xs">{speciesDeepInsights.bestMonth?.value || 0} Fänge</div>
                 </div>
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-4 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-4 border border-white/[0.08]">
                   <div className="text-ocean-light text-xs inline-flex items-center gap-1">
                     <Crosshair className="w-3.5 h-3.5" />
                     Top Köder
@@ -1157,7 +1157,7 @@ export default function StatsPage() {
                   <div className="text-white font-bold mt-1 truncate">{speciesDeepInsights.topBait?.[0] || '-'}</div>
                   <div className="text-ocean-light text-xs">{speciesDeepInsights.topBait?.[1] || 0} Fänge</div>
                 </div>
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-4 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-lg p-4 border border-white/[0.08]">
                   <div className="text-ocean-light text-xs inline-flex items-center gap-1">
                     <CloudSun className="w-3.5 h-3.5" />
                     PB-Progress
@@ -1175,7 +1175,7 @@ export default function StatsPage() {
           {primarySpeciesStats && (
             <>
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
                   <h2 className="text-lg font-bold text-white mb-4">Monatlicher Trend</h2>
                   <div className="h-72">
                     <Line
@@ -1216,7 +1216,7 @@ export default function StatsPage() {
                   </div>
                 </div>
 
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
                   <h2 className="text-lg font-bold text-white mb-4">Fangzeiten Vergleich</h2>
                   <div className="h-72">
                     <Bar
@@ -1252,7 +1252,7 @@ export default function StatsPage() {
                   </div>
                 </div>
 
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
                   <h2 className="text-lg font-bold text-white mb-4">Längenverteilung ({primarySpeciesStats.species})</h2>
                   <div className="h-72">
                     <Bar
@@ -1278,7 +1278,7 @@ export default function StatsPage() {
                   </div>
                 </div>
 
-                <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 border border-ocean-light/10">
+                <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
                   <h2 className="text-lg font-bold text-white mb-4">Wetter ({primarySpeciesStats.species})</h2>
                   <div className="h-72 mb-4">
                     <Doughnut
@@ -1311,7 +1311,7 @@ export default function StatsPage() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {primarySpeciesStats.weatherSources.map((s) => (
-                      <div key={s.source} className="px-3 py-1.5 rounded-full bg-ocean-dark/60 text-xs text-ocean-light border border-ocean-light/20">
+                      <div key={s.source} className="px-3 py-1.5 rounded-full bg-white/[0.07] text-xs text-white/60 border border-white/[0.08]">
                         {s.label}: <span className="text-white">{s.value}</span>
                       </div>
                     ))}

@@ -136,12 +136,12 @@ export default function FinDexDetailClient({ id }: { id: string }) {
   if (!entry) {
     return (
       <div className="space-y-6">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center">
           <HelpCircle className="w-16 h-16 text-ocean-light mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-4">Art nicht gefunden</h1>
           <Link
             href="/fishdex"
-            className="inline-block bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+            className="inline-block bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white font-semibold py-3 px-8 rounded-lg transition-colors"
           >
             Zurück zur FinDex
           </Link>
@@ -182,7 +182,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
         {/* Left: Image & Basic Info */}
         <div className="lg:col-span-2 space-y-4">
           {/* Image Card */}
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
             {(() => {
               const biggestCatch = catches
                 .filter(c => c.photo_url)
@@ -190,15 +190,15 @@ export default function FinDexDetailClient({ id }: { id: string }) {
               const displayPhoto = biggestCatch?.photo_url || entry.image_url
               return (
                 <>
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-ocean-dark mb-2">
+                  <div className="relative aspect-square sm:aspect-video rounded-xl overflow-hidden bg-white/[0.05] mb-2">
                     {entry.discovered ? (
                       displayPhoto ? (
                         <Image
                           src={displayPhoto}
                           alt={entry.name}
                           fill
-                          sizes="100vw"
-                          className="object-contain"
+                          sizes="(max-width: 640px) 100vw, 66vw"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -238,7 +238,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
           {/* Description */}
           {entry.discovered ? (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                 <Info className="w-5 h-5 text-ocean-light" />
                 Beschreibung
@@ -253,7 +253,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
               )}
             </div>
           ) : (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-yellow-400" />
                 Hinweise
@@ -266,7 +266,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
           {/* User's Catches */}
           {entry.discovered && catches.length > 0 && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
               <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-ocean-light" />
                 Deine Fänge ({catches.length})
@@ -276,7 +276,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                   <Link
                     key={catchItem.id}
                     href={`/catch/${catchItem.id}`}
-                    className="bg-ocean-dark/50 rounded-lg p-3 hover:bg-ocean-dark transition-colors"
+                    className="bg-white/[0.07] border border-white/[0.08] rounded-lg p-3 hover:bg-white/[0.12] transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       {catchItem.photo_url && (
@@ -324,7 +324,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
         {/* Right: Stats & Info */}
         <div className="space-y-4">
           {/* Title */}
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
             <h1 className="text-3xl font-bold text-white mb-2">
               {entry.discovered ? entry.name : '??'}
             </h1>
@@ -337,26 +337,26 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
           {/* Quick Highlights */}
           {info && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
               <h3 className="text-white font-semibold mb-3">Schnellinfos</h3>
               <div className="flex flex-wrap gap-2">
                 {seasons.length > 0 && (
-                  <span className="px-3 py-1 bg-ocean-dark rounded-full text-ocean-light text-sm">
+                  <span className="px-3 py-1 bg-white/[0.08] border border-white/[0.10] rounded-full text-white/70 text-sm">
                     Saison: {seasons.join(', ')}
                   </span>
                 )}
                 {times.length > 0 && (
-                  <span className="px-3 py-1 bg-ocean-dark rounded-full text-ocean-light text-sm">
+                  <span className="px-3 py-1 bg-white/[0.08] border border-white/[0.10] rounded-full text-white/70 text-sm">
                     Tageszeit: {times.join(', ')}
                   </span>
                 )}
                 {info.wassertemperatur && (
-                  <span className="px-3 py-1 bg-ocean-dark rounded-full text-ocean-light text-sm">
+                  <span className="px-3 py-1 bg-white/[0.08] border border-white/[0.10] rounded-full text-white/70 text-sm">
                     {info.wassertemperatur.min ? info.wassertemperatur.min : '-'}–{info.wassertemperatur.max ? info.wassertemperatur.max : '-'}°C
                   </span>
                 )}
                 {methods.length > 0 && (
-                  <span className="px-3 py-1 bg-ocean-dark rounded-full text-ocean-light text-sm">
+                  <span className="px-3 py-1 bg-white/[0.08] border border-white/[0.10] rounded-full text-white/70 text-sm">
                     Methoden: {methods.join(', ')}
                   </span>
                 )}
@@ -366,18 +366,18 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
           {/* Discovery Stats */}
           {entry.discovered && entry.userProgress && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
               <h3 className="text-white font-semibold mb-4">Deine Statistiken</h3>
               
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                   <span className="text-ocean-light text-sm">Erstfang</span>
                   <span className="text-white font-semibold text-sm">
                     {format(new Date(entry.userProgress.discovered_at), 'dd.MM.yyyy', { locale: de })}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                   <span className="text-ocean-light text-sm">Gesamt gefangen</span>
                   <span className="text-white font-semibold">
                     {entry.userProgress.total_caught}x
@@ -385,7 +385,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 </div>
 
                 {entry.userProgress.biggest_length && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm flex items-center gap-1">
                       <Ruler className="w-4 h-4" />
                       Größter
@@ -397,7 +397,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 )}
 
                 {entry.userProgress.biggest_weight && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm flex items-center gap-1">
                       <Scale className="w-4 h-4" />
                       Schwerster
@@ -414,11 +414,11 @@ export default function FinDexDetailClient({ id }: { id: string }) {
           )}
 
           {/* Species Info */}
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
             <h3 className="text-white font-semibold mb-4">Allgemeine Infos</h3>
             
             <div className="space-y-3">
-              <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                 <span className="text-ocean-light text-sm">Lebensraum</span>
                 <span className="text-white text-sm flex items-center gap-2">
                   {waterLabels.length > 0 ? (
@@ -462,7 +462,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
               </div>
 
               {entry.min_length && entry.max_length && (
-                <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                   <span className="text-ocean-light text-sm">Größe</span>
                   <span className="text-white text-sm">
                     {entry.min_length}-{entry.max_length} cm
@@ -471,7 +471,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
               )}
 
               {entry.closed_season && (
-                <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                   <span className="text-ocean-light text-sm">Schonzeit</span>
                   <span className="text-white text-sm">
                     {entry.closed_season}
@@ -480,7 +480,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
               )}
 
               {entry.best_time && (
-                <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                   <span className="text-ocean-light text-sm">Beste Zeit</span>
                   <span className="text-white text-sm">
                     {entry.best_time}
@@ -492,13 +492,13 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
           {/* Recommended Baits */}
           {baits && baits.length > 0 && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
               <h3 className="text-white font-semibold mb-3">Empfohlene Köder</h3>
               <div className="flex flex-wrap gap-2">
                 {baits.map(bait => (
                   <span
                     key={bait}
-                    className="px-3 py-1 bg-ocean-dark rounded-full text-ocean-light text-sm"
+                    className="px-3 py-1 bg-white/[0.08] border border-white/[0.10] rounded-full text-white/70 text-sm"
                   >
                     {bait}
                   </span>
@@ -509,11 +509,11 @@ export default function FinDexDetailClient({ id }: { id: string }) {
 
           {/* Fishing Tips */}
           {info && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
               <h3 className="text-white font-semibold mb-4">Angel-Infos</h3>
               <div className="space-y-3">
                 {info.typ && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm">Typ</span>
                     <span className="text-white text-sm">
                       {info.typ === 'raubfisch' ? 'Raubfisch' : 'Friedfisch'}
@@ -522,7 +522,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 )}
 
                 {info?.['gewässertyp'] && info['gewässertyp'].length > 0 && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm">Gewässer</span>
                     <span className="text-white text-sm text-right">
                       {info['gewässertyp'].join(', ')}
@@ -531,7 +531,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 )}
 
                 {info.saison && info.saison.length > 0 && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm">Saison</span>
                     <span className="text-white text-sm text-right">
                       {info.saison.join(', ')}
@@ -540,7 +540,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 )}
 
                 {info.tageszeit && info.tageszeit.length > 0 && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm">Tageszeit</span>
                     <span className="text-white text-sm text-right">
                       {info.tageszeit.join(', ')}
@@ -549,7 +549,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 )}
 
                 {info.fangmethode && info.fangmethode.length > 0 && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm">Fangmethode</span>
                     <span className="text-white text-sm text-right">
                       {info.fangmethode.join(', ')}
@@ -558,7 +558,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 )}
 
                 {info.wassertemperatur && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm">Wassertemperatur</span>
                     <span className="text-white text-sm">
                       {info.wassertemperatur.min ? info.wassertemperatur.min : '-'}–{info.wassertemperatur.max ? info.wassertemperatur.max : '-'}°C
@@ -567,7 +567,7 @@ export default function FinDexDetailClient({ id }: { id: string }) {
                 )}
 
                 {typeof info.schwierigkeit === 'number' && (
-                  <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                  <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                     <span className="text-ocean-light text-sm">Schwierigkeit</span>
                     <span className="text-white text-sm">
                       {info.schwierigkeit}/5

@@ -837,7 +837,7 @@ export default function CatchForm({
             </button>
           </div>
         ) : (
-          <label className="flex items-center justify-center w-full h-48 border-2 border-dashed border-ocean-light/30 rounded-lg cursor-pointer hover:border-ocean-light transition-colors">
+          <label className="flex items-center justify-center w-full h-48 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:border-white/40 transition-colors">
             <div className="text-center">
               <div className="mb-2 flex justify-center">
                 <Camera className="w-9 h-9 text-ocean-light" />
@@ -859,7 +859,7 @@ export default function CatchForm({
           <>
             <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {photoPreviews.map((preview, index) => (
-                <div key={`${preview}-${index}`} className="relative aspect-square rounded-lg overflow-hidden bg-ocean-dark">
+                <div key={`${preview}-${index}`} className="relative aspect-square rounded-lg overflow-hidden bg-white/[0.10]">
                   <Image
                     src={preview}
                     alt={`Foto ${index + 1}`}
@@ -868,7 +868,7 @@ export default function CatchForm({
                     className="object-cover"
                   />
                   {index === 0 && (
-                    <div className="absolute bottom-1 left-1 bg-ocean/80 text-white text-[10px] px-1.5 py-0.5 rounded">
+                    <div className="absolute bottom-1 left-1 bg-white/[0.25] backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded">
                       KI
                     </div>
                   )}
@@ -884,7 +884,7 @@ export default function CatchForm({
               ))}
             </div>
             {photoPreviews.length < MAX_PHOTOS && (
-              <label className="inline-flex mt-3 items-center justify-center px-3 py-2 rounded-lg bg-ocean-dark hover:bg-ocean text-white text-sm cursor-pointer transition-colors">
+              <label className="inline-flex mt-3 items-center justify-center px-3 py-2 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.12] text-white text-sm cursor-pointer transition-colors">
                 Weitere Fotos hinzufügen
                 <input
                   type="file"
@@ -938,14 +938,14 @@ export default function CatchForm({
           )}
         </label>
         {aiVerified ? (
-          <div className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 opacity-60">
+          <div className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] opacity-60">
             {formData.species}
           </div>
         ) : (
           <button
             type="button"
             onClick={() => setShowSpeciesPicker(true)}
-            className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-left hover:border-ocean-light transition-colors"
+            className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none text-left hover:border-white/30 transition-colors"
           >
             {formData.species || 'Wähle eine Art'}
           </button>
@@ -972,7 +972,7 @@ export default function CatchForm({
             type="number"
             value={formData.length}
             onChange={(e) => setFormData({ ...formData, length: e.target.value })}
-            className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
             required
             min="1"
           />
@@ -985,7 +985,7 @@ export default function CatchForm({
             type="number"
             value={formData.weight}
             onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-            className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
             min="1"
           />
         </div>
@@ -997,7 +997,7 @@ export default function CatchForm({
           Datum & Uhrzeit
         </label>
         <div className="relative">
-          <div className="w-full px-3 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 text-sm pointer-events-none select-none">
+          <div className="w-full px-3 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] text-sm pointer-events-none select-none">
             {formData.date
               ? new Date(formData.date).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
               : 'Datum & Uhrzeit wählen'}
@@ -1024,14 +1024,14 @@ export default function CatchForm({
             type="text"
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            className="flex-1 px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            className="flex-1 px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
             placeholder="z.B. Müggelsee, Berlin"
           />
           <button
             type="button"
             onClick={getLocation}
             disabled={gettingLocation}
-            className="px-4 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-white/[0.12] hover:bg-white/[0.20] border border-white/[0.15] text-white rounded-lg transition-colors disabled:opacity-50"
           >
             {gettingLocation ? '...' : <MapPin className="w-4 h-4" />}
           </button>
@@ -1061,7 +1061,7 @@ export default function CatchForm({
             </span>
           </button>
           {weather && (
-            <div className="mt-2 p-3 bg-ocean-dark/50 rounded-lg text-sm">
+            <div className="mt-2 p-3 bg-white/[0.07] border border-white/[0.10] rounded-lg text-sm">
               <div className="text-white">
                 <span className="inline-flex items-center gap-2">
                   <span className="inline-flex items-center gap-1">
@@ -1092,7 +1092,7 @@ export default function CatchForm({
           type="text"
           value={formData.bait}
           onChange={(e) => setFormData({ ...formData, bait: e.target.value })}
-          className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+          className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
           placeholder="z.B. Wobbler, Gummifisch, Wurm"
         />
       </div>
@@ -1106,13 +1106,13 @@ export default function CatchForm({
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           rows={3}
-          className="w-full px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none resize-none"
+          className="w-full px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none resize-none"
           placeholder="Zusätzliche Infos..."
         />
       </div>
 
       {/* Public Toggle */}
-      <div className="bg-ocean/20 rounded-lg p-4 border border-ocean-light/20">
+      <div className="bg-white/[0.07] rounded-lg p-4 border border-white/[0.12]">
         <label className="flex items-center justify-between cursor-pointer group">
           <div className="flex-1">
             <div className="text-white font-semibold mb-1 flex items-center gap-2">
@@ -1134,7 +1134,7 @@ export default function CatchForm({
               onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
               className="sr-only peer"
             />
-            <div className="w-14 h-8 bg-ocean-dark rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+            <div className="w-14 h-8 bg-white/[0.12] rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
             <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
           </div>
         </label>

@@ -157,13 +157,13 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
           return (
             <HolographicCard key={catchItem.id} enabled={!!catchItem.is_shiny} isLegendary={isLegendary} shimmerOnly>
             <div
-              className={`bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 ${
+              className={`bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 ${
                 catchItem.is_shiny ? (isLegendary ? 'legendary-ring' : 'shiny-ring') : ''
               }`}
             >
             {/* Photo - Like Social Page */}
             <Link href={`/catch/${catchItem.id}`}>
-              <div className="relative h-48 bg-ocean-dark cursor-pointer group">
+              <div className="relative h-48 bg-white/[0.05] cursor-pointer group">
                 {catchItem.photo ? (
                   <>
                     <Image
@@ -225,7 +225,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="bg-ocean-dark/50 rounded p-2">
+                <div className="bg-white/[0.05] border border-white/[0.06] rounded p-2">
                   <div className="text-ocean-light text-xs flex items-center gap-1">
                     <Ruler className="w-3 h-3" />
                     Länge
@@ -234,7 +234,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                 </div>
 
                 {catchItem.weight && (
-                  <div className="bg-ocean-dark/50 rounded p-2">
+                  <div className="bg-white/[0.05] border border-white/[0.06] rounded p-2">
                     <div className="text-ocean-light text-xs">Gewicht</div>
                     <div className="text-white font-semibold">
                       {catchItem.weight > 1000
@@ -262,9 +262,9 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
               )}
 
               {/* Actions - Mobile Optimized */}
-              <div className="flex gap-2 pt-3 border-t border-ocean-light/20">
+              <div className="flex gap-2 pt-3 border-t border-white/[0.08]">
                 <Link href={`/catch/${catchItem.id}`} className="flex-1">
-                  <button className="w-full px-3 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                  <button className="w-full px-3 py-2 bg-white/[0.12] hover:bg-white/[0.20] text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                     <Eye className="w-4 h-4" />
                     <span className="hidden sm:inline">Details</span>
                   </button>
@@ -277,7 +277,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                   className={`px-3 py-2 rounded-lg transition-colors group relative ${
                     pinnedCatchIds.includes(catchItem.id)
                       ? 'bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30'
-                      : 'bg-ocean-dark hover:bg-ocean text-ocean-light'
+                      : 'bg-white/[0.07] hover:bg-white/[0.14] text-white/60'
                   } ${pinSaving ? 'opacity-60 cursor-not-allowed' : ''}`}
                   aria-label={pinnedCatchIds.includes(catchItem.id) ? 'Aus Vitrine entfernen' : 'In Vitrine anpinnen'}
                 >
@@ -299,7 +299,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                   className={`px-3 py-2 rounded-lg transition-colors group relative ${
                   catchItem.is_public
                     ? 'bg-green-900/30 hover:bg-green-900/50 text-green-400'
-                    : 'bg-ocean-dark hover:bg-ocean text-ocean-light'
+                    : 'bg-white/[0.07] hover:bg-white/[0.14] text-white/60'
                   }`}
                   aria-label={catchItem.is_public ? 'Öffentlich' : 'Privat'}
                 >
@@ -321,7 +321,7 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
                     onClick={() => setExpandedMapId(
                       expandedMapId === catchItem.id ? null : catchItem.id
                     )}
-                    className="px-3 py-2 bg-ocean-dark hover:bg-ocean text-white rounded-lg transition-colors"
+                    className="px-3 py-2 bg-white/[0.07] hover:bg-white/[0.14] text-white/60 rounded-lg transition-colors"
                     aria-label="Karte anzeigen"
                   >
                     <MapPin className="w-4 h-4" />

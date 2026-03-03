@@ -297,7 +297,8 @@ export default function FinDexPage() {
   return (
     <div className="space-y-6 pb-20 md:pb-6">
       {/* Header */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+      <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-xl p-6 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
@@ -310,7 +311,7 @@ export default function FinDexPage() {
           </div>
           <Link
             href="/fishdex/achievements"
-            className="px-4 py-2 bg-ocean hover:bg-ocean-light text-white rounded-lg transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white rounded-lg transition-colors flex items-center gap-2"
           >
             <Trophy className="w-4 h-4" />
             <span className="hidden sm:inline">Erfolge</span>
@@ -329,7 +330,7 @@ export default function FinDexPage() {
               {stats.discovered}/{stats.total} ({stats.percentage}%)
             </span>
           </div>
-          <div className="w-full bg-ocean-dark rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-black/30 rounded-full h-3 overflow-hidden">
             <div
               className="bg-gradient-to-r from-ocean-light to-ocean h-full transition-all duration-500"
               style={{ width: `${stats.percentage}%` }}
@@ -343,7 +344,7 @@ export default function FinDexPage() {
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value as FinDexRegion)}
-            className="px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            className="px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
           >
             <option value="deutschland">Deutschland</option>
             <option value="europa">Europa</option>
@@ -354,7 +355,7 @@ export default function FinDexPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as FinDexSortBy)}
-            className="px-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            className="px-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
           >
             <option value="number">Nach Nummer</option>
             <option value="name">Nach Name</option>
@@ -370,7 +371,7 @@ export default function FinDexPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Suchen..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none placeholder:text-white/30"
             />
           </div>
 
@@ -381,7 +382,7 @@ export default function FinDexPage() {
             className={`px-4 py-2 rounded-lg border transition-colors text-sm ${
               onlyDiscovered
                 ? 'bg-green-900/40 border-green-500/40 text-green-300'
-                : 'bg-ocean-dark border-ocean-light/30 text-ocean-light hover:text-white'
+                : 'bg-white/[0.07] border-white/[0.12] text-white/60 hover:text-white'
             }`}
           >
             {onlyDiscovered ? 'Nur entdeckte' : 'Alle & Entdeckte'}
@@ -396,8 +397,8 @@ export default function FinDexPage() {
               onClick={() => setSelectedCategory(cat.value)}
               className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                 selectedCategory === cat.value
-                  ? 'bg-ocean text-white border-ocean-light'
-                  : 'bg-ocean-dark/50 text-ocean-light border-ocean-light/30 hover:text-white'
+                  ? 'bg-white/[0.18] text-white border-white/30'
+                  : 'bg-white/[0.07] text-white/60 border-white/[0.10] hover:text-white'
               }`}
             >
               {cat.label}
@@ -409,12 +410,13 @@ export default function FinDexPage() {
       {/* Collections */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {collectionStats.map((set) => (
-          <div key={set.label} className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+          <div key={set.label} className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
             <div className="text-white font-semibold mb-2">{set.label}</div>
             <div className="text-ocean-light text-sm mb-2">
               {set.discovered}/{set.total} ({set.percentage}%)
             </div>
-            <div className="w-full bg-ocean-dark rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-black/30 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-ocean-light to-ocean h-full"
                 style={{ width: `${set.percentage}%` }}
@@ -434,8 +436,8 @@ export default function FinDexPage() {
               relative aspect-square rounded-xl overflow-hidden
               transition-all duration-300 hover:scale-105 hover:shadow-xl
               ${entry.discovered
-                ? 'bg-ocean/30 backdrop-blur-sm'
-                : 'bg-ocean-dark/50'
+                ? 'bg-white/[0.10] backdrop-blur-sm border border-white/[0.12]'
+                : 'bg-white/[0.04] border border-white/[0.06]'
               }
             `}
           >
@@ -470,12 +472,12 @@ export default function FinDexPage() {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-ocean-dark/30">
+                  <div className="w-full h-full flex items-center justify-center bg-white/[0.05]">
                     <Fish className="w-16 h-16 text-ocean-light" />
                   </div>
                 )
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-ocean-dark/30">
+                <div className="w-full h-full flex items-center justify-center bg-white/[0.03]">
                   <Lock className="w-16 h-16 text-gray-600" />
                 </div>
               )}
@@ -500,7 +502,7 @@ export default function FinDexPage() {
 
       {/* Empty State */}
       {filteredEntries.length === 0 && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center">
           <Search className="w-16 h-16 text-ocean-light mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">
             Keine Ergebnisse

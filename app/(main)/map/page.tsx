@@ -193,10 +193,10 @@ export default function MapPage() {
 
       <div className="space-y-2">
         {/* Unified filter card */}
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-2xl border border-ocean-light/10 overflow-hidden">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-2xl overflow-hidden">
 
           {/* Row 1: Zeitraum + Heatmap icon */}
-          <div className="flex items-center border-b border-ocean-light/10">
+          <div className="flex items-center border-b border-white/[0.08]">
             <div className="flex gap-0.5 overflow-x-auto scrollbar-hide p-1.5 flex-1">
               {([
                 { val: 'all', label: 'Alle Zeit' },
@@ -209,21 +209,21 @@ export default function MapPage() {
                   onClick={() => setFilterTimeframe(val)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex-shrink-0 transition-all ${
                     filterTimeframe === val
-                      ? 'bg-ocean-light text-white shadow-sm'
-                      : 'text-ocean-light/70 hover:text-white hover:bg-white/5'
+                      ? 'bg-white/[0.18] text-white shadow-sm'
+                      : 'text-white/60 hover:text-white hover:bg-white/[0.08]'
                   }`}
                 >
                   {label}
                 </button>
               ))}
             </div>
-            <div className="flex-shrink-0 border-l border-ocean-light/10 p-1.5">
+            <div className="flex-shrink-0 border-l border-white/[0.08] p-1.5">
               <button
                 onClick={() => setShowHeatmap(!showHeatmap)}
                 className={`p-2 rounded-lg transition-all ${
                   showHeatmap
                     ? 'bg-amber-500/20 text-amber-400'
-                    : 'text-ocean-light/60 hover:text-ocean-light hover:bg-white/5'
+                    : 'text-white/50 hover:text-white hover:bg-white/[0.08]'
                 }`}
                 title="Heatmap"
               >
@@ -243,8 +243,8 @@ export default function MapPage() {
                   onClick={() => setFilterSpecies('all')}
                   className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex-shrink-0 transition-all ${
                     filterSpecies === 'all'
-                      ? 'bg-ocean-light text-white shadow-sm'
-                      : 'text-ocean-light/70 hover:text-white hover:bg-white/5'
+                      ? 'bg-white/[0.18] text-white shadow-sm'
+                      : 'text-white/60 hover:text-white hover:bg-white/[0.08]'
                   }`}
                 >
                   Alle
@@ -255,8 +255,8 @@ export default function MapPage() {
                     onClick={() => setFilterSpecies(filterSpecies === name ? 'all' : name)}
                     className={`px-3 py-1.5 rounded-lg text-sm flex-shrink-0 transition-all flex items-center gap-1.5 ${
                       filterSpecies === name
-                        ? 'bg-ocean-light text-white font-semibold shadow-sm'
-                        : 'text-ocean-light/70 hover:text-white hover:bg-white/5'
+                        ? 'bg-white/[0.18] text-white font-semibold shadow-sm'
+                        : 'text-white/60 hover:text-white hover:bg-white/[0.08]'
                     }`}
                   >
                     {name}
@@ -266,7 +266,7 @@ export default function MapPage() {
                 {!showAllSpecies && hiddenCount > 0 && (
                   <button
                     onClick={() => setShowAllSpecies(true)}
-                    className="px-3 py-1.5 rounded-lg text-sm flex-shrink-0 text-ocean-light/60 hover:text-ocean-light hover:bg-white/5 transition-all"
+                    className="px-3 py-1.5 rounded-lg text-sm flex-shrink-0 text-white/40 hover:text-white hover:bg-white/[0.08] transition-all"
                   >
                     +{hiddenCount} mehr
                   </button>
@@ -288,31 +288,31 @@ export default function MapPage() {
         )}
       </div>
 
-      <div className="md:hidden inline-flex w-full rounded-xl bg-ocean/30 border border-ocean-light/20 p-1">
+      <div className="md:hidden inline-flex w-full rounded-xl bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] p-1">
         <button
           type="button"
           onClick={() => setMobileView('map')}
-          className={`flex-1 py-2 rounded-lg text-sm transition-colors ${mobileView === 'map' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+          className={`flex-1 py-2 rounded-lg text-sm transition-colors ${mobileView === 'map' ? 'bg-white/[0.18] text-white' : 'text-white/60 hover:text-white'}`}
         >
           Karte
         </button>
         <button
           type="button"
           onClick={() => setMobileView('spots')}
-          className={`flex-1 py-2 rounded-lg text-sm transition-colors ${mobileView === 'spots' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+          className={`flex-1 py-2 rounded-lg text-sm transition-colors ${mobileView === 'spots' ? 'bg-white/[0.18] text-white' : 'text-white/60 hover:text-white'}`}
         >
           Spots
         </button>
       </div>
 
       {filteredCatches.length > 0 ? (
-        <div className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-4 ${mobileView === 'spots' ? 'hidden md:block' : ''}`}>
+        <div className={`bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 ${mobileView === 'spots' ? 'hidden md:block' : ''}`}>
           <div className="h-[500px] rounded-lg overflow-hidden">
             <SpotsMap catches={filteredCatches} selectedSpot={selectedSpot} showHeatmap={showHeatmap} />
           </div>
         </div>
       ) : (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center">
           <MapPin className="w-16 h-16 text-ocean-light/40 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">Keine Spots gefunden</h3>
           <p className="text-ocean-light text-sm">
@@ -324,7 +324,7 @@ export default function MapPage() {
       )}
 
       {spotStats.length > 0 && (
-        <div className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-4 sm:p-6 ${mobileView === 'map' ? 'hidden md:block' : ''}`}>
+        <div className={`bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 sm:p-6 ${mobileView === 'map' ? 'hidden md:block' : ''}`}>
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-ocean-light" />
             <h2 className="text-xl font-bold text-white">Spots</h2>
@@ -342,13 +342,13 @@ export default function MapPage() {
                   onClick={() => { setSelectedSpot(spot.coordinates); setMobileView('map') }}
                   className={`w-full text-left rounded-xl p-4 transition-all ${
                     isSelected
-                      ? 'bg-ocean-dark ring-2 ring-ocean-light'
-                      : 'bg-ocean-dark/50 hover:bg-ocean-dark'
+                      ? 'bg-white/[0.15] ring-2 ring-white/40'
+                      : 'bg-white/[0.05] hover:bg-white/[0.10]'
                   }`}
                 >
                   {/* Header row */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-6 h-6 rounded-full bg-ocean text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-white/[0.15] border border-white/20 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -369,7 +369,7 @@ export default function MapPage() {
 
                   {/* Quality bar */}
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-ocean-deeper overflow-hidden">
+                    <div className="flex-1 h-1.5 rounded-full bg-black/30 overflow-hidden">
                       <div className={`h-full rounded-full ${qualityColor} transition-all`} style={{ width: `${spot.score}%` }} />
                     </div>
                     <span className="text-xs text-ocean-light/50 w-7 text-right">{spot.score}</span>
@@ -379,7 +379,7 @@ export default function MapPage() {
                   {speciesArr.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {speciesArr.slice(0, 4).map(s => (
-                        <span key={s} className="text-xs bg-ocean/60 text-ocean-light px-2 py-0.5 rounded-full">{s}</span>
+                        <span key={s} className="text-xs bg-white/[0.08] border border-white/[0.10] text-white/60 px-2 py-0.5 rounded-full">{s}</span>
                       ))}
                       {speciesArr.length > 4 && (
                         <span className="text-xs text-ocean-light/40">+{speciesArr.length - 4}</span>
@@ -395,22 +395,26 @@ export default function MapPage() {
 
       {filteredCatches.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 text-center">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 text-center relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
             <div className="text-3xl font-bold text-white mb-1">{filteredCatches.length}</div>
             <div className="text-ocean-light text-sm">Fänge mit GPS</div>
           </div>
 
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 text-center">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 text-center relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
             <div className="text-3xl font-bold text-white mb-1">{spotStats.length}</div>
             <div className="text-ocean-light text-sm">Verschiedene Spots</div>
           </div>
 
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 text-center">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 text-center relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
             <div className="text-3xl font-bold text-white mb-1">{new Set(filteredCatches.map((c) => c.species)).size}</div>
             <div className="text-ocean-light text-sm">Verschiedene Arten</div>
           </div>
 
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 text-center">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 text-center relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
             <div className="text-3xl font-bold text-white mb-1">{spotStats.length > 0 ? Math.max(...spotStats.map((s) => s.catches)) : 0}</div>
             <div className="text-ocean-light text-sm">Max Fänge/Spot</div>
           </div>

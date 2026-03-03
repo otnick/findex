@@ -90,17 +90,17 @@ export default function CatchesPage() {
           </h1>
           <p className="text-ocean-light mt-1">{catches.length} Fänge insgesamt</p>
         </div>
-        <div className="flex bg-ocean/30 rounded-lg p-1 gap-1">
+        <div className="flex bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] rounded-xl p-1 gap-1">
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+            className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white/[0.18] text-white' : 'text-white/60 hover:text-white'}`}
             aria-label="Listenansicht"
           >
             <List className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+            className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white/[0.18] text-white' : 'text-white/60 hover:text-white'}`}
             aria-label="Galerieansicht"
           >
             <LayoutGrid className="w-4 h-4" />
@@ -129,7 +129,7 @@ export default function CatchesPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Art, Ort, Köder..."
-              className="w-full px-4 py-2.5 pr-10 rounded-xl bg-ocean/30 backdrop-blur-sm text-white border border-ocean-light/20 focus:border-ocean-light focus:outline-none placeholder:text-ocean-light/50"
+              className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white/[0.07] backdrop-blur-sm text-white border border-white/[0.12] focus:border-white/30 focus:outline-none placeholder:text-white/30"
             />
             {searchTerm && (
               <button
@@ -150,8 +150,8 @@ export default function CatchesPage() {
                 onClick={() => setSortBy(val)}
                 className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${
                   sortBy === val
-                    ? 'bg-ocean-light text-white shadow-sm'
-                    : 'bg-ocean/40 text-ocean-light hover:text-white'
+                    ? 'bg-white/[0.18] text-white shadow-sm'
+                    : 'bg-white/[0.07] text-white/60 hover:text-white'
                 }`}
               >
                 {['Neueste', 'Längste', 'Schwerste'][i]}
@@ -172,7 +172,7 @@ export default function CatchesPage() {
                     className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
                       filterShiny
                         ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/40'
-                        : 'bg-ocean/40 text-ocean-light hover:text-white'
+                        : 'bg-white/[0.07] text-white/60 hover:text-white'
                     }`}
                   >
                     ⭐ Trophäen
@@ -184,8 +184,8 @@ export default function CatchesPage() {
                       onClick={() => setFilterSpecies('all')}
                       className={`px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 transition-all ${
                         filterSpecies === 'all'
-                          ? 'bg-ocean-light text-white shadow-sm'
-                          : 'bg-ocean/40 text-ocean-light hover:text-white'
+                          ? 'bg-white/[0.18] text-white shadow-sm'
+                          : 'bg-white/[0.07] text-white/60 hover:text-white'
                       }`}
                     >
                       Alle
@@ -196,8 +196,8 @@ export default function CatchesPage() {
                         onClick={() => setFilterSpecies(filterSpecies === name ? 'all' : name)}
                         className={`px-3 py-1.5 rounded-full text-sm flex-shrink-0 transition-all flex items-center gap-1.5 ${
                           filterSpecies === name
-                            ? 'bg-ocean-light text-white font-semibold shadow-sm'
-                            : 'bg-ocean/40 text-ocean-light hover:text-white'
+                            ? 'bg-white/[0.18] text-white font-semibold shadow-sm'
+                            : 'bg-white/[0.07] text-white/60 hover:text-white'
                         }`}
                       >
                         {name}
@@ -209,7 +209,7 @@ export default function CatchesPage() {
                     {!showAllSpecies && hiddenCount > 0 && (
                       <button
                         onClick={() => setShowAllSpecies(true)}
-                        className="px-3 py-1.5 rounded-full text-sm flex-shrink-0 bg-ocean/40 text-ocean-light hover:text-white transition-all"
+                        className="px-3 py-1.5 rounded-full text-sm flex-shrink-0 bg-white/[0.07] text-white/60 hover:text-white transition-all"
                       >
                         +{hiddenCount} weitere
                       </button>
@@ -248,7 +248,7 @@ export default function CatchesPage() {
                     key={c.id}
                     type="button"
                     onClick={() => c.photo ? setLightboxIndex(photoIdx) : undefined}
-                    className="relative aspect-square bg-ocean-dark/50 overflow-hidden group"
+                    className="relative aspect-square bg-white/[0.05] overflow-hidden group"
                   >
                     {c.photo ? (
                       <Image
@@ -259,7 +259,7 @@ export default function CatchesPage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-200"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-ocean/40 to-ocean-dark/60">
+                      <div className="w-full h-full flex items-center justify-center bg-white/[0.08]">
                         <Fish className="w-8 h-8 text-ocean-light/40" />
                       </div>
                     )}

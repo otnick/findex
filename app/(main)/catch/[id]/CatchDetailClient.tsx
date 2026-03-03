@@ -322,17 +322,17 @@ export default function CatchDetailClient({ id }: { id: string }) {
         <Skeleton className="h-5 w-20" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4">
               <Skeleton className="w-full aspect-video rounded-lg" />
             </div>
           </div>
           <div className="space-y-4">
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 space-y-4">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 space-y-4">
               <Skeleton className="h-8 w-40" />
               <Skeleton className="h-4 w-24" />
               <div className="space-y-3 mt-4">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex justify-between py-2 border-b border-ocean-light/10">
+                  <div key={i} className="flex justify-between py-2 border-b border-white/[0.08]">
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-4 w-16" />
                   </div>
@@ -348,7 +348,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
   if (error || !catchData) {
     return (
       <div className="space-y-6">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center">
           <div className="mb-4 flex justify-center"><FishIcon className="w-14 h-14 text-ocean-light" /></div>
           <h1 className="text-2xl font-bold text-white mb-4">Fang nicht gefunden</h1>
           <p className="text-ocean-light mb-6">
@@ -378,7 +378,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
       {/* Open in App Banner — only shown in browser, not in native app */}
       {!isNative && (
-        <div className="flex items-center justify-between gap-4 bg-ocean/40 border border-ocean-light/20 rounded-xl px-4 py-3">
+        <div className="flex items-center justify-between gap-4 bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-xl px-4 py-3">
           <div className="text-sm text-white font-medium">Diesen Fang in der FinDex App ansehen</div>
           <a
             href={`findex://catch/${id}`}
@@ -394,12 +394,12 @@ export default function CatchDetailClient({ id }: { id: string }) {
         <div className="lg:col-span-2 space-y-4">
           {/* Photo */}
           {(catchData.photos && catchData.photos.length > 0) || catchData.photo_url ? (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4">
               <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'} shimmerOnly>
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}
-                className="relative w-full aspect-video rounded-lg overflow-hidden bg-ocean-dark block cursor-zoom-in"
+                className="relative w-full aspect-video rounded-lg overflow-hidden bg-white/[0.05] block cursor-zoom-in"
               >
                 <Image
                   src={catchData.photos?.[selectedPhotoIndex] || catchData.photo_url || ''}
@@ -419,8 +419,8 @@ export default function CatchDetailClient({ id }: { id: string }) {
                       onClick={() => setSelectedPhotoIndex(index)}
                       className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-colors ${
                         selectedPhotoIndex === index
-                          ? 'border-ocean-light'
-                          : 'border-transparent hover:border-ocean-light/50'
+                          ? 'border-white/50'
+                          : 'border-transparent hover:border-white/30'
                       }`}
                     >
                       <Image
@@ -439,7 +439,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
           {/* Map */}
           {catchData.coordinates && (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4">
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-ocean-light" />
                 Fangort
@@ -458,7 +458,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
         <div className="space-y-4">
           {/* Main Info Card */}
           <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'}>
-          <div className={`bg-ocean/30 backdrop-blur-sm rounded-xl p-6 ${catchData.is_shiny ? (catchData.shiny_reason === 'legendary' ? 'legendary-ring' : 'shiny-ring') : ''}`}>
+          <div className={`bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 ${catchData.is_shiny ? (catchData.shiny_reason === 'legendary' ? 'legendary-ring' : 'shiny-ring') : ''}`}>
             <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
               <FishIcon className="w-8 h-8 text-ocean-light" />
               {catchData.species}
@@ -508,7 +508,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
             {/* Stats */}
             <div className="space-y-3 mb-4">
-              <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                 <span className="text-ocean-light text-sm flex items-center gap-2">
                   <Ruler className="w-4 h-4" />
                   Länge
@@ -517,7 +517,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
               </div>
 
               {catchData.weight && (
-                <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                   <span className="text-ocean-light text-sm flex items-center gap-2">
                     <Scale className="w-4 h-4" />
                     Gewicht
@@ -530,7 +530,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                 <span className="text-ocean-light text-sm flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   Datum
@@ -546,7 +546,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
               </div>
 
               {catchData.location && (
-                <div className="flex items-center justify-between py-2 border-b border-ocean-light/20">
+                <div className="flex items-center justify-between py-2 border-b border-white/[0.08]">
                   <span className="text-ocean-light text-sm flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
                     Ort
@@ -574,7 +574,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
             )}
 
             {catchData.weather && (
-              <div className="mb-4 p-4 rounded-lg bg-ocean-dark/50 border border-ocean-light/20">
+              <div className="mb-4 p-4 rounded-lg bg-white/[0.05] border border-white/[0.08]">
                 <div className="flex items-center gap-2 text-white font-semibold mb-3">
                   <CloudSun className="w-4 h-4 text-ocean-light" />
                   Wetter zum Fangzeitpunkt
@@ -613,7 +613,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
 
             {/* Public Toggle - Only for own catches */}
             {catchData.user_id === user?.id && (
-              <div className="mb-4 pb-4 border-b border-ocean-light/20">
+              <div className="mb-4 pb-4 border-b border-white/[0.08]">
                 <label className="flex items-center justify-between cursor-pointer group">
                   <div>
                     <div className="text-white font-semibold mb-1">
@@ -632,7 +632,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
                       onChange={togglePublic}
                       className="sr-only peer"
                     />
-                    <div className="w-14 h-8 bg-ocean-dark rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+                    <div className="w-14 h-8 bg-white/[0.10] rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
                     <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                   </div>
                 </label>
@@ -640,7 +640,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-4 pt-4 border-t border-ocean-light/20">
+            <div className="flex items-center gap-4 pt-4 border-t border-white/[0.08]">
               {catchData.user_id === user?.id && (
                 <button
                   onClick={handleTogglePin}

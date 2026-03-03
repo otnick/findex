@@ -98,7 +98,8 @@ export default function Auth({ onSuccess }: AuthProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark flex items-center justify-center p-4">
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full shadow-2xl">
+      <div className="bg-white/[0.08] backdrop-blur-3xl border border-white/[0.15] rounded-2xl p-8 max-w-md w-full shadow-2xl shadow-black/40 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
         {/* Logo/Header */}
         <div className="text-center mb-8">
             <Image src="/icon-512x512.png" alt="FinDex" width={48} height={48} className="mx-auto mb-2 rounded-xl" />
@@ -131,7 +132,7 @@ export default function Auth({ onSuccess }: AuthProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="deine@email.de"
-              className="w-full px-4 py-3 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
             />
           </div>
 
@@ -144,7 +145,7 @@ export default function Auth({ onSuccess }: AuthProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 pr-12 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+                className="w-full px-4 py-3 pr-12 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
               />
               <button
                 type="button"
@@ -177,7 +178,7 @@ export default function Auth({ onSuccess }: AuthProps) {
             type="button"
             onClick={handleMagicLink}
             disabled={loading}
-            className="w-full border border-ocean-light/30 text-ocean-light hover:bg-ocean-light/10 font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+            className="w-full bg-white/[0.07] border border-white/[0.12] text-white/70 hover:bg-white/[0.14] hover:text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
             <Sparkles className="w-4 h-4" />
             Magic Link senden

@@ -104,11 +104,11 @@ export default function SharedCatchClient({ id }: { id: string }) {
   if (error || !catchData) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark flex items-center justify-center p-4">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center max-w-md">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center max-w-md">
           <div className="mb-4 flex justify-center"><Fish className="w-14 h-14 text-ocean-light" /></div>
           <h1 className="text-2xl font-bold text-white mb-4">Fang nicht gefunden</h1>
           <p className="text-ocean-light mb-6">Dieser Fang existiert nicht oder ist nicht öffentlich.</p>
-          <Link href="/" className="inline-block bg-ocean hover:bg-ocean-light text-white font-semibold py-3 px-8 rounded-lg transition-colors">
+          <Link href="/" className="inline-block bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white font-semibold py-3 px-8 rounded-lg transition-colors">
             Zur Startseite
           </Link>
         </div>
@@ -127,7 +127,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
       <div className="max-w-lg mx-auto px-4 py-8 pb-16">
 
         {/* App Banner */}
-        <div className="bg-ocean-light/10 border border-ocean-light/30 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <Fish className="w-5 h-5 text-ocean-light" />
@@ -163,7 +163,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
         )}
 
         {/* Catch Info Card */}
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-2xl p-6 mb-4">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-2xl p-6 mb-4">
           <div className="flex items-start justify-between mb-4">
             <div>
               <h1 className="text-2xl font-bold text-white">{catchData.species}</h1>
@@ -185,7 +185,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2">
+            <div className="bg-white/[0.05] border border-white/[0.06] rounded-xl p-3 flex items-center gap-2">
               <Ruler className="w-4 h-4 text-ocean-light shrink-0" />
               <div>
                 <div className="text-ocean-light text-xs">Länge</div>
@@ -193,7 +193,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
               </div>
             </div>
             {weightStr && (
-              <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2">
+              <div className="bg-white/[0.05] border border-white/[0.06] rounded-xl p-3 flex items-center gap-2">
                 <Scale className="w-4 h-4 text-ocean-light shrink-0" />
                 <div>
                   <div className="text-ocean-light text-xs">Gewicht</div>
@@ -202,7 +202,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
               </div>
             )}
             {catchData.location && (
-              <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2 col-span-2">
+              <div className="bg-white/[0.05] border border-white/[0.06] rounded-xl p-3 flex items-center gap-2 col-span-2">
                 <MapPin className="w-4 h-4 text-ocean-light shrink-0" />
                 <div>
                   <div className="text-ocean-light text-xs">Ort</div>
@@ -211,7 +211,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
               </div>
             )}
             {catchData.bait && (
-              <div className="bg-ocean-dark/50 rounded-xl p-3 flex items-center gap-2 col-span-2">
+              <div className="bg-white/[0.05] border border-white/[0.06] rounded-xl p-3 flex items-center gap-2 col-span-2">
                 <Utensils className="w-4 h-4 text-ocean-light shrink-0" />
                 <div>
                   <div className="text-ocean-light text-xs">Köder</div>
@@ -220,7 +220,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
               </div>
             )}
             {catchData.weather && (
-              <div className="bg-ocean-dark/50 rounded-xl p-3 col-span-2">
+              <div className="bg-white/[0.05] border border-white/[0.06] rounded-xl p-3 col-span-2">
                 <div className="text-ocean-light text-xs mb-1">Wetter</div>
                 <div className="text-white font-bold">{catchData.weather.temperature}°C · {catchData.weather.description}</div>
               </div>
@@ -228,7 +228,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
           </div>
 
           {catchData.notes && (
-            <div className="mt-3 p-3 bg-ocean-dark/50 rounded-xl">
+            <div className="mt-3 p-3 bg-white/[0.05] border border-white/[0.06] rounded-xl">
               <p className="text-white/80 text-sm italic">&bdquo;{catchData.notes}&ldquo;</p>
             </div>
           )}
@@ -245,7 +245,7 @@ export default function SharedCatchClient({ id }: { id: string }) {
         <div className="flex gap-3">
           <button
             onClick={handleShare}
-            className="flex-1 flex items-center justify-center gap-2 bg-ocean/40 border border-ocean-light/20 text-white font-semibold py-3 rounded-xl hover:bg-ocean/60 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-white/[0.07] border border-white/[0.12] text-white font-semibold py-3 rounded-xl hover:bg-white/[0.14] transition-colors"
           >
             <Share2 className="w-4 h-4" />
             Teilen
@@ -260,9 +260,9 @@ export default function SharedCatchClient({ id }: { id: string }) {
         </div>
 
         {/* Download CTA */}
-        <div className="text-center mt-6 pt-6 border-t border-ocean-light/10">
+        <div className="text-center mt-6 pt-6 border-t border-white/[0.08]">
           <p className="text-ocean-light text-sm mb-3">Noch kein FinDex? Tracke deine Fänge kostenlos.</p>
-          <Link href="/" className="inline-block bg-ocean-dark border border-ocean-light/20 hover:bg-ocean text-white font-semibold py-2.5 px-6 rounded-xl transition-colors text-sm">
+          <Link href="/" className="inline-block bg-white/[0.07] border border-white/[0.12] hover:bg-white/[0.14] text-white font-semibold py-2.5 px-6 rounded-xl transition-colors text-sm">
             Jetzt starten
           </Link>
         </div>

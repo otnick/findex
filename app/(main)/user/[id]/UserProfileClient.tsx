@@ -303,7 +303,7 @@ export default function UserProfileClient({ id }: { id: string }) {
             {friendshipStatus === 'none' && (
               <button
                 onClick={sendFriendRequest}
-                className="flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg bg-ocean-light/20 text-ocean-light hover:bg-ocean-light/30 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white/70 hover:text-white transition-colors"
               >
                 <UserPlus className="w-4 h-4" />
                 Anfrage senden
@@ -332,10 +332,11 @@ export default function UserProfileClient({ id }: { id: string }) {
       </div>
 
       {/* Profile Card */}
-      <div className="bg-gradient-to-br from-ocean/40 to-ocean-dark/40 backdrop-blur-sm rounded-xl p-8 border border-ocean-light/10 shadow-xl">
+      <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-8 border border-white/[0.12] shadow-xl relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
         <div className="flex items-start gap-6">
           {/* Avatar */}
-          <div className="w-24 h-24 flex-shrink-0 shadow-lg rounded-full ring-2 ring-ocean-light/30">
+          <div className="w-24 h-24 flex-shrink-0 shadow-lg rounded-full ring-2 ring-white/20">
             <Avatar
               seed={profile.username || profile.id}
               src={profile.avatar_url}
@@ -371,32 +372,32 @@ export default function UserProfileClient({ id }: { id: string }) {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-ocean-light/20">
-          <div className="bg-ocean/30 rounded-lg p-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-white/[0.08]">
+          <div className="bg-white/[0.08] border border-white/[0.10] rounded-lg p-4">
             <div className="flex items-center gap-2 text-ocean-light text-sm mb-1">
               <Fish className="w-4 h-4" />
               Fänge
             </div>
             <div className="text-2xl font-bold text-white">{stats.totalCatches}</div>
           </div>
-          <div className="bg-ocean/30 rounded-lg p-4">
+          <div className="bg-white/[0.08] border border-white/[0.10] rounded-lg p-4">
             <div className="flex items-center gap-2 text-ocean-light text-sm mb-1">
               <Award className="w-4 h-4" />
               Arten
             </div>
             <div className="text-2xl font-bold text-white">{stats.uniqueSpecies}</div>
           </div>
-          <div className="bg-ocean/30 rounded-lg p-4">
+          <div className="bg-white/[0.08] border border-white/[0.10] rounded-lg p-4">
             <div className="text-ocean-light text-sm mb-1">Größter</div>
             <div className="text-2xl font-bold text-white">{stats.biggestCatch} cm</div>
           </div>
-          <div className="bg-ocean/30 rounded-lg p-4">
+          <div className="bg-white/[0.08] border border-white/[0.10] rounded-lg p-4">
             <div className="text-ocean-light text-sm mb-1">Gewicht</div>
             <div className="text-2xl font-bold text-white">
               {(stats.totalWeight / 1000).toFixed(1)} kg
             </div>
           </div>
-          <div className="bg-ocean/30 rounded-lg p-4">
+          <div className="bg-white/[0.08] border border-white/[0.10] rounded-lg p-4">
             <div className="flex items-center gap-2 text-ocean-light text-sm mb-1">
               <Star className="w-4 h-4 text-yellow-300" />
               Trophäen
@@ -406,7 +407,7 @@ export default function UserProfileClient({ id }: { id: string }) {
         </div>
 
         {isOwnProfile && (
-          <div className="mt-4 pt-4 border-t border-ocean-light/10">
+          <div className="mt-4 pt-4 border-t border-white/[0.06]">
             <Link
               href="/stats"
               className="inline-flex items-center gap-2 text-sm text-ocean-light hover:text-white transition-colors"
@@ -420,7 +421,7 @@ export default function UserProfileClient({ id }: { id: string }) {
 
       {/* Showcase */}
       {(isOwnProfile || pinnedCatches.length > 0) && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Star className="w-5 h-5 text-yellow-400" />
@@ -438,15 +439,15 @@ export default function UserProfileClient({ id }: { id: string }) {
                   onDragOver={(event) => isOwnProfile && handleDragOver(event)}
                   onDrop={(event) => isOwnProfile && handleDrop(event, catchData.id)}
                   onDragEnd={() => isOwnProfile && handleDragEnd()}
-                  className={`bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-300 ${
-                    isOwnProfile ? 'hover:bg-ocean/40 hover:shadow-xl hover:scale-[1.02]' : 'hover:bg-ocean/40'
-                  } ${draggingId === catchData.id ? 'ring-2 ring-ocean-light/60' : ''} ${
+                  className={`bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden transition-all duration-300 ${
+                    isOwnProfile ? 'hover:bg-white/[0.12] hover:shadow-xl hover:scale-[1.02]' : 'hover:bg-white/[0.12]'
+                  } ${draggingId === catchData.id ? 'ring-2 ring-white/40' : ''} ${
                     catchData.is_shiny ? (catchData.shiny_reason === 'legendary' ? 'legendary-ring' : 'shiny-ring') : ''
                   }`}
                 >
                   <Link href={`/catch/${catchData.id}`}>
                     {catchData.photo_url ? (
-                      <div className="relative h-40 bg-ocean-dark">
+                      <div className="relative h-40 bg-white/[0.05]">
                         <Image
                           src={catchData.photo_url}
                           alt={catchData.species}
@@ -471,7 +472,7 @@ export default function UserProfileClient({ id }: { id: string }) {
                         )}
                       </div>
                     ) : (
-                      <div className="h-40 bg-gradient-to-br from-ocean-light/20 to-ocean-dark/20 flex items-center justify-center relative">
+                      <div className="h-40 bg-white/[0.05] flex items-center justify-center relative">
                         <Fish className="w-10 h-10 text-ocean-light/50" />
                         {catchData.is_shiny && (
                           <div className={`absolute top-2 right-2 ${catchData.shiny_reason === 'legendary' ? 'legendary-badge text-white' : 'shiny-badge text-black'} rounded-full p-2 shadow-lg group`}>
@@ -536,7 +537,7 @@ export default function UserProfileClient({ id }: { id: string }) {
               ) : (
                 <div
                   key={`slot-${index}`}
-                  className="border border-dashed border-ocean-light/30 rounded-xl p-4 flex items-center justify-center text-ocean-light text-sm bg-ocean/20"
+                  className="border border-dashed border-white/[0.12] rounded-xl p-4 flex items-center justify-center text-white/30 text-sm bg-white/[0.03]"
                 >
                   Leerer Platz
                 </div>
@@ -612,9 +613,9 @@ export default function UserProfileClient({ id }: { id: string }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {catches.map((catchData) => (
                 <Link key={catchData.id} href={`/catch/${catchData.id}`}>
-                  <div className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:bg-ocean/40 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 animate-slide-up">
+                  <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden hover:bg-white/[0.12] transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 animate-slide-up">
                     {catchData.photo_url ? (
-                      <div className="relative h-48 bg-ocean-dark">
+                      <div className="relative h-48 bg-white/[0.05]">
                         <Image
                           src={catchData.photo_url}
                           alt={catchData.species}
@@ -630,7 +631,7 @@ export default function UserProfileClient({ id }: { id: string }) {
                         <div className="absolute inset-0 bg-gradient-to-t from-ocean-deeper/60 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
                       </div>
                     ) : (
-                      <div className="h-48 bg-gradient-to-br from-ocean-light/20 to-ocean-dark/20 flex items-center justify-center">
+                      <div className="h-48 bg-white/[0.05] flex items-center justify-center">
                         <Fish className="w-12 h-12 text-ocean-light/50" />
                       </div>
                     )}

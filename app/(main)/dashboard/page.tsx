@@ -94,7 +94,7 @@ export default function DashboardPage() {
           <div className="h-4 w-32 bg-ocean-light/10 rounded animate-pulse" />
         </div>
         <DashboardStatsSkeleton />
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6 space-y-4">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 space-y-4">
           <div className="h-5 w-28 bg-ocean-light/10 rounded animate-pulse" />
           {[...Array(3)].map((_, i) => <CatchRowSkeleton key={i} />)}
         </div>
@@ -112,7 +112,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-8 text-center border border-ocean-light/10">
+        <div className="bg-white/[0.06] backdrop-blur-xl border border-white/[0.10] rounded-xl p-8 text-center">
           <FishIcon className="w-16 h-16 text-ocean-light/40 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Noch kein Fang eingetragen</h2>
           <p className="text-ocean-light text-sm mb-6">
@@ -136,7 +136,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Catches */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+      <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Letzte Fänge</h2>
           <Link href="/catches" className="text-ocean-light hover:text-white text-sm transition-colors">
@@ -144,10 +145,10 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-3">
           {recentCatchesList.map((catchData) => (
-            <Link key={catchData.id} href={`/catch/${catchData.id}`}>
-              <div className="flex items-center gap-4 bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors cursor-pointer group">
+            <Link key={catchData.id} href={`/catch/${catchData.id}`} className="block">
+              <div className="flex items-center gap-4 bg-white/[0.05] border border-white/[0.06] rounded-xl p-4 hover:bg-white/[0.10] transition-colors cursor-pointer group">
                 {catchData.photo && (
                   <div className="relative w-16 h-16 flex-shrink-0">
                     <Image
@@ -207,25 +208,29 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Gesamt</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.totalCatches}</div>
           <div className="text-ocean-light text-xs mt-1">Fänge</div>
         </div>
 
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Diese Woche</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.recentCatches}</div>
           <div className="text-ocean-light text-xs mt-1">Neue Fänge</div>
         </div>
 
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Größter</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.biggestCatch}</div>
           <div className="text-ocean-light text-xs mt-1">cm</div>
         </div>
 
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-6">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Arten</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.uniqueSpecies}</div>
           <div className="text-ocean-light text-xs mt-1">Verschiedene</div>
@@ -234,7 +239,8 @@ export default function DashboardPage() {
 
       {/* FinDex Widget */}
       {fishDexStats && (
-        <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-6">
+        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <BookOpen className="w-6 h-6 text-ocean-light" />
@@ -254,7 +260,7 @@ export default function DashboardPage() {
                   : 0}%)
               </span>
             </div>
-            <div className="w-full bg-ocean-dark rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-black/30 rounded-full h-3 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-ocean-light to-ocean h-full transition-all duration-500"
                 style={{ width: `${fishDexStats.total > 0 ? (fishDexStats.discovered / fishDexStats.total) * 100 : 0}%` }}
@@ -263,11 +269,11 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Link href="/fishdex" className="bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors">
+            <Link href="/fishdex" className="bg-white/[0.05] border border-white/[0.06] rounded-lg p-4 hover:bg-white/[0.09] transition-colors">
               <div className="text-2xl font-bold text-white mb-1">{fishDexStats.discovered}</div>
               <div className="text-ocean-light text-sm">Entdeckt</div>
             </Link>
-            <Link href="/fishdex/achievements" className="bg-ocean-dark/50 rounded-lg p-4 hover:bg-ocean-dark transition-colors flex items-center justify-between">
+            <Link href="/fishdex/achievements" className="bg-white/[0.05] border border-white/[0.06] rounded-lg p-4 hover:bg-white/[0.09] transition-colors flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold text-yellow-400 mb-1 flex items-center gap-1">
                   {levelInfo.currentLevel.emoji} {levelInfo.currentLevel.level}
@@ -279,7 +285,7 @@ export default function DashboardPage() {
           </div>
 
           {fishDexStats.discovered === 0 && (
-            <div className="mt-4 text-center p-4 bg-ocean-dark/30 rounded-lg">
+            <div className="mt-4 text-center p-4 bg-white/[0.04] rounded-lg border border-white/[0.06]">
               <p className="text-ocean-light text-sm inline-flex items-center gap-1">
                 <Lightbulb className="w-4 h-4" />
                 Fange deinen ersten Fisch um die FinDex zu starten!
@@ -291,7 +297,9 @@ export default function DashboardPage() {
 
       {/* Level Widget */}
       <Link href="/fishdex/achievements" className="block">
-        <div className={`relative rounded-2xl overflow-hidden bg-gradient-to-r ${levelInfo.currentLevel.gradient} border border-white/10 shadow-lg hover:scale-[1.01] transition-transform`}>
+        <div className="relative rounded-2xl overflow-hidden backdrop-blur-2xl bg-white/[0.07] border border-white/[0.13] shadow-lg hover:scale-[1.01] transition-transform">
+          <div className={`absolute inset-0 bg-gradient-to-r ${levelInfo.currentLevel.gradient} opacity-[0.22] pointer-events-none`} />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent pointer-events-none" />
           <div className="relative px-5 py-4 flex items-center gap-4">
             <div className="flex-shrink-0 text-center">
               <div className="text-3xl">{levelInfo.currentLevel.emoji}</div>

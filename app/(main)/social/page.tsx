@@ -456,11 +456,11 @@ export default function SocialPage() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1">
+      <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-xl p-1 flex gap-1">
         <button
           onClick={() => { setActiveTab('feed'); hapticLight() }}
           className={`flex-1 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold ${
-            activeTab === 'feed' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            activeTab === 'feed' ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'
           }`}
         >
           Feed
@@ -468,7 +468,7 @@ export default function SocialPage() {
         <button
           onClick={() => { setActiveTab('leaderboard'); hapticLight() }}
           className={`flex-1 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold flex items-center justify-center gap-1 ${
-            activeTab === 'leaderboard' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            activeTab === 'leaderboard' ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'
           }`}
         >
           <Trophy className="w-3.5 h-3.5" />
@@ -477,7 +477,7 @@ export default function SocialPage() {
         <button
           onClick={() => { setActiveTab('requests'); hapticLight() }}
           className={`flex-1 !min-h-0 py-2 px-3 rounded-lg transition-all text-sm font-semibold relative flex items-center justify-center gap-1 ${
-            activeTab === 'requests' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'
+            activeTab === 'requests' ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'
           }`}
         >
           <Users className="w-3.5 h-3.5" />
@@ -511,13 +511,13 @@ export default function SocialPage() {
           {/* Search */}
           <div className="space-y-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ocean-light/60" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <input
                 type="text"
                 placeholder="Angler suchen..."
                 value={searchQuery}
                 onChange={(e) => searchUsers(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none text-sm"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.07] backdrop-blur-xl text-white border border-white/[0.12] focus:border-white/30 focus:outline-none text-sm placeholder:text-white/30"
               />
             </div>
             {searchQuery.trim() && (
@@ -526,7 +526,7 @@ export default function SocialPage() {
               ) : (
                 <div className="space-y-2">
                   {searchResults.map((result) => (
-                    <div key={result.id} className="flex items-center gap-3 bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+                    <div key={result.id} className="flex items-center gap-3 bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4">
                       <Link href={`/user/${result.id}`} className="flex items-center gap-3 flex-1 min-w-0">
                         <Avatar seed={result.username || result.id} src={result.avatar_url} size={40} className="w-10 h-10 flex-shrink-0" />
                         <div className="min-w-0">
@@ -547,7 +547,7 @@ export default function SocialPage() {
                       ) : (
                         <button
                           onClick={() => sendRequest(result.id)}
-                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-ocean-light/20 text-ocean-light hover:bg-ocean-light/30 hover:text-white transition-colors flex-shrink-0"
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white/70 hover:text-white transition-colors flex-shrink-0"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
                           Anfrage
@@ -565,7 +565,7 @@ export default function SocialPage() {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-ocean-light uppercase tracking-wider">Anfragen ({requests.length})</h3>
               {requests.map((request) => (
-                <div key={request.id} className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 flex items-center justify-between">
+                <div key={request.id} className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 flex items-center justify-between">
                   <Link href={`/user/${request.friend_id}`} className="flex items-center gap-3 min-w-0">
                     <Avatar seed={request.username} src={null} size={36} className="w-9 h-9 flex-shrink-0" />
                     <div className="min-w-0">
@@ -595,14 +595,14 @@ export default function SocialPage() {
             {friendsLoading ? (
               <div className="text-ocean-light/60 text-sm text-center py-6">Laden...</div>
             ) : friends.length === 0 ? (
-              <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-8 text-center">
+              <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-8 text-center">
                 <Users className="w-12 h-12 text-ocean-light/40 mx-auto mb-3" />
                 <p className="text-ocean-light text-sm">Noch keine Freunde. Suche oben nach Anglern!</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {friends.map((friend) => (
-                  <div key={friend.id} className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 flex items-center gap-3">
+                  <div key={friend.id} className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4 flex items-center gap-3">
                     <Link href={`/user/${friend.id}`} className="flex items-center gap-3 flex-1 min-w-0">
                       <Avatar seed={friend.username || friend.id} src={friend.avatar_url} size={40} className="w-10 h-10 flex-shrink-0" />
                       <div className="min-w-0">
@@ -626,12 +626,12 @@ export default function SocialPage() {
       ) : activeTab === 'leaderboard' ? (
         <div className="space-y-4">
           {/* Timeframe selector */}
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 w-fit">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-xl p-1 flex gap-1 w-fit">
             {(['week', 'month', 'all'] as const).map((tf) => (
               <button
                 key={tf}
                 onClick={() => setLeaderboardTimeframe(tf)}
-                className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${leaderboardTimeframe === tf ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${leaderboardTimeframe === tf ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
               >
                 {tf === 'week' ? 'Woche' : tf === 'month' ? 'Monat' : 'Gesamt'}
               </button>
@@ -641,7 +641,7 @@ export default function SocialPage() {
           {leaderboardLoading ? (
             <div className="text-center py-12 text-ocean-light">Laden...</div>
           ) : leaderboard.length === 0 ? (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center">
               <Trophy className="w-12 h-12 text-ocean-light/40 mx-auto mb-3" />
               <p className="text-ocean-light text-sm">Noch keine Einträge für diesen Zeitraum.</p>
             </div>
@@ -651,7 +651,7 @@ export default function SocialPage() {
                 <Link
                   key={entry.user_id}
                   href={`/user/${entry.user_id}`}
-                  className="flex items-center gap-4 bg-ocean/30 backdrop-blur-sm rounded-xl px-4 py-3 hover:bg-ocean/40 transition-colors"
+                  className="flex items-center gap-4 bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl px-4 py-3 hover:bg-white/[0.12] transition-colors"
                 >
                   <div className={`w-8 text-center font-bold text-lg flex-shrink-0 ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-amber-600' : 'text-ocean-light'}`}>
                     {index < 3 ? ['🥇', '🥈', '🥉'][index] : `#${index + 1}`}
@@ -676,16 +676,16 @@ export default function SocialPage() {
       ) : activeTab === 'feed' ? (
         <div className="space-y-4">
           {/* Freunde / Alle sub-toggle */}
-          <div className="bg-ocean/30 backdrop-blur-sm rounded-lg p-1 flex gap-1 w-fit">
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-xl p-1 flex gap-1 w-fit">
             <button
               onClick={() => { setFeedMode('friends'); hapticLight() }}
-              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${feedMode === 'friends' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${feedMode === 'friends' ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
               Freunde
             </button>
             <button
               onClick={() => { setFeedMode('all'); hapticLight() }}
-              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${feedMode === 'all' ? 'bg-ocean text-white' : 'text-ocean-light hover:text-white'}`}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${feedMode === 'all' ? 'bg-white/[0.18] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
               Alle
             </button>
@@ -696,7 +696,7 @@ export default function SocialPage() {
               {[...Array(3)].map((_, i) => <SocialCardSkeleton key={i} />)}
             </div>
           ) : showEmptyState ? (
-            <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center">
+            <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center">
               <div className="text-6xl mb-4">?</div>
               <h3 className="text-2xl font-bold text-white mb-2">Keine Aktivitäten</h3>
               <p className="text-ocean-light">
@@ -713,11 +713,11 @@ export default function SocialPage() {
               <Link
                 key={activity.id}
                 href={`/catch/${activity.id}`}
-                className="bg-ocean/30 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group"
+                className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden hover:bg-white/[0.11] hover:shadow-xl transition-all duration-300 group"
               >
             {/* Photo */}
             {activity.photo_url && (
-              <div className="relative h-56 bg-ocean-dark">
+              <div className="relative h-56 bg-white/[0.05]">
                 <Image
                   src={activity.photo_url}
                   alt={activity.species}
@@ -783,7 +783,7 @@ export default function SocialPage() {
 
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-ocean-dark/50 rounded p-2">
+                    <div className="bg-white/[0.05] border border-white/[0.06] rounded p-2">
                       <div className="text-ocean-light text-xs flex items-center gap-1">
                         <Ruler className="w-3 h-3" />
                         Länge
@@ -792,7 +792,7 @@ export default function SocialPage() {
                     </div>
 
                     {activity.weight && (
-                      <div className="bg-ocean-dark/50 rounded p-2">
+                      <div className="bg-white/[0.05] border border-white/[0.06] rounded p-2">
                         <div className="text-ocean-light text-xs">Gewicht</div>
                         <div className="text-white font-semibold">
                           {activity.weight > 1000
@@ -812,7 +812,7 @@ export default function SocialPage() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex items-center gap-4 pt-4 border-t border-ocean-light/20">
+                  <div className="flex items-center gap-4 pt-4 border-t border-white/[0.08]">
                     <button
                       onClick={(e) => {
                         e.preventDefault()
