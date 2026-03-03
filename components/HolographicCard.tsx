@@ -11,64 +11,91 @@ interface Props {
   shimmerOnly?: boolean
 }
 
-// Singleton: gyro permission + listener shared across all HolographicCard instances
-const gyroCallbacks = new Set<(e: DeviceOrientationEvent) => void>()
-let gyroPermissionState: 'unknown' | 'granted' | 'denied' = 'unknown'
-let windowTouchListenerAdded = false
+// ── Shared orientation callbacks (singleton) ──────────────────────────────────
+const gyroCallbacks = new Set<(gamma: number, beta: number) => void>()
+let gyroStarted = false
 
-function addGyroCallback(cb: (e: DeviceOrientationEvent) => void) {
+function addGyroCallback(cb: (gamma: number, beta: number) => void) {
   gyroCallbacks.add(cb)
 }
-function removeGyroCallback(cb: (e: DeviceOrientationEvent) => void) {
+function removeGyroCallback(cb: (gamma: number, beta: number) => void) {
   gyroCallbacks.delete(cb)
 }
-
-function onOrientation(e: DeviceOrientationEvent) {
-  gyroCallbacks.forEach((cb) => cb(e))
+function dispatchOrientation(gamma: number, beta: number) {
+  gyroCallbacks.forEach((cb) => cb(gamma, beta))
 }
 
-function startGyroListener() {
-  window.addEventListener('deviceorientation', onOrientation, { passive: true })
+// ── Native path: CMMotionManager via our custom Capacitor plugin ──────────────
+async function startNativeGyro() {
+  if (gyroStarted) return
+  gyroStarted = true
+  try {
+    const { registerPlugin } = await import('@capacitor/core')
+    // 'NativeMotion' matches @objc(NativeMotionPlugin) in Swift (suffix stripped)
+    const NativeMotion = registerPlugin<{
+      addListener(
+        event: 'orientation',
+        handler: (data: { beta: number; gamma: number }) => void,
+      ): Promise<unknown>
+    }>('NativeMotion')
+    await NativeMotion.addListener('orientation', (data) => {
+      dispatchOrientation(data.gamma, data.beta)
+    })
+  } catch {
+    // Plugin unavailable — fall back to browser events
+    gyroStarted = false
+    startWebGyroListener()
+  }
 }
 
-// Called from a user-gesture handler (touchstart)
-function requestIOSPermission(): void {
+// ── Web fallback: browser DeviceOrientationEvent ──────────────────────────────
+let webListenerAdded = false
+let windowTouchListenerAdded = false
+
+function onWebOrientation(e: DeviceOrientationEvent) {
+  dispatchOrientation(e.gamma ?? 0, e.beta ?? 40)
+}
+
+function startWebGyroListener() {
+  if (webListenerAdded) return
+  webListenerAdded = true
+  window.addEventListener('deviceorientation', onWebOrientation, { passive: true })
+}
+
+function requestIOSWebPermission(): void {
   const DOE = DeviceOrientationEvent as any
   if (typeof DOE?.requestPermission !== 'function') {
-    // Android / desktop — just ensure listener is running
-    if (gyroPermissionState === 'unknown') {
-      gyroPermissionState = 'granted'
-      startGyroListener()
-    }
+    startWebGyroListener()
     return
   }
-  if (gyroPermissionState !== 'unknown') return // already handled
-
-  // Call synchronously inside the user gesture so iOS accepts it
   DOE.requestPermission()
     .then((result: string) => {
-      if (result === 'granted') {
-        gyroPermissionState = 'granted'
-        // Listener must be added AFTER permission is granted on iOS
-        startGyroListener()
-      } else {
-        gyroPermissionState = 'denied'
-      }
+      if (result === 'granted') startWebGyroListener()
     })
-    .catch(() => {
-      gyroPermissionState = 'denied'
-    })
+    .catch(() => {})
 }
 
-// Register a ONE-TIME window-level touchstart so the user doesn't have
-// to tap a specific card — any touch on the page triggers iOS permission.
-function ensureIOSPermissionOnNextTouch() {
+// Register a one-time window touchstart so any touch triggers iOS permission
+function ensureWebGyroOnNextTouch() {
   if (windowTouchListenerAdded) return
   windowTouchListenerAdded = true
-  window.addEventListener('touchstart', () => requestIOSPermission(), {
+  window.addEventListener('touchstart', () => requestIOSWebPermission(), {
     once: true,
     passive: true,
   })
+}
+
+// ── Platform detection ────────────────────────────────────────────────────────
+let isNative: boolean | null = null
+function checkNative(): boolean {
+  if (isNative !== null) return isNative
+  try {
+    const cap = (window as any).Capacitor
+    isNative = typeof cap?.isNativePlatform === 'function' && cap.isNativePlatform()
+  } catch {
+    isNative = false
+  }
+  return isNative!
 }
 
 export default function HolographicCard({
@@ -98,10 +125,10 @@ export default function HolographicCard({
   }, [])
 
   const handleOrientation = useCallback(
-    (e: DeviceOrientationEvent) => {
-      const gamma = Math.max(-30, Math.min(30, e.gamma ?? 0))
-      const beta = Math.max(-30, Math.min(30, (e.beta ?? 40) - 40))
-      applyTilt(beta * 0.4, gamma * 0.5)
+    (gamma: number, beta: number) => {
+      const g = Math.max(-30, Math.min(30, gamma))
+      const b = Math.max(-30, Math.min(30, beta - 40))
+      applyTilt(b * 0.4, g * 0.5)
     },
     [applyTilt],
   )
@@ -109,16 +136,19 @@ export default function HolographicCard({
   useEffect(() => {
     if (!enabled) return
 
-    const DOE = DeviceOrientationEvent as any
-    if (typeof DOE?.requestPermission !== 'function') {
-      // Android / desktop: auto-start without a gesture
-      if (gyroPermissionState === 'unknown') {
-        gyroPermissionState = 'granted'
-        startGyroListener()
-      }
+    if (checkNative()) {
+      // Capacitor native app: use CMMotionManager via Swift plugin — no permission dialog
+      startNativeGyro()
     } else {
-      // iOS: request permission on the next touch anywhere on the page
-      ensureIOSPermissionOnNextTouch()
+      // Browser: use DeviceOrientationEvent with iOS permission handling
+      const DOE = DeviceOrientationEvent as any
+      if (typeof DOE?.requestPermission !== 'function') {
+        // Android / desktop: start immediately
+        startWebGyroListener()
+      } else {
+        // iOS Safari: request permission on next touch anywhere on page
+        ensureWebGyroOnNextTouch()
+      }
     }
 
     addGyroCallback(handleOrientation)
