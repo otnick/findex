@@ -159,15 +159,16 @@ jobs:
           # Capacitor already generates MainViewController.swift – we just overwrite it.
           # backgroundColor is handled by capacitor.config.ts (ios.backgroundColor).
           # IMPORTANT: do NOT set webView?.isOpaque = false – it causes a black re-render flash.
-          # CMMotionManager fires directly into the WKWebView via evaluateJavaScript –
-          # no Capacitor plugin system needed, works reliably with remote-URL apps.
+          # JS signals Swift via webkit.messageHandlers when React is mounted and ready.
+          # Swift then starts CMMotionManager and pushes events back via evaluateJavaScript.
+          # This avoids the race condition where events fire before the JS listener exists.
           cat > ios/App/App/MainViewController.swift << 'SWIFT_EOF'
           import UIKit
           import Capacitor
           import WebKit
           import CoreMotion
 
-          class MainViewController: CAPBridgeViewController {
+          class MainViewController: CAPBridgeViewController, WKScriptMessageHandler {
               private let motionManager = CMMotionManager()
 
               override func viewDidLoad() {
@@ -178,11 +179,19 @@ jobs:
                   webView?.scrollView.alwaysBounceVertical = false
                   // Enable native iOS swipe-from-left-edge back gesture
                   webView?.allowsBackForwardNavigationGestures = true
+                  // JS calls webkit.messageHandlers.nativemotionready.postMessage({})
+                  // once the event listener is registered — then we start CMMotionManager.
+                  webView?.configuration.userContentController.add(self, name: "nativemotionready")
+              }
+
+              func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+                  guard message.name == "nativemotionready" else { return }
                   startMotionUpdates()
               }
 
               private func startMotionUpdates() {
-                  guard motionManager.isDeviceMotionAvailable else { return }
+                  guard motionManager.isDeviceMotionAvailable,
+                        !motionManager.isDeviceMotionActive else { return }
                   motionManager.deviceMotionUpdateInterval = 1.0 / 30.0
                   motionManager.startDeviceMotionUpdates(to: .main) { [weak self] data, _ in
                       guard let data = data, let webView = self?.webView else { return }

@@ -105,10 +105,16 @@ export default function HolographicCard({
   useEffect(() => {
     if (!enabled) return
 
-    // Native iOS Capacitor: Swift dispatches 'nativemotion' via evaluateJavaScript
+    // Native iOS: register listener first, then signal Swift to start CMMotionManager.
+    // Swift listens via webkit.messageHandlers.nativemotionready and only then starts
+    // sending 'nativemotion' events — eliminates the race condition.
     startNativeMotionListener()
+    try {
+      const wk = (window as any).webkit?.messageHandlers?.nativemotionready
+      if (wk) wk.postMessage({})
+    } catch {}
 
-    // Browser / Android / iOS Safari: DeviceOrientationEvent
+    // Browser / Android / iOS Safari fallback: DeviceOrientationEvent
     const DOE = DeviceOrientationEvent as any
     if (typeof DOE?.requestPermission !== 'function') {
       startWebGyroListener()
