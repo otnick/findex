@@ -175,6 +175,11 @@ jobs:
                   webView?.allowsBackForwardNavigationGestures = true
               }
 
+              override func capacitorDidLoad() {
+                  // Register native gyroscope plugin for holographic shimmer effect
+                  bridge?.registerPlugin(NativeMotionPlugin.self)
+              }
+
               // iOS 15+: grant geolocation permission for the WKWebView.
               // Without this, navigator.geolocation silently fails in remote-URL Capacitor apps.
               // iOS will still show its own native location permission dialog if needed.
@@ -186,6 +191,38 @@ jobs:
                   decisionHandler: @escaping (WKPermissionDecision) -> Void
               ) {
                   decisionHandler(.grant)
+              }
+          }
+          SWIFT_EOF
+
+          # Native gyroscope plugin using CMMotionManager (no web permission dialog needed)
+          cat > ios/App/App/NativeMotionPlugin.swift << 'SWIFT_EOF'
+          import Foundation
+          import Capacitor
+          import CoreMotion
+
+          @objc(NativeMotionPlugin)
+          public class NativeMotionPlugin: CAPPlugin {
+              private let motionManager = CMMotionManager()
+
+              override public func load() {
+                  guard motionManager.isDeviceMotionAvailable else { return }
+                  motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
+                  motionManager.startDeviceMotionUpdates(to: .main) { [weak self] data, _ in
+                      guard let data = data else { return }
+                      let g = data.gravity
+                      // Compute angles matching web DeviceOrientationEvent convention:
+                      //   beta  ≈ 0° flat face-up, ≈ 90° held upright in portrait
+                      //   gamma ≈ 0° no tilt, + right, - left
+                      let gamma = atan2(g.x, sqrt(g.y * g.y + g.z * g.z)) * 180.0 / .pi
+                      let beta  = atan2(-g.y, g.z) * 180.0 / .pi
+                      self?.notifyListeners("orientation", data: ["beta": beta, "gamma": gamma])
+                  }
+              }
+
+              @objc func stop(_ call: CAPPluginCall) {
+                  motionManager.stopDeviceMotionUpdates()
+                  call.resolve()
               }
           }
           SWIFT_EOF
@@ -210,6 +247,8 @@ jobs:
             plutil -replace NSPhotoLibraryUsageDescription -string "FinDex benötigt Zugriff auf deine Fotos, um Bilder hochzuladen." ios/App/App/Info.plist
           plutil -insert NSLocationWhenInUseUsageDescription -string "FinDex benötigt deinen Standort, um Fangorte zu speichern." ios/App/App/Info.plist 2>/dev/null || \
             plutil -replace NSLocationWhenInUseUsageDescription -string "FinDex benötigt deinen Standort, um Fangorte zu speichern." ios/App/App/Info.plist
+          plutil -insert NSMotionUsageDescription -string "FinDex nutzt den Bewegungssensor für den holographischen Effekt auf Trophäen-Karten." ios/App/App/Info.plist 2>/dev/null || \
+            plutil -replace NSMotionUsageDescription -string "FinDex nutzt den Bewegungssensor für den holographischen Effekt auf Trophäen-Karten." ios/App/App/Info.plist
 
       - name: Install CocoaPods
         working-directory: ios/App
