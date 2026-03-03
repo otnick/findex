@@ -157,10 +157,13 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
           return (
             <HolographicCard key={catchItem.id} enabled={!!catchItem.is_shiny} isLegendary={isLegendary} shimmerOnly>
             <div
-              className={`bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 ${
+              className={`glass-grain ${!catchItem.is_shiny ? 'glass-shimmer' : ''} bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 ${
                 catchItem.is_shiny ? (isLegendary ? 'legendary-ring' : 'shiny-ring') : ''
               }`}
             >
+            {/* Prismatic edges */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none z-10" />
             {/* Photo - Like Social Page */}
             <Link href={`/catch/${catchItem.id}`}>
               <div className="relative h-48 bg-white/[0.05] cursor-pointer group">

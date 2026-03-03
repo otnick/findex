@@ -83,7 +83,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <nav className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:top-4 lg:bottom-4 lg:left-4 bg-white/[0.07] backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden">
+      <nav className="glass-grain hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:top-4 lg:bottom-4 lg:left-4 bg-white/[0.07] backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden">
         <div className="flex-1 flex flex-col min-h-0 pt-8 pb-4">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0 px-6 mb-8">
@@ -222,7 +222,7 @@ export default function Navigation() {
           />
           <div
             ref={sheetRef}
-            className="absolute bottom-0 inset-x-0 bg-white/[0.08] backdrop-blur-3xl border-t border-x border-white/[0.15] rounded-t-3xl shadow-2xl p-6 pb-28 space-y-1.5 max-h-[80vh] overflow-y-scroll overscroll-contain"
+            className="glass-grain absolute bottom-0 inset-x-0 bg-white/[0.08] backdrop-blur-3xl border-t border-x border-white/[0.15] rounded-t-3xl shadow-2xl p-6 pb-28 space-y-1.5 max-h-[80vh] overflow-y-scroll overscroll-contain"
             style={{
               WebkitOverflowScrolling: 'touch',
               transform: `translateY(${dragY}px)`,

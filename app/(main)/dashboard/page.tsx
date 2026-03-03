@@ -136,8 +136,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Catches */}
-      <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
+      <div className="glass-grain glass-shimmer bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+        <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Letzte Fänge</h2>
           <Link href="/catches" className="text-ocean-light hover:text-white text-sm transition-colors">
@@ -148,57 +149,71 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-3">
           {recentCatchesList.map((catchData) => (
             <Link key={catchData.id} href={`/catch/${catchData.id}`} className="block">
-              <div className="flex items-center gap-4 bg-white/[0.05] border border-white/[0.06] rounded-xl p-4 hover:bg-white/[0.10] transition-colors cursor-pointer group">
+              <div className="relative flex items-center gap-4 bg-white/[0.05] border border-white/[0.06] rounded-xl p-4 hover:bg-white/[0.09] transition-colors cursor-pointer group overflow-hidden">
+                {/* Blurred photo as background wash */}
                 {catchData.photo && (
-                  <div className="relative w-16 h-16 flex-shrink-0">
+                  <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
                     <Image
                       src={catchData.photo}
-                      alt={catchData.species}
+                      alt=""
                       fill
-                      sizes="64px"
-                      className="object-cover rounded-lg group-hover:scale-105 transition-transform"
+                      sizes="600px"
+                      className="object-cover blur-2xl scale-110 opacity-[0.13] group-hover:opacity-[0.18] transition-opacity duration-500"
                     />
-                    <div className="absolute -top-1 -left-1">
-                      <VerificationBadge
-                        status={catchData.verification_status as any}
-                        aiVerified={catchData.ai_verified}
-                        className="scale-75 origin-top-left"
-                      />
-                    </div>
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className="font-semibold text-white truncate group-hover:text-ocean-light transition-colors">
-                      {catchData.species}
-                    </div>
-                    {!catchData.photo && (
-                      <VerificationBadge
-                        status={catchData.verification_status as any}
-                        aiVerified={catchData.ai_verified}
-                        className="scale-75 origin-left"
+                <div className="relative z-10 flex items-center gap-4 w-full">
+                  {catchData.photo && (
+                    <div className="relative w-16 h-16 flex-shrink-0">
+                      <Image
+                        src={catchData.photo}
+                        alt={catchData.species}
+                        fill
+                        sizes="64px"
+                        className="object-cover rounded-lg group-hover:scale-105 transition-transform"
                       />
-                    )}
-                  </div>
-                  <div className="text-sm text-ocean-light">
-                    {catchData.length} cm
-                    {catchData.weight && ` • ${catchData.weight > 1000
-                      ? `${(catchData.weight / 1000).toFixed(1)} kg`
-                      : `${catchData.weight} g`
-                    }`}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm text-ocean-light">
-                    {format(new Date(catchData.date), 'dd.MM.yyyy', { locale: de })}
-                  </div>
-                  {catchData.location && (
-                    <div className="text-xs text-ocean-light/70 truncate max-w-[100px]">
-                      <span className="inline-flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />{catchData.location}
-                      </span>
+                      <div className="absolute -top-1 -left-1">
+                        <VerificationBadge
+                          status={catchData.verification_status as any}
+                          aiVerified={catchData.ai_verified}
+                          className="scale-75 origin-top-left"
+                        />
+                      </div>
                     </div>
                   )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="font-semibold text-white truncate group-hover:text-ocean-light transition-colors">
+                        {catchData.species}
+                      </div>
+                      {!catchData.photo && (
+                        <VerificationBadge
+                          status={catchData.verification_status as any}
+                          aiVerified={catchData.ai_verified}
+                          className="scale-75 origin-left"
+                        />
+                      )}
+                    </div>
+                    <div className="text-sm text-ocean-light">
+                      {catchData.length} cm
+                      {catchData.weight && ` • ${catchData.weight > 1000
+                        ? `${(catchData.weight / 1000).toFixed(1)} kg`
+                        : `${catchData.weight} g`
+                      }`}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-ocean-light">
+                      {format(new Date(catchData.date), 'dd.MM.yyyy', { locale: de })}
+                    </div>
+                    {catchData.location && (
+                      <div className="text-xs text-ocean-light/70 truncate max-w-[100px]">
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />{catchData.location}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </Link>
@@ -208,29 +223,33 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain glass-shimmer bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Gesamt</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.totalCatches}</div>
           <div className="text-ocean-light text-xs mt-1">Fänge</div>
         </div>
 
-        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain glass-shimmer shimmer-delay-1 bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Diese Woche</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.recentCatches}</div>
           <div className="text-ocean-light text-xs mt-1">Neue Fänge</div>
         </div>
 
-        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain glass-shimmer shimmer-delay-2 bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Größter</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.biggestCatch}</div>
           <div className="text-ocean-light text-xs mt-1">cm</div>
         </div>
 
-        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain glass-shimmer shimmer-delay-3 bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Arten</div>
           <div className="text-3xl font-bold text-white mt-1">{stats.uniqueSpecies}</div>
           <div className="text-ocean-light text-xs mt-1">Verschiedene</div>
@@ -239,8 +258,9 @@ export default function DashboardPage() {
 
       {/* FinDex Widget */}
       {fishDexStats && (
-        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
+        <div className="glass-grain glass-shimmer shimmer-delay-1 bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <BookOpen className="w-6 h-6 text-ocean-light" />

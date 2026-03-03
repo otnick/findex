@@ -58,11 +58,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-ocean-deeper to-ocean-dark pt-[env(safe-area-inset-top)] relative">
-      {/* Ambient color blobs */}
+      {/* Ambient animated color blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[55%] rounded-full bg-blue-800/20 blur-[120px]" />
-        <div className="absolute top-[25%] -right-[15%] w-[55%] h-[45%] rounded-full bg-cyan-800/15 blur-[110px]" />
-        <div className="absolute -bottom-[10%] left-[15%] w-[60%] h-[45%] rounded-full bg-indigo-900/20 blur-[110px]" />
+        <div className="animate-blob-1 absolute -top-[20%] -left-[10%] w-[70%] h-[55%] rounded-full bg-blue-800/20 blur-[120px]" />
+        <div className="animate-blob-2 absolute top-[25%] -right-[15%] w-[55%] h-[45%] rounded-full bg-cyan-800/15 blur-[110px]" />
+        <div className="animate-blob-3 absolute -bottom-[10%] left-[15%] w-[60%] h-[45%] rounded-full bg-indigo-900/20 blur-[110px]" />
+        <div className="animate-blob-4 absolute top-[50%] left-[35%] w-[45%] h-[40%] rounded-full bg-violet-900/10 blur-[130px]" />
+        {/* Subtle dot-grid canvas */}
+        <div className="dot-grid absolute inset-0 opacity-100" />
       </div>
 
       <Navigation />
@@ -85,7 +88,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             />
             <div
               data-catch-modal-sheet="true"
-              className="relative w-full max-w-none sm:max-w-2xl max-h-[72dvh] sm:max-h-[80dvh] flex flex-col bg-white/[0.09] backdrop-blur-3xl border border-white/[0.15] rounded-3xl shadow-2xl shadow-black/40 animate-catchModalIn overflow-hidden"
+              className="glass-grain relative w-full max-w-none sm:max-w-2xl max-h-[72dvh] sm:max-h-[80dvh] flex flex-col bg-white/[0.09] backdrop-blur-3xl border border-white/[0.15] rounded-3xl shadow-2xl shadow-black/40 animate-catchModalIn overflow-hidden"
             >
               {/* Prismatic top edge highlight */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-10" />
