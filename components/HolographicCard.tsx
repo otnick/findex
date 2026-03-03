@@ -14,6 +14,7 @@ interface Props {
 // Singleton: gyro permission + listener shared across all HolographicCard instances
 const gyroCallbacks = new Set<(e: DeviceOrientationEvent) => void>()
 let gyroPermissionState: 'unknown' | 'granted' | 'denied' = 'unknown'
+let windowTouchListenerAdded = false
 
 function addGyroCallback(cb: (e: DeviceOrientationEvent) => void) {
   gyroCallbacks.add(cb)
@@ -59,6 +60,17 @@ function requestIOSPermission(): void {
     })
 }
 
+// Register a ONE-TIME window-level touchstart so the user doesn't have
+// to tap a specific card — any touch on the page triggers iOS permission.
+function ensureIOSPermissionOnNextTouch() {
+  if (windowTouchListenerAdded) return
+  windowTouchListenerAdded = true
+  window.addEventListener('touchstart', () => requestIOSPermission(), {
+    once: true,
+    passive: true,
+  })
+}
+
 export default function HolographicCard({
   children,
   isLegendary,
@@ -97,11 +109,16 @@ export default function HolographicCard({
   useEffect(() => {
     if (!enabled) return
 
-    // Android/desktop: auto-start without needing a gesture
     const DOE = DeviceOrientationEvent as any
-    if (typeof DOE?.requestPermission !== 'function' && gyroPermissionState === 'unknown') {
-      gyroPermissionState = 'granted'
-      startGyroListener()
+    if (typeof DOE?.requestPermission !== 'function') {
+      // Android / desktop: auto-start without a gesture
+      if (gyroPermissionState === 'unknown') {
+        gyroPermissionState = 'granted'
+        startGyroListener()
+      }
+    } else {
+      // iOS: request permission on the next touch anywhere on the page
+      ensureIOSPermissionOnNextTouch()
     }
 
     addGyroCallback(handleOrientation)
@@ -156,7 +173,6 @@ export default function HolographicCard({
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      onTouchStart={requestIOSPermission}
     >
       {children}
       {/* Holographic foil shimmer */}
