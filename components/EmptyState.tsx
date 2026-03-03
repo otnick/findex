@@ -19,8 +19,8 @@ export default function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-12 text-center animate-fade-in">
-      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-ocean-light/20 to-ocean/20 mb-6">
+    <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-12 text-center animate-fade-in">
+      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/[0.08] border border-white/[0.10] mb-6">
         <Icon className="w-10 h-10 text-ocean-light" />
       </div>
       <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
@@ -30,14 +30,14 @@ export default function EmptyState({
           {actionHref ? (
             <Link
               href={actionHref}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-light to-ocean hover:from-ocean hover:to-ocean-dark text-white font-semibold py-3 px-8 rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="inline-flex items-center gap-2 bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white font-semibold py-3 px-8 rounded-lg transition-all"
             >
               {actionLabel}
             </Link>
           ) : (
             <button
               onClick={onAction}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-light to-ocean hover:from-ocean hover:to-ocean-dark text-white font-semibold py-3 px-8 rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="inline-flex items-center gap-2 bg-white/[0.10] hover:bg-white/[0.18] border border-white/[0.15] text-white font-semibold py-3 px-8 rounded-lg transition-all"
             >
               {actionLabel}
             </button>

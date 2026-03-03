@@ -29,8 +29,8 @@ export default function NoDetectionModal({
       <div
         className={
           embedded
-            ? 'bg-ocean/30 backdrop-blur-sm rounded-2xl w-full h-full p-4 sm:p-6 overflow-x-hidden overflow-y-auto overscroll-contain break-words animate-catchSubModalIn touch-auto'
-            : 'bg-ocean/30 backdrop-blur-sm rounded-xl max-w-2xl w-full p-4 sm:p-6 max-h-[82dvh] sm:max-h-[90vh] overflow-x-hidden overflow-y-auto break-words'
+            ? 'bg-white/[0.08] backdrop-blur-3xl border border-white/[0.15] rounded-2xl w-full h-full p-4 sm:p-6 overflow-x-hidden overflow-y-auto overscroll-contain break-words animate-catchSubModalIn touch-auto'
+            : 'bg-white/[0.08] backdrop-blur-3xl border border-white/[0.15] rounded-xl max-w-2xl w-full p-4 sm:p-6 max-h-[82dvh] sm:max-h-[90vh] overflow-x-hidden overflow-y-auto break-words'
         }
         data-catch-submodal={embedded ? 'true' : undefined}
       >
@@ -42,7 +42,7 @@ export default function NoDetectionModal({
           </div>
         </div>
 
-        <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 bg-ocean-dark">
+        <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 bg-white/[0.05]">
           <Image
             src={photoPreview}
             alt="Catch"
@@ -90,7 +90,7 @@ export default function NoDetectionModal({
             </button>
           </div>
 
-          <div className="bg-ocean/20 rounded-lg p-3 text-center">
+          <div className="bg-white/[0.05] border border-white/[0.06] rounded-lg p-3 text-center">
             <p className="text-ocean-light text-xs inline-flex items-center gap-1">
               <Lightbulb className="w-4 h-4" />
               <span>

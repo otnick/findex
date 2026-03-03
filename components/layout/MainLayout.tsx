@@ -69,7 +69,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
         {/* Main Content */}
         <main
-          className="lg:pl-72 pb-28 lg:pb-4"
+          className="lg:pl-72 lg:pb-4"
+          style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >

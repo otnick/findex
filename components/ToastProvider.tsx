@@ -77,7 +77,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
                   ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-100'
                   : t.type === 'error'
                     ? 'bg-red-500/15 border-red-400/40 text-red-100'
-                    : 'bg-ocean/30 border-ocean-light/20 text-white'
+                    : 'bg-white/[0.09] backdrop-blur-2xl border-white/[0.15] text-white'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
                       ? 'border-emerald-300/50 bg-emerald-500/15'
                       : t.type === 'error'
                         ? 'border-red-300/50 bg-red-500/15'
-                        : 'border-ocean-light/30 bg-ocean-dark/40'
+                        : 'border-white/[0.20] bg-white/[0.07]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -95,7 +95,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
                 <div className="text-sm flex-1 leading-snug">{t.message}</div>
                 <button
                   onClick={() => remove(t.id)}
-                  className="text-ocean-light hover:text-white flex items-center"
+                  className="text-white/50 hover:text-white flex items-center"
                   aria-label="Schließen"
                 >
                   <X className="w-4 h-4" />

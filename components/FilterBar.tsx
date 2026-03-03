@@ -20,7 +20,7 @@ export default function FilterBar({
   clearAllLabel = 'Alle Filter zurücksetzen',
 }: FilterBarProps) {
   return (
-    <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4 border border-ocean-light/10">
+    <div className="bg-white/[0.07] backdrop-blur-xl rounded-xl p-4 border border-white/[0.08]">
       <div className="flex items-center gap-2 mb-4">
         {Icon && <Icon className="w-5 h-5 text-ocean-light" />}
         <span className="text-white font-semibold">{title}</span>
@@ -32,7 +32,7 @@ export default function FilterBar({
               key={filter.id}
               type="button"
               onClick={filter.onClear}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-ocean-dark text-xs text-ocean-light border border-ocean-light/30 hover:text-white hover:border-ocean-light transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.07] text-xs text-white/60 border border-white/[0.10] hover:text-white hover:border-white/30 transition-colors"
             >
               {filter.label}
               {filter.onClear ? <span className="text-xs">×</span> : null}
@@ -42,7 +42,7 @@ export default function FilterBar({
             <button
               type="button"
               onClick={onClearAll}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-ocean text-xs text-white border border-ocean-light/30 hover:border-ocean-light transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.14] text-xs text-white border border-white/[0.20] hover:bg-white/[0.22] transition-colors"
             >
               {clearAllLabel}
             </button>

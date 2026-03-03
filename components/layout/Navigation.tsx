@@ -28,6 +28,8 @@ const navigation = [
   { name: 'Profil', href: '/profile', icon: UserCircle },
 ]
 
+const OVERFLOW_ROUTES = ['/social', '/profile', '/settings', '/map', '/stats', '/gallery', '/friends', '/leaderboard']
+
 export default function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -106,7 +108,7 @@ export default function Navigation() {
                     group flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200
                     ${isActive
                       ? 'bg-white/[0.15] text-white shadow-sm ring-1 ring-white/20'
-                      : 'text-ocean-light hover:text-white hover:bg-white/[0.08]'
+                      : 'text-white/50 hover:text-white hover:bg-white/[0.08]'
                     }
                   `}
                 >
@@ -128,7 +130,7 @@ export default function Navigation() {
                 group flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200
                 ${pathname === '/settings'
                   ? 'bg-white/[0.15] text-white shadow-sm ring-1 ring-white/20'
-                  : 'text-ocean-light hover:text-white hover:bg-white/[0.08]'
+                  : 'text-white/50 hover:text-white hover:bg-white/[0.08]'
                 }
               `}
             >
@@ -142,38 +144,36 @@ export default function Navigation() {
       {/* Mobile Bottom Nav */}
       <div
         className="lg:hidden fixed inset-x-4 bg-white/[0.09] backdrop-blur-2xl border border-white/[0.14] rounded-2xl z-[60] shadow-2xl overflow-hidden"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 0.5rem)' }}
       >
         {/* Top edge highlight */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
         <div className="grid grid-cols-5 items-center h-16 px-1">
 
           {/* Dashboard */}
-          <Link
-            href="/dashboard"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex flex-col items-center justify-center py-1"
-          >
-            <div className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${pathname === '/dashboard' && !mobileMenuOpen ? 'bg-white/[0.15] text-white' : 'text-ocean-light/70'}`}>
-              <Home className="w-5 h-5" />
-              <span className="text-[10px] font-medium leading-none">Dashboard</span>
-            </div>
-          </Link>
+          {(() => {
+            const a = pathname === '/dashboard' && !mobileMenuOpen
+            return (
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex flex-col items-center justify-center gap-1 py-2">
+                <div className={`p-1.5 rounded-xl transition-all duration-200 ${a ? 'bg-white/[0.18]' : ''}`}><Home className={`w-5 h-5 transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`} /></div>
+                <span className={`text-[10px] font-medium leading-none transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`}>Dashboard</span>
+              </Link>
+            )
+          })()}
 
           {/* Fänge */}
-          <Link
-            href="/catches"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex flex-col items-center justify-center py-1"
-          >
-            <div className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${pathname === '/catches' && !mobileMenuOpen ? 'bg-white/[0.15] text-white' : 'text-ocean-light/70'}`}>
-              <Fish className="w-5 h-5" />
-              <span className="text-[10px] font-medium leading-none">Fänge</span>
-            </div>
-          </Link>
+          {(() => {
+            const a = pathname.startsWith('/catch') && !mobileMenuOpen
+            return (
+              <Link href="/catches" onClick={() => setMobileMenuOpen(false)} className="flex flex-col items-center justify-center gap-1 py-2">
+                <div className={`p-1.5 rounded-xl transition-all duration-200 ${a ? 'bg-white/[0.18]' : ''}`}><Fish className={`w-5 h-5 transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`} /></div>
+                <span className={`text-[10px] font-medium leading-none transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`}>Fänge</span>
+              </Link>
+            )
+          })()}
 
           {/* Center: Fang action */}
-          <div className="flex flex-col items-center justify-center gap-0.5">
+          <div className="flex items-center justify-center">
             <button
               type="button"
               onClick={toggleCatchModal}
@@ -189,29 +189,26 @@ export default function Navigation() {
           </div>
 
           {/* FinDex */}
-          <Link
-            href="/fishdex"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex flex-col items-center justify-center py-1"
-          >
-            <div className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${pathname.startsWith('/fishdex') && !mobileMenuOpen ? 'bg-white/[0.15] text-white' : 'text-ocean-light/70'}`}>
-              <BookOpen className="w-5 h-5" />
-              <span className="text-[10px] font-medium leading-none">FinDex</span>
-            </div>
-          </Link>
+          {(() => {
+            const a = pathname.startsWith('/fishdex') && !mobileMenuOpen
+            return (
+              <Link href="/fishdex" onClick={() => setMobileMenuOpen(false)} className="flex flex-col items-center justify-center gap-1 py-2">
+                <div className={`p-1.5 rounded-xl transition-all duration-200 ${a ? 'bg-white/[0.18]' : ''}`}><BookOpen className={`w-5 h-5 transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`} /></div>
+                <span className={`text-[10px] font-medium leading-none transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`}>FinDex</span>
+              </Link>
+            )
+          })()}
 
           {/* Menü */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="flex flex-col items-center justify-center py-1 w-full"
-            aria-label="Navigation öffnen"
-          >
-            <div className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${mobileMenuOpen ? 'bg-white/[0.15] text-white' : 'text-ocean-light/70'}`}>
-              <Menu className="w-5 h-5" />
-              <span className="text-[10px] font-medium leading-none">Menü</span>
-            </div>
-          </button>
+          {(() => {
+            const a = mobileMenuOpen || (OVERFLOW_ROUTES.some(r => pathname.startsWith(r)) && !mobileMenuOpen)
+            return (
+              <button type="button" onClick={() => setMobileMenuOpen((prev) => !prev)} className="flex flex-col items-center justify-center gap-1 py-2 w-full" aria-label="Navigation öffnen">
+                <div className={`p-1.5 rounded-xl transition-all duration-200 ${a ? 'bg-white/[0.18]' : ''}`}><Menu className={`w-5 h-5 transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`} /></div>
+                <span className={`text-[10px] font-medium leading-none transition-colors duration-200 ${a ? 'text-white' : 'text-white/40'}`}>Menü</span>
+              </button>
+            )
+          })()}
 
         </div>
       </div>

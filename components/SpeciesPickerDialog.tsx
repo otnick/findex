@@ -80,8 +80,8 @@ export default function SpeciesPickerDialog({
       <div
         className={
           embedded
-            ? 'bg-ocean/30 backdrop-blur-sm rounded-2xl w-full h-full p-4 sm:p-6 overflow-x-hidden overflow-y-auto overscroll-contain break-words animate-catchSubModalIn touch-auto'
-            : 'bg-ocean/30 backdrop-blur-sm rounded-xl max-w-3xl w-full p-4 sm:p-6 max-h-[82dvh] sm:max-h-[92vh] overflow-x-hidden overflow-y-auto break-words'
+            ? 'bg-white/[0.08] backdrop-blur-3xl border border-white/[0.15] rounded-2xl w-full h-full p-4 sm:p-6 overflow-x-hidden overflow-y-auto overscroll-contain break-words animate-catchSubModalIn touch-auto'
+            : 'bg-white/[0.08] backdrop-blur-3xl border border-white/[0.15] rounded-xl max-w-3xl w-full p-4 sm:p-6 max-h-[82dvh] sm:max-h-[92vh] overflow-x-hidden overflow-y-auto break-words'
         }
         data-catch-submodal={embedded ? 'true' : undefined}
       >
@@ -100,7 +100,7 @@ export default function SpeciesPickerDialog({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div className="bg-ocean-dark/50 rounded-lg p-2">
+          <div className="bg-white/[0.05] border border-white/[0.06] rounded-lg p-2">
             <div className="text-ocean-light text-xs mb-2">Gewässer</div>
             <div className="flex flex-wrap gap-2">
               {(['all', 'fresh', 'salt'] as WaterFilter[]).map((filter) => (
@@ -109,8 +109,8 @@ export default function SpeciesPickerDialog({
                   onClick={() => setWaterFilter(filter)}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     waterFilter === filter
-                      ? 'bg-ocean text-white'
-                      : 'bg-ocean-dark/60 text-ocean-light hover:text-white'
+                      ? 'bg-white/[0.18] text-white shadow-sm'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   {WATER_LABELS[filter]}
@@ -118,7 +118,7 @@ export default function SpeciesPickerDialog({
               ))}
             </div>
           </div>
-          <div className="bg-ocean-dark/50 rounded-lg p-2">
+          <div className="bg-white/[0.05] border border-white/[0.06] rounded-lg p-2">
             <div className="text-ocean-light text-xs mb-2">Gruppe</div>
             <div className="flex flex-wrap gap-2">
               {(['all', 'predator', 'peace'] as TypeFilter[]).map((filter) => (
@@ -127,8 +127,8 @@ export default function SpeciesPickerDialog({
                   onClick={() => setTypeFilter(filter)}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     typeFilter === filter
-                      ? 'bg-ocean text-white'
-                      : 'bg-ocean-dark/60 text-ocean-light hover:text-white'
+                      ? 'bg-white/[0.18] text-white shadow-sm'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   {TYPE_LABELS[filter]}
@@ -144,7 +144,7 @@ export default function SpeciesPickerDialog({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Suche nach Art..."
-            className="w-full pl-10 pr-3 py-2 rounded-lg bg-ocean-dark text-white border border-ocean-light/30 focus:border-ocean-light focus:outline-none"
+            className="w-full pl-10 pr-3 py-2 rounded-lg bg-white/[0.07] text-white border border-white/[0.12] focus:border-white/30 focus:outline-none"
           />
         </div>
 
@@ -156,8 +156,8 @@ export default function SpeciesPickerDialog({
             }}
             className={`text-left px-3 py-2 rounded-lg border transition-colors ${
               selected === 'Andere'
-                ? 'bg-ocean border-ocean-light text-white'
-                : 'bg-ocean-dark/50 border-transparent text-ocean-light hover:border-ocean-light/40 hover:text-white'
+                ? 'bg-white/[0.18] border-white/[0.25] text-white'
+                : 'bg-white/[0.05] border-transparent text-white/60 hover:border-white/[0.20] hover:text-white'
             }`}
           >
             Andere
@@ -181,7 +181,7 @@ export default function SpeciesPickerDialog({
         </div>
 
         {filteredSpecies.length === 0 && (
-          <div className="text-ocean-light text-sm bg-ocean-dark/40 rounded-lg p-4 mt-3">
+          <div className="text-white/60 text-sm bg-white/[0.05] border border-white/[0.06] rounded-lg p-4 mt-3">
             Keine Treffer mit den aktuellen Filtern. Setze die Filter zurück oder suche nach einem anderen Begriff.
           </div>
         )}

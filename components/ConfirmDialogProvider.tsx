@@ -67,7 +67,7 @@ export default function ConfirmDialogProvider({ children }: { children: React.Re
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => close(false)}
           />
-          <div className="relative w-full max-w-md rounded-3xl sm:rounded-2xl bg-ocean-deeper sm:bg-ocean/30 border border-ocean-light/20 shadow-2xl p-5 sm:p-6 animate-catchModalIn">
+          <div className="relative w-full max-w-md rounded-3xl sm:rounded-2xl bg-white/[0.08] backdrop-blur-3xl border border-white/[0.15] shadow-2xl p-5 sm:p-6 animate-catchModalIn">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-white">{pending.title}</h3>
@@ -84,7 +84,7 @@ export default function ConfirmDialogProvider({ children }: { children: React.Re
             <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={() => close(false)}
-                className="flex-1 bg-ocean-dark/60 hover:bg-ocean-dark text-white font-semibold py-3 rounded-xl transition-colors"
+                className="flex-1 bg-white/[0.07] hover:bg-white/[0.14] border border-white/[0.12] text-white font-semibold py-3 rounded-xl transition-colors"
               >
                 {pending.cancelLabel}
               </button>
@@ -93,7 +93,7 @@ export default function ConfirmDialogProvider({ children }: { children: React.Re
                 className={`flex-1 font-semibold py-3 rounded-xl transition-colors ${
                   pending.variant === 'danger'
                     ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-ocean hover:bg-ocean-light text-white'
+                    : 'bg-white/[0.18] hover:bg-white/[0.28] text-white'
                 }`}
               >
                 {pending.confirmLabel}
