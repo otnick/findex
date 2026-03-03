@@ -395,6 +395,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
           {/* Photo */}
           {(catchData.photos && catchData.photos.length > 0) || catchData.photo_url ? (
             <div className="bg-ocean/30 backdrop-blur-sm rounded-xl p-4">
+              <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'} shimmerOnly>
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}
@@ -408,6 +409,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
                   className="object-cover"
                 />
               </button>
+              </HolographicCard>
               {catchData.photos && catchData.photos.length > 1 && (
                 <div className="mt-3 grid grid-cols-5 gap-2">
                   {catchData.photos.map((photoUrl, index) => (

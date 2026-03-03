@@ -7,16 +7,70 @@ interface Props {
   isLegendary?: boolean
   /** When false, renders children as-is with no effect */
   enabled?: boolean
+  /** Skip the 3D perspective tilt — only move the shimmer gradient */
+  shimmerOnly?: boolean
 }
 
-export default function HolographicCard({ children, isLegendary, enabled = true }: Props) {
+// Singleton: gyro permission + listener shared across all HolographicCard instances
+const gyroCallbacks = new Set<(e: DeviceOrientationEvent) => void>()
+let gyroPermissionState: 'unknown' | 'granted' | 'denied' = 'unknown'
+
+function addGyroCallback(cb: (e: DeviceOrientationEvent) => void) {
+  gyroCallbacks.add(cb)
+}
+function removeGyroCallback(cb: (e: DeviceOrientationEvent) => void) {
+  gyroCallbacks.delete(cb)
+}
+
+function onOrientation(e: DeviceOrientationEvent) {
+  gyroCallbacks.forEach((cb) => cb(e))
+}
+
+function startGyroListener() {
+  window.addEventListener('deviceorientation', onOrientation, { passive: true })
+}
+
+// Called from a user-gesture handler (touchstart)
+function requestIOSPermission(): void {
+  const DOE = DeviceOrientationEvent as any
+  if (typeof DOE?.requestPermission !== 'function') {
+    // Android / desktop — just ensure listener is running
+    if (gyroPermissionState === 'unknown') {
+      gyroPermissionState = 'granted'
+      startGyroListener()
+    }
+    return
+  }
+  if (gyroPermissionState !== 'unknown') return // already handled
+
+  // Call synchronously inside the user gesture so iOS accepts it
+  DOE.requestPermission()
+    .then((result: string) => {
+      if (result === 'granted') {
+        gyroPermissionState = 'granted'
+        // Listener must be added AFTER permission is granted on iOS
+        startGyroListener()
+      } else {
+        gyroPermissionState = 'denied'
+      }
+    })
+    .catch(() => {
+      gyroPermissionState = 'denied'
+    })
+}
+
+export default function HolographicCard({
+  children,
+  isLegendary,
+  enabled = true,
+  shimmerOnly = false,
+}: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [tiltX, setTiltX] = useState(0)
   const [tiltY, setTiltY] = useState(0)
   const [shimmerX, setShimmerX] = useState(50)
   const [shimmerY, setShimmerY] = useState(50)
   const [isActive, setIsActive] = useState(false)
-  const gyroListening = useRef(false)
   const rafRef = useRef<number>(0)
 
   const applyTilt = useCallback((rx: number, ry: number) => {
@@ -33,44 +87,29 @@ export default function HolographicCard({ children, isLegendary, enabled = true 
 
   const handleOrientation = useCallback(
     (e: DeviceOrientationEvent) => {
-      const gamma = Math.max(-30, Math.min(30, e.gamma ?? 0)) // left/right
-      const beta = Math.max(-30, Math.min(30, (e.beta ?? 40) - 40)) // front/back, offset by 40° rest angle
+      const gamma = Math.max(-30, Math.min(30, e.gamma ?? 0))
+      const beta = Math.max(-30, Math.min(30, (e.beta ?? 40) - 40))
       applyTilt(beta * 0.4, gamma * 0.5)
     },
     [applyTilt],
   )
 
-  // Start listening to gyroscope. On Android / desktop it works immediately.
-  // On iOS 13+ we need a user gesture to call requestPermission first.
-  const startGyro = useCallback(() => {
-    if (gyroListening.current) return
-    gyroListening.current = true
-    window.addEventListener('deviceorientation', handleOrientation, { passive: true })
-  }, [handleOrientation])
-
-  const requestGyroPermission = useCallback(async () => {
-    const DOE = DeviceOrientationEvent as any
-    if (typeof DOE?.requestPermission === 'function') {
-      try {
-        const result = await DOE.requestPermission()
-        if (result === 'granted') startGyro()
-      } catch {
-        // user declined or gesture not valid — mouse fallback still works
-      }
-    } else {
-      startGyro()
-    }
-  }, [startGyro])
-
   useEffect(() => {
     if (!enabled) return
-    // Try without permission (Android, desktop) — silently ignored on iOS 13+ until granted
-    startGyro()
+
+    // Android/desktop: auto-start without needing a gesture
+    const DOE = DeviceOrientationEvent as any
+    if (typeof DOE?.requestPermission !== 'function' && gyroPermissionState === 'unknown') {
+      gyroPermissionState = 'granted'
+      startGyroListener()
+    }
+
+    addGyroCallback(handleOrientation)
     return () => {
-      window.removeEventListener('deviceorientation', handleOrientation)
+      removeGyroCallback(handleOrientation)
       cancelAnimationFrame(rafRef.current)
     }
-  }, [enabled, startGyro, handleOrientation])
+  }, [enabled, handleOrientation])
 
   // ── Mouse fallback for desktop ──────────────────────────────────────────────
   const handleMouseMove = useCallback(
@@ -100,23 +139,24 @@ export default function HolographicCard({ children, isLegendary, enabled = true 
   const sy = Math.max(10, Math.min(90, shimmerY))
 
   const shimmerGradient = isLegendary
-    ? `radial-gradient(ellipse 85% 75% at ${sx}% ${sy}%, rgba(56,189,248,0.32) 0%, rgba(217,70,239,0.24) 28%, rgba(245,158,11,0.18) 52%, rgba(34,197,94,0.16) 72%, transparent 95%)`
-    : `radial-gradient(ellipse 80% 70% at ${sx}% ${sy}%, rgba(250,204,21,0.32) 0%, rgba(253,186,116,0.22) 38%, rgba(255,255,255,0.1) 62%, transparent 90%)`
+    ? `radial-gradient(ellipse 85% 75% at ${sx}% ${sy}%, rgba(56,189,248,0.38) 0%, rgba(217,70,239,0.28) 28%, rgba(245,158,11,0.22) 52%, rgba(34,197,94,0.18) 72%, transparent 95%)`
+    : `radial-gradient(ellipse 80% 70% at ${sx}% ${sy}%, rgba(250,204,21,0.36) 0%, rgba(253,186,116,0.24) 38%, rgba(255,255,255,0.12) 62%, transparent 90%)`
 
   return (
     <div
       ref={cardRef}
       style={{
         position: 'relative',
-        transform: isActive
-          ? `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.015,1.015,1.015)`
-          : undefined,
+        transform:
+          !shimmerOnly && isActive
+            ? `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.015,1.015,1.015)`
+            : undefined,
         transition: 'transform 0.12s ease-out',
         willChange: 'transform',
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      onTouchStart={requestGyroPermission}
+      onTouchStart={requestIOSPermission}
     >
       {children}
       {/* Holographic foil shimmer */}
