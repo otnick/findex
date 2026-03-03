@@ -144,7 +144,7 @@ export default function Navigation() {
       {/* Mobile Bottom Nav */}
       <div
         className="lg:hidden fixed inset-x-4 bg-white/[0.09] backdrop-blur-2xl border border-white/[0.14] rounded-2xl z-[60] shadow-2xl overflow-hidden"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 0.5rem)' }}
+        style={{ bottom: 'max(env(safe-area-inset-bottom), 0.5rem)' }}
       >
         {/* Top edge highlight */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
