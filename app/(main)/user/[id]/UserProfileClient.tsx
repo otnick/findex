@@ -675,7 +675,6 @@ export default function UserProfileClient({ id }: { id: string }) {
             </div>
           )}
         </div>
-      </div>
     </div>
   )
 }
