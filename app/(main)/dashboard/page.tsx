@@ -136,7 +136,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Catches */}
-      <div className="glass-grainbg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
+      <div className="glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
         <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-4">
@@ -223,7 +223,7 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-grainbg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Gesamt</div>
@@ -231,7 +231,7 @@ export default function DashboardPage() {
           <div className="text-ocean-light text-xs mt-1">Fänge</div>
         </div>
 
-        <div className="glass-grainbg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Diese Woche</div>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
           <div className="text-ocean-light text-xs mt-1">Neue Fänge</div>
         </div>
 
-        <div className="glass-grainbg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Größter</div>
@@ -247,7 +247,7 @@ export default function DashboardPage() {
           <div className="text-ocean-light text-xs mt-1">cm</div>
         </div>
 
-        <div className="glass-grainbg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
+        <div className="glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-lg p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent pointer-events-none" />
           <div className="text-ocean-light text-sm">Arten</div>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
 
       {/* FinDex Widget */}
       {fishDexStats && (
-        <div className="glass-grainbg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
+        <div className="glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
           <div className="flex items-center justify-between mb-4">

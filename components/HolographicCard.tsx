@@ -22,7 +22,7 @@ export default function HolographicCard({ children, isLegendary, enabled = true 
   if (!enabled) return <>{children}</>
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', borderRadius: '0.75rem', overflow: 'hidden' }}>
       {children}
       <div
         aria-hidden
