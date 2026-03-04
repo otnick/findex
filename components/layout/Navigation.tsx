@@ -143,12 +143,15 @@ export default function Navigation() {
 
       {/* Mobile Bottom Nav */}
       <div
-        className="lg:hidden fixed inset-x-4 bg-white/[0.09] backdrop-blur-2xl border border-white/[0.14] rounded-2xl z-[60] shadow-2xl overflow-hidden"
+        className="lg:hidden fixed inset-x-4 rounded-2xl z-[60]"
         style={{ bottom: 'max(env(safe-area-inset-bottom), 0.5rem)' }}
       >
-        {/* Top edge highlight */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
-        <div className="grid grid-cols-5 items-center h-16 px-1">
+        {/* Backdrop layer — isolated so backdrop-blur doesn't bleed into icon rendering */}
+        <div className="absolute inset-0 bg-white/[0.09] backdrop-blur-2xl border border-white/[0.14] rounded-2xl shadow-2xl overflow-hidden pointer-events-none">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+        {/* Content layer */}
+        <div className="relative grid grid-cols-5 items-center h-16 px-1">
 
           {/* Dashboard */}
           {(() => {
