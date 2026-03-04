@@ -457,8 +457,8 @@ export default function CatchDetailClient({ id }: { id: string }) {
         {/* Right Column - Info */}
         <div className="space-y-4">
           {/* Main Info Card */}
-          <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'}>
-          <div className={`bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6 ${catchData.is_shiny ? (catchData.shiny_reason === 'legendary' ? 'legendary-ring' : 'shiny-ring') : ''}`}>
+          <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'} className={catchData.is_shiny ? (catchData.shiny_reason === 'legendary' ? 'legendary-ring' : 'shiny-ring') : undefined}>
+          <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-6">
             <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
               <FishIcon className="w-8 h-8 text-ocean-light" />
               {catchData.species}

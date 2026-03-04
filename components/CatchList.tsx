@@ -155,11 +155,9 @@ export default function CatchList({ catches: propCatches }: CatchListProps = {})
         {catches.map((catchItem) => {
           const isLegendary = catchItem.shiny_reason === 'legendary'
           return (
-            <HolographicCard key={catchItem.id} enabled={!!catchItem.is_shiny} isLegendary={isLegendary}>
+            <HolographicCard key={catchItem.id} enabled={!!catchItem.is_shiny} isLegendary={isLegendary} className={catchItem.is_shiny ? (isLegendary ? 'legendary-ring' : 'shiny-ring') : undefined}>
             <div
-              className={`glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 ${
-                catchItem.is_shiny ? (isLegendary ? 'legendary-ring' : 'shiny-ring') : ''
-              }`}
+              className="glass-grain bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300"
             >
             {/* Prismatic edges */}
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none z-10" />

@@ -6,11 +6,12 @@ interface Props {
   children: React.ReactNode
   isLegendary?: boolean
   enabled?: boolean
+  className?: string
   /** @deprecated no longer used */
   shimmerOnly?: boolean
 }
 
-export default function HolographicCard({ children, isLegendary, enabled = true }: Props) {
+export default function HolographicCard({ children, isLegendary, enabled = true, className }: Props) {
   // Each card instance gets its own random timing so they don't all animate in sync.
   // Negative delay starts the animation at a random point mid-cycle.
   const { duration, delay } = useMemo(() => {
@@ -22,7 +23,7 @@ export default function HolographicCard({ children, isLegendary, enabled = true 
   if (!enabled) return <>{children}</>
 
   return (
-    <div style={{ position: 'relative', borderRadius: '0.75rem', overflow: 'hidden' }}>
+    <div className={className} style={{ position: 'relative', borderRadius: '0.75rem', overflow: 'hidden' }}>
       {children}
       <div
         aria-hidden
