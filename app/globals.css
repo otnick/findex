@@ -340,9 +340,9 @@ textarea {
 .animate-blob-3 { animation: blobDrift3 24s ease-in-out infinite 8s; }
 .animate-blob-4 { animation: blobDrift1 32s ease-in-out infinite 12s; }
 
-/* Glass grain / noise texture — applies via ::after pseudo-element */
+/* Glass grain / noise texture — applies via ::after pseudo-element.
+   Does NOT set position so it won't override absolute/fixed on the element. */
 .glass-grain {
-  position: relative;
   overflow: hidden;
 }
 .glass-grain::after {

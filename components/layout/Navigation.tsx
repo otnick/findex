@@ -217,12 +217,12 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50"
             onClick={() => setMobileMenuOpen(false)}
           />
           <div
             ref={sheetRef}
-            className="glass-grain absolute bottom-0 inset-x-0 bg-white/[0.08] backdrop-blur-3xl border-t border-x border-white/[0.15] rounded-t-3xl shadow-2xl p-6 pb-28 space-y-1.5 max-h-[80vh] overflow-y-scroll overscroll-contain"
+            className="absolute bottom-0 inset-x-0 bg-white/[0.08] backdrop-blur-3xl border-t border-x border-white/[0.15] rounded-t-3xl shadow-2xl p-6 pb-28 space-y-1.5 max-h-[80vh] overflow-y-scroll overscroll-contain"
             style={{
               WebkitOverflowScrolling: 'touch',
               transform: `translateY(${dragY}px)`,
