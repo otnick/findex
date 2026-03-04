@@ -358,35 +358,57 @@ textarea {
   mix-blend-mode: overlay;
 }
 
-/* Glass shimmer light sweep */
-@keyframes glassShimmerSweep {
-  0%   { transform: translateX(-180%) skewX(-18deg); }
-  100% { transform: translateX(300%)  skewX(-18deg); }
+/* Holographic foil — continuous auto-playing animation for shiny/legendary cards */
+@keyframes holoSweep {
+  0%   { background-position: 0%   0%;   }
+  25%  { background-position: 100% 50%;  }
+  50%  { background-position: 100% 100%; }
+  75%  { background-position: 0%   50%;  }
+  100% { background-position: 0%   0%;   }
 }
-.glass-shimmer {
-  position: relative;
-  overflow: hidden;
+@keyframes holoRainbow {
+  0%   { background-position: 0%   50%; filter: hue-rotate(0deg);   }
+  50%  { background-position: 100% 50%; filter: hue-rotate(180deg); }
+  100% { background-position: 0%   50%; filter: hue-rotate(360deg); }
 }
-.glass-shimmer::before {
-  content: '';
+
+.holo-shiny,
+.holo-legendary {
   position: absolute;
-  top: 0; left: 0;
-  width: 40%; height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255,255,255,0.04) 35%,
-    rgba(255,255,255,0.07) 50%,
-    rgba(255,255,255,0.04) 65%,
-    transparent 100%
-  );
-  animation: glassShimmerSweep 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
-  z-index: 2;
+  z-index: 20;
+  mix-blend-mode: screen;
+  background-size: 400% 400%;
 }
-.glass-shimmer.shimmer-delay-1::before { animation-delay: 2s; }
-.glass-shimmer.shimmer-delay-2::before { animation-delay: 4s; }
-.glass-shimmer.shimmer-delay-3::before { animation-delay: 6s; }
+.holo-shiny {
+  background-image: linear-gradient(
+    125deg,
+    transparent          0%,
+    rgba(255,215,0,0.22) 20%,
+    rgba(255,255,190,0.30) 35%,
+    rgba(255,185,0,0.22) 50%,
+    rgba(255,235,140,0.28) 65%,
+    rgba(255,215,0,0.18) 82%,
+    transparent          100%
+  );
+  animation: holoSweep 4s ease-in-out infinite;
+}
+.holo-legendary {
+  background-image: linear-gradient(
+    125deg,
+    transparent              0%,
+    rgba(56,189,248,0.30)   14%,
+    rgba(167,139,250,0.26)  28%,
+    rgba(217,70,239,0.24)   42%,
+    rgba(251,191,36,0.26)   57%,
+    rgba(52,211,153,0.24)   71%,
+    rgba(56,189,248,0.22)   86%,
+    transparent              100%
+  );
+  animation: holoRainbow 3.5s ease-in-out infinite;
+}
 
 /* Dot-grid background canvas texture */
 .dot-grid {
