@@ -393,7 +393,7 @@ textarea {
     rgba(255,215,0,0.18) 82%,
     transparent          100%
   );
-  animation: holoSweep 14s ease-in-out infinite;
+  animation: holoSweep 22s ease-in-out infinite;
 }
 .holo-legendary {
   background-image: linear-gradient(
@@ -407,7 +407,7 @@ textarea {
     rgba(56,189,248,0.22)   86%,
     transparent              100%
   );
-  animation: holoRainbow 12s ease-in-out infinite;
+  animation: holoRainbow 18s ease-in-out infinite;
 }
 
 /* Dot-grid background canvas texture */
