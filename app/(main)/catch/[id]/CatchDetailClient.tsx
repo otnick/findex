@@ -395,7 +395,7 @@ export default function CatchDetailClient({ id }: { id: string }) {
           {/* Photo */}
           {(catchData.photos && catchData.photos.length > 0) || catchData.photo_url ? (
             <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.10] rounded-xl p-4">
-              <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'} shimmerOnly>
+              <HolographicCard enabled={!!catchData.is_shiny} isLegendary={catchData.shiny_reason === 'legendary'}>
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}

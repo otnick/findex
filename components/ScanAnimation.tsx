@@ -19,12 +19,6 @@ export default function ScanAnimation({ species, newAchievements = [], catchPhot
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    console.log('ScanAnimation mounted', { species: species.name, achievements: newAchievements.length })
-    return () => console.log('ScanAnimation unmounted')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
     if (stage === 'scanning') {
       const interval = setInterval(() => {
         setProgress(prev => {

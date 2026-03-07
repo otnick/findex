@@ -7,8 +7,6 @@ interface Props {
   isLegendary?: boolean
   enabled?: boolean
   className?: string
-  /** @deprecated no longer used */
-  shimmerOnly?: boolean
 }
 
 export default function HolographicCard({ children, isLegendary, enabled = true, className }: Props) {
