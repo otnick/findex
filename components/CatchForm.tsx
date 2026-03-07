@@ -359,7 +359,11 @@ export default function CatchForm({
         setWeather(weatherData)
       } else {
         if (geoError === 'permission_denied') {
-          toast('Standort verweigert – Einstellungen > FinDex > Standort aktivieren', 'error')
+          const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
+          const msg = isStandalone
+            ? 'Standort verweigert – Einstellungen → Datenschutz → Ortungsdienste → Safari/FinDex'
+            : 'Standort verweigert – bitte in den Browser-Einstellungen erlauben'
+          toast(msg, 'error')
         } else if (geoError === 'timeout') {
           toast('GPS-Timeout – bitte im Freien erneut versuchen', 'error')
         } else {
