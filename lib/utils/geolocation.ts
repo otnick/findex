@@ -17,6 +17,19 @@ export async function getCurrentPosition(returnError?: boolean): Promise<any> {
     return returnError ? err : null
   }
 
+  // Fast-fail if permission is already denied — avoids waiting for the full timeout
+  if ('permissions' in navigator) {
+    try {
+      const status = await navigator.permissions.query({ name: 'geolocation' })
+      if (status.state === 'denied') {
+        const err = { coords: null, error: 'permission_denied' as GeolocationError }
+        return returnError ? err : null
+      }
+    } catch {
+      // permissions API not supported on this browser, proceed normally
+    }
+  }
+
   let lastError: GeolocationError | undefined
 
   const tryGet = (highAccuracy: boolean): Promise<Coordinates | null> =>
@@ -37,10 +50,10 @@ export async function getCurrentPosition(returnError?: boolean): Promise<any> {
         },
         {
           enableHighAccuracy: highAccuracy,
-          // Allow up to 30s-old cached position on high accuracy — avoids forcing
-          // a cold GPS fix on iOS which regularly timeouts indoors
+          // 60s cached position for high-accuracy — avoids unnecessary cold GPS
+          // starts on iOS when a recent fix is already available
           timeout: highAccuracy ? 15000 : 10000,
-          maximumAge: highAccuracy ? 30000 : 300000,
+          maximumAge: highAccuracy ? 60000 : 300000,
         }
       )
     })
